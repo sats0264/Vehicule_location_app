@@ -9,7 +9,16 @@ module location.app.vehicule_location_app {
     requires org.kordamp.ikonli.javafx;
     requires org.kordamp.bootstrapfx.core;
     requires eu.hansolo.tilesfx;
+    requires jakarta.persistence;
+    requires org.hibernate.orm.core;
+    requires java.naming;
 
-    opens location.app.vehicule_location_app to javafx.fxml;
+    exports location.app.vehicule_location_app.runtime;
+    opens location.app.vehicule_location_app.runtime to javafx.fxml;
+    exports location.app.vehicule_location_app.controllers;
+    opens location.app.vehicule_location_app.controllers to javafx.fxml;
+
     exports location.app.vehicule_location_app;
+    exports location.app.vehicule_location_app.jdbc;
+    opens location.app.vehicule_location_app.jdbc to javafx.fxml;
 }
