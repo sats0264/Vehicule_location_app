@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane fx:id="registrationAnchorPane" prefHeight="568.0" prefWidth="350.0" style="-fx-background-color: #f4f4f4; -fx-border-color: #cccccc; -fx-border-width: 1; -fx-border-radius: 8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIInscriptionController">
+    <padding>
+        <Insets bottom="30.0" left="40.0" right="40.0" top="30.0" />
+    </padding>
+    <children>
+        <Label layoutX="125.0" layoutY="84.0" prefHeight="40.0" prefWidth="114.0" text="Créer un compte" textAlignment="CENTER" textFill="#333333" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+            <font>
+                <Font name="System Bold" size="28.0" />
+            </font>
+            <VBox.margin>
+                <Insets bottom="20.0" />
+            </VBox.margin>
+        </Label>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="100.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="100.0">
+            <children>
+                <Label text="Nom :" textFill="#555555" />
+                <TextField fx:id="lastNameField" promptText="Entrez votre nom" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="160.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="160.0">
+            <children>
+                <Label text="Prénom :" textFill="#555555" />
+                <TextField fx:id="firstNameField" promptText="Entrez votre prénom" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="220.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="220.0">
+            <children>
+                <Label text="Email :" textFill="#555555" />
+                <TextField fx:id="emailField" promptText="Entrez votre email" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="280.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="280.0">
+            <children>
+                <Label text="Mot de passe :" textFill="#555555" />
+                <PasswordField fx:id="passwordField" promptText="Entrez votre mot de passe" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="340.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="340.0">
+            <children>
+                <Label text="Confirmer le mot de passe :" textFill="#555555" />
+                <PasswordField fx:id="confirmPasswordField" promptText="Confirmez votre mot de passe" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <HBox alignment="CENTER" layoutX="190.0" layoutY="420.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="420.0">
+            <children>
+                <Button fx:id="cancelButton" onAction="#handleCancelButton" prefWidth="120.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;" text="Annuler">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+                <Button fx:id="registerButton" onAction="#handleRegisterButton" prefWidth="120.0" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;" text="S'inscrire">
+                    <font>
+                        <Font size="14.0" />
+                    </font>
+                </Button>
+            </children>
+        </HBox>
+
+        <Hyperlink fx:id="backToLoginLink" layoutX="146.0" layoutY="480.0" onAction="#handleBackToLoginLink" text="Vous avez déjà un compte? Connectez-vous" textFill="#2196f3" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="480.0">
+            <font>
+                <Font size="13.0" />
+            </font>
+        </Hyperlink>
+    </children>
+</AnchorPane>
