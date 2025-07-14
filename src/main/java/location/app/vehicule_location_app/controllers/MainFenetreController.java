@@ -21,12 +21,11 @@ public class MainFenetreController {
     private BorderPane mainBorderPane;
 
     @FXML
-    private AnchorPane contentArea; // The area where dynamic content will be loaded
+    private AnchorPane contentArea;
 
     @FXML
-    private Label dateTimeLabel; // For the date and time in the top bar
+    private Label dateTimeLabel;
 
-    // Sidebar menu buttons
     @FXML
     private Button dashboardButton;
     @FXML
@@ -44,14 +43,9 @@ public class MainFenetreController {
      */
     @FXML
     public void initialize() {
-        // Set initial date and time
         updateDateTimeLabel();
-
-        // Load the initial view (e.g., Dashboard) into the content area
-        // You'll need to create a UIDashboard.fxml and its controller for this
-        loadView("/views/UIDashboard.fxml"); // Assuming a 'views' subpackage for content FXMLs
-        // Or, if you want to reuse the 'voitures' interface as initial content:
-        // loadView("/hello-view.fxml");
+        loadView("/views/UIDashboard.fxml");
+        setSelectedButton(dashboardButton);
 
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(0), event -> updateDateTimeLabel()),
@@ -77,9 +71,8 @@ public class MainFenetreController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
-            contentArea.getChildren().setAll(view); // Replace existing content
+            contentArea.getChildren().setAll(view);
 
-            // Optional: Adjust the loaded view to fill the AnchorPane
             AnchorPane.setTopAnchor(view, 0.0);
             AnchorPane.setBottomAnchor(view, 0.0);
             AnchorPane.setLeftAnchor(view, 0.0);
@@ -87,46 +80,48 @@ public class MainFenetreController {
 
         } catch (IOException e) {
             e.printStackTrace();
-            // Handle error, e.g., show an alert
             System.err.println("Failed to load view: " + fxmlPath);
         }
     }
 
-    // --- Event Handlers for Sidebar Menu Buttons ---
+    private void setSelectedButton(Button selectedButton) {
+        dashboardButton.getStyleClass().remove("selected-menu-btn");
+        reservationsButton.getStyleClass().remove("selected-menu-btn");
+        clientsButton.getStyleClass().remove("selected-menu-btn");
+        voituresButton.getStyleClass().remove("selected-menu-btn");
+        notificationsButton.getStyleClass().remove("selected-menu-btn");
+
+        // Ajoute la classe au bouton sélectionné
+        selectedButton.getStyleClass().add("selected-menu-btn");
+    }
 
     @FXML
     private void handleDashboardClick() {
-        System.out.println("Dashboard clicked!");
-        // Load the dashboard FXML
+        setSelectedButton(dashboardButton);
         loadView("/views/UIDashboard.fxml");
-        // You'll need to create UIDashboard.fxml and its controller
     }
 
     @FXML
     private void handleReservationsClick() {
-        System.out.println("Reservations clicked!");
-        // Load the reservations FXML
+        setSelectedButton(reservationsButton);
         loadView("/views/UIReservation.fxml");
     }
 
     @FXML
     private void handleClientsClick() {
-        System.out.println("Clients clicked!");
-        // Load the clients FXML
+        setSelectedButton(clientsButton);
         loadView("/views/UIClient.fxml");
     }
 
     @FXML
     private void handleVoituresClick() {
-        System.out.println("Voitures clicked!");
-        // Load the existing voiture management FXML
+        setSelectedButton(voituresButton);
         loadView("/views/UIVehicule.fxml");
     }
 
     @FXML
     private void handleNotificationClick() {
-        System.out.println("Notification clicked!");
-        // Load the notification FXML
+        setSelectedButton(notificationsButton);
         loadView("/views/UINotification.fxml");
     }
 }

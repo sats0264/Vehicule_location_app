@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.*?>
 <?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
@@ -49,6 +50,9 @@
             <Button fx:id="clientsButton" onAction="#handleClientsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="CLIENTS" />
             <Button fx:id="voituresButton" onAction="#handleVoituresClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="VOITURES" />
          <Button fx:id="notificationsButton" layoutX="25.0" layoutY="261.0" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="NOTIFICATIONS" />
+         <stylesheets>
+            <URL value="@../CSS/style.css" />
+         </stylesheets>
         </VBox>
     </left>
 
