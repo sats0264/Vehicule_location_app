@@ -5,10 +5,12 @@ import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 import javafx.util.Duration;
 
 import java.io.IOException;
@@ -36,6 +38,8 @@ public class MainFenetreController {
     private Button voituresButton;
     @FXML
     private Button notificationsButton;
+    @FXML
+    private Button logoutButton;
 
     /**
      * Méthode d'initialisation du contrôleur.
@@ -123,5 +127,17 @@ public class MainFenetreController {
     private void handleNotificationClick() {
         setSelectedButton(notificationsButton);
         loadView("/views/UINotification.fxml");
+    }
+    @FXML
+    private void handleLogoutClick() throws IOException {
+        // Logique de déconnexion
+        System.out.println("Déconnexion...");
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UILogin.fxml"));
+        Parent mainRoot = loader.load();
+        Stage stage = (Stage) logoutButton.getScene().getWindow();
+        stage.setScene(new Scene(mainRoot));
+        stage.centerOnScreen();
+        stage.setTitle("Connexion - Application de Location de Véhicules");
+        stage.show();
     }
 }
