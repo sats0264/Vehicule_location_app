@@ -3,16 +3,44 @@ package location.app.vehicule_location_app.models;
 import jakarta.persistence.*;
 
 @Entity(name = "T_Facture")
-public class Facture{
-
-    @OneToOne
-    @JoinColumn(name = "reservation_id")
-    private Reservation reservation;
+public class Facture {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_facture")
     private int id;
+
     private double montant;
 
+    @OneToOne
+    @JoinColumn(name = "reservation_id", unique = true)
+    private Reservation reservation;
+
+    public Facture() {}
+
+    public Facture(int id, double montant) {
+        this.setId(id);
+        this.setMontant(montant);
+    }
+
+    public int getId() {
+        return id;
+    }
+    public double getMontant() {
+        return montant;
+    }
+
+    public Reservation getReservation() {
+        return reservation;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    public void setMontant(double montant) {
+        this.montant = montant;
+    }
+    public void setReservation(Reservation reservation) {
+        this.reservation = reservation;
+    }
 }

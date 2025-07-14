@@ -7,11 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity(name = "T_Reservation")
-public class Reservation{
-
-    @OneToOne(cascade = CascadeType.PERSIST)
-    @JoinColumn(name = "facture_id")
-    private Facture facture;
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,16 +16,107 @@ public class Reservation{
 
     private LocalDate dateDebut;
     private LocalDate dateFin;
+
     @Enumerated(EnumType.STRING)
     private Statut statut;
 
     @ManyToOne
-    private Client client = null;
+    @JoinColumn(name = "client_id")
+    private Client client;
 
-    @OneToMany(mappedBy = "classe", cascade = CascadeType.PERSIST)
-    private List<Vehicule> vehicules  = new ArrayList<Vehicule>();
-    @OneToMany(mappedBy = "classe", cascade = CascadeType.PERSIST)
-    private List<Chauffeur> chauffeurs = new ArrayList<Chauffeur>();
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "facture_id")
+    private Facture facture;
 
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private List<Vehicule> vehicules = new ArrayList<>();
 
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    private List<Chauffeur> chauffeurs = new ArrayList<>();
+
+    public Reservation() {}
+
+    public Reservation(int id){
+        this.id = id;
+    }
+    public Reservation(LocalDate dateDebut, LocalDate dateFin,
+                       Statut statut) {
+        this.dateDebut = dateDebut;
+        this.dateFin = dateFin;
+        this.statut = statut;
+    }
+
+    // Méthodes d'ajout
+    public void addVehicule(Vehicule car) {
+        vehicules.add(car);
+        car.setReservation(this);
+    }
+
+    public void addChauffeur(Chauffeur chauffeur) {
+        chauffeurs.add(chauffeur);
+        chauffeur.setReservation(this);
+    }
+    public Facture getFacture() {
+        return facture;
+    }
+
+    public void setFacture(Facture facture) {
+        this.facture = facture;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public LocalDate getDateDebut() {
+        return dateDebut;
+    }
+
+    public void setDateDebut(LocalDate dateDebut) {
+        this.dateDebut = dateDebut;
+    }
+
+    public LocalDate getDateFin() {
+        return dateFin;
+    }
+
+    public void setDateFin(LocalDate dateFin) {
+        this.dateFin = dateFin;
+    }
+
+    public Statut getStatut() {
+        return statut;
+    }
+
+    public void setStatut(Statut statut) {
+        this.statut = statut;
+    }
+
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client client) {
+        this.client = client;
+    }
+
+    public List<Vehicule> getVehicules() {
+        return vehicules;
+    }
+
+    public void setVehicules(List<Vehicule> vehicules) {
+        this.vehicules = vehicules;
+    }
+
+    public List<Chauffeur> getChauffeurs() {
+        return chauffeurs;
+    }
+
+    public void setChauffeurs(List<Chauffeur> chauffeurs) {
+        this.chauffeurs = chauffeurs;
+    }
 }
