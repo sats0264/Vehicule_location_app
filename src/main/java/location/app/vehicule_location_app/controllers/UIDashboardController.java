@@ -7,8 +7,14 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import location.app.vehicule_location_app.exceptions.DAOException;
+import location.app.vehicule_location_app.models.*;
 
-public class UIDashboardController {
+import java.util.List;
+import java.util.stream.Collectors;
+
+@SuppressWarnings("ClassEscapesDefinedScope")
+public class UIDashboardController extends Controller {
 
     // --- Summary Labels ---
     @FXML
@@ -20,27 +26,30 @@ public class UIDashboardController {
 
     // --- Reserved Cars Table ---
     @FXML
-    private TableView<ReservedCar> reservedCarsTable;
+    private TableView<Reservation> reservedCarsTable;
     @FXML
-    private TableColumn<ReservedCar, String> resMatriculeColumn;
+    private TableColumn<Reservation, String> resMatriculeColumn;
     @FXML
-    private TableColumn<ReservedCar, Integer> resCountColumn;
+    private TableColumn<Reservation, Integer> resCountColumn;
     @FXML
-    private TableColumn<ReservedCar, String> resStartDateColumn;
+    private TableColumn<Reservation, String> resStartDateColumn;
     @FXML
-    private TableColumn<ReservedCar, String> resEndDateColumn;
+    private TableColumn<Reservation, String> resEndDateColumn;
     @FXML
-    private TableColumn<ReservedCar, String> resClientNameColumn;
+    private TableColumn<Reservation, String> resClientNameColumn;
 
     // --- Top Clients Table ---
     @FXML
-    private TableView<TopClient> topClientsTable;
+    private TableView<Client> topClientsTable;
     @FXML
-    private TableColumn<TopClient, String> topClientFirstNameColumn;
+    private TableColumn<Client, String> topClientFirstNameColumn;
     @FXML
-    private TableColumn<TopClient, String> topClientLastNameColumn;
+    private TableColumn<Client, String> topClientLastNameColumn;
     @FXML
-    private TableColumn<TopClient, Double> topClientAmountColumn;
+    private TableColumn<Client, Double> topClientAmountColumn;
+
+    public UIDashboardController() throws DAOException {
+    }
 
     /**
      * Méthode d'initialisation du contrôleur.
@@ -48,82 +57,96 @@ public class UIDashboardController {
      */
     @FXML
     public void initialize() {
-        // --- Populate Summary Labels ---
-        chiffreAffairesLabel.setText("301100 DH");
-        voituresCountLabel.setText("23");
-        clientsCountLabel.setText("17");
+        System.out.println("Dashboard initialized");  // test
+        System.out.println(">>> Nombre de véhicules : " + vehiculeList.size());
+        System.out.println(">>> Nombre de clients : " + clientList.size());
+        System.out.println(">>> Nombre de réservations : " + reservationList.size());
 
-        // --- Initialize Reserved Cars Table ---
-        resMatriculeColumn.setCellValueFactory(cellData -> cellData.getValue().matriculeProperty());
-        resCountColumn.setCellValueFactory(cellData -> cellData.getValue().countProperty().asObject());
-        resStartDateColumn.setCellValueFactory(cellData -> cellData.getValue().startDateProperty());
-        resEndDateColumn.setCellValueFactory(cellData -> cellData.getValue().endDateProperty());
-        resClientNameColumn.setCellValueFactory(cellData -> cellData.getValue().clientNameProperty());
+        voituresCountLabel.setText(String.valueOf(vehiculeList.size()));
+        clientsCountLabel.setText(String.valueOf(clientList.size()));
 
-        ObservableList<ReservedCar> reservedCars = FXCollections.observableArrayList(
-                new ReservedCar("1-A-36543", 5, "11/12/2020", "28/12/2020", "Nour Salma"),
-                new ReservedCar("1-A-69854", 15, "25/12/2020", "27/12/2020", "Ouadi Sabai")
-        );
+        double chiffreAffaires = reservationList.stream()
+            .filter(r -> r.getFacture() != null)
+            .mapToDouble(r -> r.getFacture().getMontant())
+            .sum();
+        chiffreAffairesLabel.setText(String.format("%.0f FCFA", chiffreAffaires));
+
+        resMatriculeColumn.setCellValueFactory(cellData -> {
+            List<Vehicule> vehicules = cellData.getValue().getVehicules();
+            String matricule = vehicules.isEmpty() ? "" : vehicules.getFirst().getImmatriculation();
+            return new ReadOnlyStringWrapper(matricule);
+        });
+
+        resCountColumn.setCellValueFactory(cellData ->
+                new ReadOnlyObjectWrapper<>(cellData.getValue().getVehicules().size()));
+
+        resStartDateColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
+                        ? cellData.getValue().getDateDebut().toString()
+                        : ""));
+
+        resEndDateColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getDateFin() != null
+                        ? cellData.getValue().getDateFin().toString()
+                        : ""));
+
+        resClientNameColumn.setCellValueFactory(cellData -> {
+            Client c = cellData.getValue().getClient();
+            return new ReadOnlyStringWrapper(c != null ? c.getPrenom() + " " + c.getNom() : "");
+        });
+
+        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(reservationList);
         reservedCarsTable.setItems(reservedCars);
 
-        // --- Initialize Top Clients Table ---
-        topClientFirstNameColumn.setCellValueFactory(cellData -> cellData.getValue().firstNameProperty());
-        topClientLastNameColumn.setCellValueFactory(cellData -> cellData.getValue().lastNameProperty());
-        topClientAmountColumn.setCellValueFactory(cellData -> cellData.getValue().amountProperty().asObject());
 
-        ObservableList<TopClient> topClients = FXCollections.observableArrayList(
-                new TopClient("Sara", "Tourabi", 35100.00),
-                new TopClient("Amal", "Fillali", 29300.00),
-                new TopClient("Khalid", "Tabali", 25200.00),
-                new TopClient("Fatiha", "Anouar", 24500.00),
-                new TopClient("Ali", "Fahd", 20800.00)
+        // --- Top Clients Table ---
+        topClientFirstNameColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getPrenom())
         );
-        topClientsTable.setItems(topClients);
-    }
 
-    // --- Data Model Classes for Tables ---
+        topClientLastNameColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getNom())
+        );
 
-    /**
-     * Modèle de données pour une voiture actuellement réservée.
-     */
-    public static class ReservedCar {
-        private final SimpleStringProperty matricule;
-        private final SimpleIntegerProperty count;
-        private final SimpleStringProperty startDate;
-        private final SimpleStringProperty endDate;
-        private final SimpleStringProperty clientName;
+        topClientAmountColumn.setCellValueFactory(cellData -> {
+            double total = cellData.getValue().getReservations().stream()
+                    .filter(r -> r.getFacture() != null)
+                    .mapToDouble(r -> r.getFacture().getMontant())
+                    .sum();
+            return new ReadOnlyObjectWrapper<>(total);
+        });
 
-        public ReservedCar(String matricule, int count, String startDate, String endDate, String clientName) {
-            this.matricule = new SimpleStringProperty(matricule);
-            this.count = new SimpleIntegerProperty(count);
-            this.startDate = new SimpleStringProperty(startDate);
-            this.endDate = new SimpleStringProperty(endDate);
-            this.clientName = new SimpleStringProperty(clientName);
+//        ObservableList<Client> topClientTable = FXCollections.observableArrayList(clientList);
+//        topClientsTable.setItems(topClientTable);
+
+        // Calculer le montant total des factures pour chaque client
+        List<Client> topClients = clientList.stream()
+                .sorted((c1, c2) -> {
+                    double total1 = c1.getReservations().stream()
+                            .filter(r -> r.getFacture() != null)
+                            .mapToDouble(r -> r.getFacture().getMontant())
+                            .sum();
+                    double total2 = c2.getReservations().stream()
+                            .filter(r -> r.getFacture() != null)
+                            .mapToDouble(r -> r.getFacture().getMontant())
+                            .sum();
+                    return Double.compare(total2, total1); // Tri décroissant
+                })
+                .limit(5)
+                .collect(Collectors.toList());
+
+        // Si tous les montants sont 0, on prend les 5 premiers clients
+        boolean allZero = topClients.stream().allMatch(c ->
+                c.getReservations().stream()
+                        .filter(r -> r.getFacture() != null)
+                        .mapToDouble(r -> r.getFacture().getMontant())
+                        .sum() == 0.0);
+
+        if (allZero) {
+            topClients = clientList.stream().limit(5).collect(Collectors.toList());
         }
-
-        public StringProperty matriculeProperty() { return matricule; }
-        public IntegerProperty countProperty() { return count; }
-        public StringProperty startDateProperty() { return startDate; }
-        public StringProperty endDateProperty() { return endDate; }
-        public StringProperty clientNameProperty() { return clientName; }
+        // Mettre à jour le TableView
+        topClientsTable.setItems(FXCollections.observableArrayList(topClients));
     }
 
-    /**
-     * Modèle de données pour un client top.
-     */
-    public static class TopClient {
-        private final SimpleStringProperty firstName;
-        private final SimpleStringProperty lastName;
-        private final SimpleDoubleProperty amount;
-
-        public TopClient(String firstName, String lastName, double amount) {
-            this.firstName = new SimpleStringProperty(firstName);
-            this.lastName = new SimpleStringProperty(lastName);
-            this.amount = new SimpleDoubleProperty(amount);
-        }
-
-        public StringProperty firstNameProperty() { return firstName; }
-        public StringProperty lastNameProperty() { return lastName; }
-        public DoubleProperty amountProperty() { return amount; }
-    }
 }
