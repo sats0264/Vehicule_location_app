@@ -1,5 +1,6 @@
 package location.app.vehicule_location_app.dao;
 
+import jakarta.persistence.Entity;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.jdbc.HibernateConnection;
 import org.hibernate.Session;
@@ -40,7 +41,9 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
     @Override
     public List<T> list() throws DAOException {
         try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-            String hql = "from " + type.getSimpleName();
+//            String hql = "from " + type.getSimpleName();
+            String hql = "from " + type.getAnnotation(Entity.class).name();
+
             return session.createQuery(hql, type).getResultList();
         } catch (Exception e) {
             throw new DAOException("Erreur listing : " + e.getMessage());
@@ -76,23 +79,16 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
     }
 
     public int getId(T entity) throws DAOException {
-        Transaction transaction = null;
         try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            if (entity == null) {
-                throw new DAOException("L'entité ne peut pas être nulle");
-            }
+            if (entity == null) throw new DAOException("L'entité ne peut pas être nulle");
             Integer id = (Integer) session.getIdentifier(entity);
-            if (id == null) {
-                throw new DAOException("L'entité n'a pas d'identifiant");
-            }
-            transaction.commit();
+            if (id == null) throw new DAOException("L'entité n'a pas d'identifiant");
             return id;
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
             throw new DAOException("Erreur récupération ID : " + e.getMessage());
         }
     }
+
 
     public int getAllEntitiesCount() throws DAOException {
         Transaction transaction = null;
