@@ -14,15 +14,6 @@ public class Main extends Application {
 
     public static void main(String[] args){
         launch(args);
-        try {
-            Controller.creerDemoDonnees();
-            System.out.println("✔ Données de démonstration insérées avec succès !");
-        } catch (DAOException e) {
-            e.printStackTrace();
-        } finally {
-            // Ferme proprement les ressources Hibernate
-//            HibernateConnection.shutdown();
-        }
     }
 
     @Override
