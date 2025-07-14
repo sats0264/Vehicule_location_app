@@ -7,6 +7,7 @@ import location.app.vehicule_location_app.factory.HibernateFactory;
 import location.app.vehicule_location_app.models.*;
 import java.time.LocalDate;
 import java.util.Arrays;
+import java.util.List;
 
 public class Controller {
 
@@ -14,6 +15,9 @@ public class Controller {
     protected HibernateObjectDaoImpl<Client> clientDao;
     protected HibernateObjectDaoImpl<Chauffeur> chauffeurDao;
     protected HibernateObjectDaoImpl<Reservation> reservationDao;
+    protected List<Vehicule> vehiculeList;
+    protected List<Client> clientList;
+    protected List<Reservation> reservationList;
 
     public Controller() throws DAOException {
         vehiculeDao = ConcreteFactory
@@ -31,6 +35,10 @@ public class Controller {
         reservationDao = ConcreteFactory
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(Reservation.class);
+
+        vehiculeList = vehiculeDao.list();
+        clientList = clientDao.list();
+        reservationList = reservationDao.list();
     }
 
     public static <T> void ajouterObject(T entity, Class<T> entityClass) throws DAOException {
@@ -61,6 +69,13 @@ public class Controller {
         hibernateDao.update(entity);
     }
 
+    public static <T> List<T> listerObjects(Class<T> entityClass) throws DAOException {
+        HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
+                .getFactory(HibernateFactory.class)
+                .getHibernateObjectDaoImpl(entityClass);
+        return hibernateDao.list();
+    }
+
     public static void creerDemoDonnees() throws DAOException {
 
         var client1 = new Client("Dupont", "Jean", "jean.dupont@email.com","1 rue de Paris", "0600000000", "password");
@@ -68,20 +83,35 @@ public class Controller {
 
 
         var vehicule1 = new Vehicule("Renault", "Clio", 300.0, Statut.DISPONIBLE, "AA-123-BB", null);
+        var vehicule2 = new Vehicule("Peugeot", "208", 350.0, Statut.DISPONIBLE, "CC-456-DD", null);
+        var vehicule3 = new Vehicule("Citroen", "C3", 320.0, Statut.DISPONIBLE, "EE-789-FF", null);
 
         var chauffeur1 = new Chauffeur("Sow", "Moussa", Statut.DISPONIBLE, null);
+        var chauffeur2 = new Chauffeur("Diallo", "Fatou", Statut.DISPONIBLE, null);
+
+
 
         var reservationAvecChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(3),
-                Statut.DISPONIBLE);
-
+                StatutReservation.EN_ATTENTE);
 
         reservationAvecChauffeur.addVehicule(vehicule1);
+        reservationAvecChauffeur.addVehicule(vehicule2);
         reservationAvecChauffeur.addChauffeur(chauffeur1);
+        reservationAvecChauffeur.addChauffeur(chauffeur2);
+
+        var reservationSansChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(2),
+                StatutReservation.EN_ATTENTE);
+        reservationSansChauffeur.addVehicule(vehicule3);
+
+        var facture1 = new Facture(reservationAvecChauffeur);
+        var facture2 = new Facture(reservationSansChauffeur);
+
         client1.addReservation(reservationAvecChauffeur);
 
         ajouterObject(client1, Client.class);
         ajouterObject(client2, Client.class);
-        ajouterObject(reservationAvecChauffeur, Reservation.class);
+//        ajouterObject(facture1, Facture.class);
+//        ajouterObject(reservationAvecChauffeur, Reservation.class);
 
     }
 }
