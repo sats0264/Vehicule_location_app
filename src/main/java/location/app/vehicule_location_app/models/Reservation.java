@@ -18,7 +18,7 @@ public class Reservation {
     private LocalDate dateFin;
 
     @Enumerated(EnumType.STRING)
-    private Statut statut;
+    private StatutReservation statut;
 
     @ManyToOne
     @JoinColumn(name = "client_id")
@@ -28,10 +28,10 @@ public class Reservation {
     @JoinColumn(name = "facture_id")
     private Facture facture;
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Vehicule> vehicules = new ArrayList<>();
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Chauffeur> chauffeurs = new ArrayList<>();
 
     public Reservation() {}
@@ -40,7 +40,7 @@ public class Reservation {
         this.id = id;
     }
     public Reservation(LocalDate dateDebut, LocalDate dateFin,
-                       Statut statut) {
+                       StatutReservation statut) {
         this.dateDebut = dateDebut;
         this.dateFin = dateFin;
         this.statut = statut;
@@ -88,11 +88,11 @@ public class Reservation {
         this.dateFin = dateFin;
     }
 
-    public Statut getStatut() {
+    public StatutReservation getStatut() {
         return statut;
     }
 
-    public void setStatut(Statut statut) {
+    public void setStatut(StatutReservation statut) {
         this.statut = statut;
     }
 

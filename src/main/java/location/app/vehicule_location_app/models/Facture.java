@@ -23,6 +23,13 @@ public class Facture {
         this.setMontant(montant);
     }
 
+    public Facture(Reservation reservation) {
+        this.setReservation(reservation);
+        this.setMontant(reservation.getVehicules().stream()
+                .mapToDouble(Vehicule::getTarif)
+                .sum());
+    }
+
     public int getId() {
         return id;
     }
@@ -42,5 +49,8 @@ public class Facture {
     }
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
+        if (reservation != null) {
+            reservation.setFacture(this);
+        }
     }
 }

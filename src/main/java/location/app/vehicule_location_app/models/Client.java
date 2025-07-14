@@ -21,7 +21,7 @@ public class Client {
     private String password;
     private int pointFidelite;
 
-    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Reservation> reservations = new ArrayList<>();
 
     public Client() {}
