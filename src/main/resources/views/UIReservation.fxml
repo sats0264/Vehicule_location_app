@@ -1,83 +1,26 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.image.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
 <AnchorPane prefHeight="640.0" prefWidth="1000.0" style="-fx-background-color: #f8f8f8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIReservationController">
+    <padding>
+        <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+    </padding>
     <children>
-        <!-- Informations client & Informations voiture sections -->
-        <HBox layoutX="20.0" layoutY="20.0" spacing="40.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="10.0">
-            <!-- Informations client -->
-            <VBox prefWidth="500.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
-                <children>
-                    <Label text="Informations client" textFill="#424242">
-                        <font>
-                            <Font name="System Bold" size="16.0" />
-                        </font>
-                    </Label>
-                    <Separator />
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Client :" />
-                        <ComboBox fx:id="clientComboBox" prefWidth="200.0" promptText="Sélectionner un client" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Téléphone :" />
-                        <TextField fx:id="clientPhoneField" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Email :" />
-                        <TextField fx:id="clientEmailField" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                </children>
-            </VBox>
-
-            <!-- Informations voiture -->
-            <VBox prefWidth="500.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
-                <children>
-                    <Label text="Informations voiture" textFill="#424242">
-                        <font>
-                            <Font name="System Bold" size="16.0" />
-                        </font>
-                    </Label>
-                    <Separator />
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Voiture :" />
-                        <ComboBox fx:id="voitureComboBox" prefWidth="200.0" promptText="Sélectionner une voiture" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Modèle :" />
-                        <TextField fx:id="voitureModeleField" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                    <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Marque :" />
-                        <TextField fx:id="voitureMarqueField" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
-                    </HBox>
-                </children>
-            </VBox>
-        </HBox>
-
-        <!-- Informations réservation section -->
-        <VBox layoutX="20.0" layoutY="240.0" prefWidth="1040.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="210.0">
+        <!-- Liste des réservations Table (now filling the entire content area) -->
+        <VBox layoutX="20.0" layoutY="20.0" prefWidth="1000.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="5.0" AnchorPane.rightAnchor="5.0" AnchorPane.topAnchor="5.0">
             <children>
                 <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Label text="Informations réservation" textFill="#424242">
+                    <Label prefHeight="25.0" prefWidth="243.0" text="Liste des réservations" textFill="#424242">
                         <font>
                             <Font name="System Bold" size="16.0" />
                         </font>
                     </Label>
-                    <Region HBox.hgrow="ALWAYS" />
-                    <!-- Action Buttons for Reservation -->
-                    <Button fx:id="plusButton" contentDisplay="GRAPHIC_ONLY" onAction="#handlePlusButton" style="-fx-background-color: transparent;">
-                        <graphic>
-                            <ImageView fitHeight="24.0" fitWidth="24.0">
-                                <image>
-                                    <Image url="@../images/plus_icon.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
+                    <Region prefHeight="32.0" prefWidth="537.0" HBox.hgrow="ALWAYS" />
                     <Button fx:id="refreshButton" contentDisplay="GRAPHIC_ONLY" onAction="#handleRefreshButton" style="-fx-background-color: transparent;">
                         <graphic>
                             <ImageView fitHeight="24.0" fitWidth="24.0">
@@ -105,86 +48,6 @@
                             </ImageView>
                         </graphic>
                     </Button>
-                </HBox>
-                <Separator />
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Label text="Code :" />
-                    <TextField fx:id="codeField" prefWidth="80.0" text="7" />
-                    <Label text="Date de début :" />
-                    <DatePicker fx:id="startDatePicker" prefWidth="120.0" />
-                    <Label text="Date de fin :" />
-                    <DatePicker fx:id="endDatePicker" prefWidth="120.0" />
-                    <Button onAction="#handleOkButton" style="-fx-background-color: #4CAF50; -fx-text-fill: white;" text="OK" />
-                    <Region HBox.hgrow="ALWAYS" />
-                    <Label text="Durée :" />
-                    <TextField fx:id="durationField" editable="false" prefWidth="80.0" text="37 jour(s)" />
-                    <Label text="Montant :" />
-                    <TextField fx:id="amountField" editable="false" prefWidth="100.0" text="11100 DH" />
-                </HBox>
-                <HBox alignment="CENTER" spacing="10.0">
-                    <!-- Navigation Buttons -->
-                    <Button fx:id="firstButton" contentDisplay="GRAPHIC_ONLY" onAction="#handleFirstButton" style="-fx-background-color: transparent;">
-                        <graphic>
-                            <ImageView fitHeight="20.0" fitWidth="20.0">
-                                <image>
-                                    <Image url="@../images/arrow_double_left.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                    <Button fx:id="previousButton" contentDisplay="GRAPHIC_ONLY" onAction="#handlePreviousButton" style="-fx-background-color: transparent;">
-                        <graphic>
-                            <ImageView fitHeight="20.0" fitWidth="20.0">
-                                <image>
-                                    <Image url="@../images/arrow_left.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                    <Button fx:id="nextButton" contentDisplay="GRAPHIC_ONLY" onAction="#handleNextButton" style="-fx-background-color: transparent;">
-                        <graphic>
-                            <ImageView fitHeight="20.0" fitWidth="20.0">
-                                <image>
-                                    <Image url="@../images/arrow_right.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                    <Button fx:id="lastButton" contentDisplay="GRAPHIC_ONLY" onAction="#handleLastButton" style="-fx-background-color: transparent;">
-                        <graphic>
-                            <ImageView fitHeight="20.0" fitWidth="20.0">
-                                <image>
-                                    <Image url="@../images/arrow_double_right.png" />
-                                </image>
-                            </ImageView>
-                        </graphic>
-                    </Button>
-                </HBox>
-                <HBox alignment="CENTER" spacing="10.0">
-                    <Button fx:id="enregistrerButton" onAction="#handleEnregistrer" style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Enregistrer">
-                        <font>
-                            <Font size="14.0" />
-                        </font>
-                    </Button>
-                    <Button fx:id="supprimerButton" onAction="#handleSupprimer" style="-fx-background-color: #e91e63; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Supprimer">
-                        <font>
-                            <Font size="14.0" />
-                        </font>
-                    </Button>
-                </HBox>
-            </children>
-        </VBox>
-
-        <!-- Liste des réservations Table -->
-        <VBox layoutX="60.0" layoutY="470.0" prefHeight="197.0" prefWidth="920.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" AnchorPane.bottomAnchor="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="420.0">
-            <children>
-                <HBox alignment="CENTER_LEFT" spacing="10.0">
-                    <Label text="Liste des réservations" textFill="#424242">
-                        <font>
-                            <Font name="System Bold" size="16.0" />
-                        </font>
-                    </Label>
-                    <Region HBox.hgrow="ALWAYS" />
                     <Button contentDisplay="GRAPHIC_ONLY" style="-fx-background-color: transparent;">
                         <graphic>
                             <ImageView fitHeight="24.0" fitWidth="24.0">
@@ -197,9 +60,9 @@
                 </HBox>
                 <TableView fx:id="reservationsTable" prefHeight="200.0" VBox.vgrow="ALWAYS">
                     <columns>
-                        <TableColumn fx:id="resListCodeColumn" prefWidth="60.0" text="Code" />
                         <TableColumn fx:id="resListStartDateColumn" prefWidth="100.0" text="Date de début" />
                         <TableColumn fx:id="resListEndDateColumn" prefWidth="100.0" text="Date de fin" />
+                  <TableColumn fx:id="resListStatutColumn" prefWidth="75.0" text="Statut" />
                         <TableColumn fx:id="resListFirstNameColumn" prefWidth="100.0" text="Prénom" />
                         <TableColumn fx:id="resListLastNameColumn" prefWidth="100.0" text="Nom" />
                         <TableColumn fx:id="resListMatriculeColumn" prefWidth="100.0" text="Matricule" />
@@ -210,6 +73,11 @@
                         <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
                     </columnResizePolicy>
                 </TableView>
+            <ButtonBar>
+               <buttons>
+                      <Button fx:id="inspectReservationButton" onAction="#handleInspectReservationButton" style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Inspecter la réservation" />
+               </buttons>
+            </ButtonBar>
             </children>
         </VBox>
     </children>
