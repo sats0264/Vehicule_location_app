@@ -85,7 +85,7 @@ public class Notification {
     @Column(name = "entityId", nullable = false)
     private int entityId;
 
-    @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "notification", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<NotificationReception> receptions = new ArrayList<>();
 
     public Notification() {}
