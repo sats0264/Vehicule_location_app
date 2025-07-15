@@ -4,7 +4,7 @@
         "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
     <session-factory>
-        <property name="hbm2ddl.auto">create</property>
+        <property name="hbm2ddl.auto">update</property>
         <property name="hibernate.dialect">org.hibernate.dialect.MySQLDialect</property>
         <property name="hibernate.connection.driver_class">com.mysql.cj.jdbc.Driver</property>
         <property name="hibernate.connection.url">jdbc:mysql://localhost:3306/vehicule_location?serverTimezone=UTC</property>
@@ -19,5 +19,7 @@
         <mapping class="location.app.vehicule_location_app.models.Reservation" />
         <mapping class="location.app.vehicule_location_app.models.Vehicule" />
         <mapping class="location.app.vehicule_location_app.models.Utilisateur" />
+        <mapping class="location.app.vehicule_location_app.models.Notification" />
+        <mapping class="location.app.vehicule_location_app.models.NotificationReception" />
     </session-factory>
 </hibernate-configuration>

@@ -12,6 +12,7 @@ module location.app.vehicule_location_app {
     requires jakarta.persistence;
     requires org.hibernate.orm.core;
     requires java.naming;
+    requires java.desktop;
 
     exports location.app.vehicule_location_app.runtime;
     opens location.app.vehicule_location_app.runtime to javafx.fxml;

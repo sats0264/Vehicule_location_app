@@ -42,19 +42,34 @@
 
         <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="280.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="280.0">
             <children>
+                <Label text="Adresse :" textFill="#555555" />
+                <TextField fx:id="adresseField" promptText="Entrez votre adresse" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="340.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="340.0">
+            <children>
+                <Label text="Téléphone :" textFill="#555555" />
+                <TextField fx:id="phoneField" promptText="Entrez votre numéro de téléphone" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
+            </children>
+        </VBox>
+
+
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="400.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="400.0">
+            <children>
                 <Label text="Mot de passe :" textFill="#555555" />
                 <PasswordField fx:id="passwordField" promptText="Entrez votre mot de passe" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
             </children>
         </VBox>
 
-        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="340.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="340.0">
+        <VBox alignment="CENTER_LEFT" layoutX="40.0" layoutY="460.0" spacing="5.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="460.0">
             <children>
                 <Label text="Confirmer le mot de passe :" textFill="#555555" />
                 <PasswordField fx:id="confirmPasswordField" promptText="Confirmez votre mot de passe" style="-fx-background-color: white; -fx-border-color: #cccccc; -fx-border-radius: 5; -fx-padding: 8;" />
             </children>
         </VBox>
 
-        <HBox alignment="CENTER" layoutX="190.0" layoutY="420.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="420.0">
+        <HBox alignment="CENTER" layoutX="190.0" layoutY="530.0" spacing="20.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="530.0">
             <children>
                 <Button fx:id="cancelButton" onAction="#handleCancelButton" prefWidth="120.0" style="-fx-background-color: #e0e0e0; -fx-text-fill: #333333; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 5;" text="Annuler">
                     <font>
@@ -69,7 +84,7 @@
             </children>
         </HBox>
 
-        <Hyperlink fx:id="backToLoginLink" layoutX="146.0" layoutY="480.0" onAction="#handleBackToLoginLink" text="Vous avez déjà un compte? Connectez-vous" textFill="#2196f3" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="480.0">
+        <Hyperlink fx:id="backToLoginLink" layoutX="146.0" layoutY="580.0" onAction="#handleBackToLoginLink" text="Vous avez déjà un compte? Connectez-vous" textFill="#2196f3" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="580.0">
             <font>
                 <Font size="13.0" />
             </font>
