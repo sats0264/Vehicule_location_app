@@ -90,7 +90,7 @@ public class UILoginController extends Controller {
 
                 if (isClient) {
                 } else {
-                    controller.setCurrentUser(currentUser);
+                    controller.setUtilisateurConnecte(currentUser);
                 }
             } else {
                 showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Identifiants incorrects.");
