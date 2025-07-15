@@ -103,4 +103,14 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
             throw new DAOException("Erreur comptage des entités : " + e.getMessage());
         }
     }
+
+    public List<T> readAll() {
+    try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+        String hql = "from " + type.getAnnotation(Entity.class).name();
+        return session.createQuery(hql, type).getResultList();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return java.util.Collections.emptyList();
+    }
+}
 }

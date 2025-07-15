@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="location.app.vehicule_location_app.controllers.UIFenetreReservationController"
+            prefHeight="300.0" prefWidth="700.0">
+    <HBox spacing="30" alignment="CENTER" AnchorPane.topAnchor="30" AnchorPane.leftAnchor="30" AnchorPane.rightAnchor="30" AnchorPane.bottomAnchor="30">
+        <!-- Photo à gauche -->
+        <ImageView fx:id="voitureImage" fitHeight="140" fitWidth="210" preserveRatio="true"/>
+        <!-- Infos voiture au centre -->
+        <VBox spacing="10" alignment="CENTER">
+            <Label fx:id="marqueLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+            <Label fx:id="modeleLabel" style="-fx-font-size: 14px;"/>
+            <Label fx:id="immatriculationLabel" style="-fx-font-size: 14px;"/>
+            <HBox spacing="8" alignment="CENTER">
+                <Label text="Nombre de jours:" style="-fx-font-size: 13px;"/>
+                <Label fx:id="nbJoursLabel" style="-fx-font-size: 13px; -fx-font-weight: bold;"/>
+            </HBox>
+        </VBox>
+        <!-- Statut à droite -->
+        <VBox spacing="15" alignment="CENTER">
+            <Label text="Statut de la demande :" style="-fx-font-size: 13px;"/>
+            <Label fx:id="statutLabel" style="-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: #FFA000;"/>
+        </VBox>
+    </HBox>
+</AnchorPane>

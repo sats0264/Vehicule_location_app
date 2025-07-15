@@ -7,7 +7,7 @@
       <imported>true</imported>
       <remarks>Hibernate
 
-C:/Java/Workspace_MISI1/Vehicule_location_app/src/main/resources/hibernate.cfg.xml</remarks>
+F:/workspace_Master/Vehicule_location_app/src/main/resources/hibernate.cfg.xml</remarks>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
       <jdbc-url>jdbc:mysql://localhost:3306/vehicule_location?serverTimezone=UTC</jdbc-url>
       <jdbc-additional-properties>

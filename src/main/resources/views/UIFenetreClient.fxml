@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<?import java.net.URL?>
+<BorderPane fx:id="mainBorderPane" prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIFenetreClientController">
+    <top>
+        <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" style="-fx-background-color: #f0f0f0; -fx-padding: 0 20;">
+            <padding>
+                <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
+            </padding>
+            <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
+                <image>
+                    <Image url="@../images/car_logo.png" />
+                </image>
+            </ImageView>
+            <Label text="RENTAL CAR" textFill="#2196f3">
+                <font>
+                    <Font name="System Bold" size="24.0" />
+                </font>
+            </Label>
+            <Region HBox.hgrow="ALWAYS" />
+            <Label fx:id="dateTimeLabel" text="15/07/2025 12:00:00" textFill="#616161">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Label>
+            <Button contentDisplay="GRAPHIC_ONLY" graphicTextGap="5.0" minHeight="30.0" minWidth="30.0" style="-fx-background-color: transparent;">
+                <graphic>
+                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../images/user_icon.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+            <Button fx:id="logoutButton" contentDisplay="GRAPHIC_ONLY" graphicTextGap="5.0" minHeight="30.0" minWidth="30.0" onAction="#handleLogoutClick" style="-fx-background-color: transparent;">
+                <graphic>
+                    <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
+                        <Image url="@../images/logout-icon.png" />
+                    </ImageView>
+                </graphic>
+            </Button>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #3f51b5; -fx-padding: 15;">
+            <Button fx:id="dashboardButton" onAction="#handleDashboardClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="TABLEAU DE BORD" />
+            <Button fx:id="reservationsButton" onAction="#handleReservationsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="RESERVATIONS" />
+            <Button fx:id="notificationsButton" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="NOTIFICATIONS" />
+            <stylesheets>
+                <URL value="@../CSS/style.css" />
+            </stylesheets>
+        </VBox>
+    </left>
+
+    <center>
+        <AnchorPane fx:id="contentArea" style="-fx-background-color: #ffffff; -fx-padding: 20;">
+            <!-- Le contenu dynamique sera chargé ici -->
+        </AnchorPane>
+    </center>
+</BorderPane>

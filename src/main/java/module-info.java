@@ -18,7 +18,6 @@ module location.app.vehicule_location_app {
     exports location.app.vehicule_location_app.controllers;
     opens location.app.vehicule_location_app.controllers to javafx.fxml;
 
-    exports location.app.vehicule_location_app;
     exports location.app.vehicule_location_app.jdbc;
     opens location.app.vehicule_location_app.jdbc to javafx.fxml;
 }

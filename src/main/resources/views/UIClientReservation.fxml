@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="location.app.vehicule_location_app.controllers.UIClientReservationController"
+            prefHeight="500.0" prefWidth="400.0">
+    <VBox spacing="20" alignment="CENTER" AnchorPane.topAnchor="20" AnchorPane.leftAnchor="20" AnchorPane.rightAnchor="20">
+        <ImageView fx:id="voitureImage" fitHeight="180" fitWidth="270" preserveRatio="true"/>
+        <Label fx:id="marqueLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;"/>
+        <Label fx:id="modeleLabel" style="-fx-font-size: 14px;"/>
+        <Label fx:id="immatriculationLabel" style="-fx-font-size: 14px;"/>
+        <Label fx:id="typeReservationLabel" style="-fx-font-size: 13px; -fx-text-fill: #2196f3;"/>
+        <Label fx:id="prixLabel" style="-fx-font-size: 15px; -fx-font-weight: bold;"/>
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Date début:"/>
+            <DatePicker fx:id="dateDebutPicker"/>
+        </HBox>
+        <HBox spacing="10" alignment="CENTER">
+            <Label text="Date fin:"/>
+            <DatePicker fx:id="dateFinPicker"/>
+        </HBox>
+        <HBox spacing="20" alignment="CENTER">
+            <Button text="Valider la réservation" fx:id="validerBtn" style="-fx-background-color: #2196f3; -fx-text-fill: white;"/>
+            <Button text="Annuler" fx:id="annulerBtn" style="-fx-background-color: #e53935; -fx-text-fill: white;"/>
+        </HBox>
+    </VBox>
+</AnchorPane>

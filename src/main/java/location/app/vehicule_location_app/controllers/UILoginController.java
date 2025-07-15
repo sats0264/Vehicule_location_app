@@ -75,7 +75,24 @@ public class UILoginController {
                     e.printStackTrace();
                     showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la fenêtre principale.");
                 }
-            } else {
+            }
+            else if(username.equals("jean.dupont@email.com") && password.equals("password")){
+                // Ici, vous navigueriez vers l'écran principal de l'application
+                // Par exemple: Stage stage = (Stage) loginButton.getScene().getWindow(); stage.close();
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIFenetreClient.fxml"));
+                    Parent mainRoot = loader.load();
+                    Stage stage = (Stage) loginButton.getScene().getWindow();
+                    stage.setScene(new Scene(mainRoot));
+                    stage.centerOnScreen();
+                    stage.setTitle("Accueil - Application de Location de Véhicules");
+                    stage.show();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la fenêtre principale.");
+                }
+            }
+            else {
                 showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Nom d'utilisateur ou mot de passe incorrect.");
             }
         }
