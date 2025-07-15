@@ -3,6 +3,8 @@ package location.app.vehicule_location_app.dao;
 import jakarta.persistence.Entity;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.jdbc.HibernateConnection;
+import location.app.vehicule_location_app.models.Notification;
+import location.app.vehicule_location_app.models.Utilisateur;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -24,17 +26,44 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
             session.persist(entity);
             transaction.commit();
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
+            // ❗️ Ajoute cette sécurité
+            if (transaction != null && transaction.isActive()) {
+                try {
+                    transaction.rollback();
+                } catch (Exception rollbackEx) {
+                    // Logging secondaire
+                    System.err.println("Erreur rollback : " + rollbackEx.getMessage());
+                }
+            }
             throw new DAOException("Erreur création : " + e.getMessage());
         }
     }
 
+
     @Override
-    public T read(int id) throws DAOException {
+    public T readById(int id) throws DAOException {
         try (Session session = HibernateConnection.getSessionFactory().openSession()) {
             return session.find(type, id);
         } catch (Exception e) {
             throw new DAOException("Erreur lecture : " + e.getMessage());
+        }
+    }
+
+    @Override
+    public T readByString(String value) throws DAOException {
+        try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+            String entityName = type.getAnnotation(Entity.class).name();
+            String hql;
+            if (value.contains("@")) {
+                hql = "from " + entityName + " where email = :value";
+            } else {
+                hql = "from " + entityName + " where login = :value";
+            }
+            return session.createQuery(hql, type)
+                    .setParameter("value", value)
+                    .uniqueResult();
+        } catch (Exception e) {
+            throw new DAOException("Erreur lecture par chaîne : " + e.getMessage());
         }
     }
 
@@ -103,4 +132,5 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
             throw new DAOException("Erreur comptage des entités : " + e.getMessage());
         }
     }
+
 }

@@ -1,6 +1,7 @@
 package location.app.vehicule_location_app.factory;
 
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
+import location.app.vehicule_location_app.dao.NotificationReceptionDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 
 public class HibernateFactoryImpl extends AbstractFactory {
@@ -14,6 +15,15 @@ public class HibernateFactoryImpl extends AbstractFactory {
                     return new HibernateObjectDaoImpl<>(entityClass);
                 } catch (Exception e) {
                     throw new DAOException("Error creating HibernateObjectDaoImpl for class: " + entityClass.getName() + ": " + e.getMessage());
+                }
+            }
+
+            @Override
+            public NotificationReceptionDaoImpl getNotificationReceptionDaoImpl() throws DAOException {
+                try {
+                    return new NotificationReceptionDaoImpl();
+                } catch (Exception e) {
+                    throw new DAOException("Error creating NotificationReceptionDaoImpl: " + e.getMessage());
                 }
             }
         };

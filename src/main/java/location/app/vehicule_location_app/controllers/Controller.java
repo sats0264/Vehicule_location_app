@@ -14,6 +14,8 @@ public class Controller {
     protected HibernateObjectDaoImpl<Client> clientDao;
     protected HibernateObjectDaoImpl<Chauffeur> chauffeurDao;
     protected HibernateObjectDaoImpl<Reservation> reservationDao;
+    protected HibernateObjectDaoImpl<Facture> factureDao;
+    protected HibernateObjectDaoImpl<Utilisateur> utilisateurDao;
     protected List<Vehicule> controllerVehiculeList;
     protected List<Client> controllerClientList;
     protected List<Reservation> controllerReservationList;
@@ -35,6 +37,14 @@ public class Controller {
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(Reservation.class);
 
+        utilisateurDao = ConcreteFactory
+                .getFactory(HibernateFactory.class)
+                .getHibernateObjectDaoImpl(Utilisateur.class);
+
+        factureDao = ConcreteFactory
+                .getFactory(HibernateFactory.class)
+                .getHibernateObjectDaoImpl(Facture.class);
+
         controllerVehiculeList = vehiculeDao.list();
         controllerClientList = clientDao.list();
         controllerReservationList = reservationDao.list();
@@ -52,12 +62,20 @@ public class Controller {
                 .getHibernateObjectDaoImpl(entityClass);
         hibernateDao.delete(objectId);
     }
-    public static <T> T rechercherObject(int objectId, Class<T> entityClass) throws DAOException {
+    public static <T> T rechercherObjectByInt(int objectId, Class<T> entityClass) throws DAOException {
         HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(entityClass);
 
-        return hibernateDao.read(objectId);
+        return hibernateDao.readById(objectId);
+    }
+
+    public static <T> T rechercherObjectByString(String value, Class<T> entityClass) throws DAOException {
+        HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
+                .getFactory(HibernateFactory.class)
+                .getHibernateObjectDaoImpl(entityClass);
+
+        return hibernateDao.readByString(value);
     }
 
     public static <T> void updateObject(T entity, Class<T> entityClass) throws DAOException {
@@ -73,6 +91,25 @@ public class Controller {
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(entityClass);
         return hibernateDao.list();
+    }
+
+    public boolean authenticateClient(String email, String password) throws DAOException {
+        List<Client> clients = clientDao.list();
+        for (Client client : clients) {
+            if (client.getEmail().equals(email) && client.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public boolean authenticateUser(String login, String password) throws DAOException {
+        List<Utilisateur> users = utilisateurDao.list();
+        for (Utilisateur user : users) {
+            if (user.getLogin().equals(login) && user.getPassword().equals(password)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public static void creerDemoDonnees() throws DAOException {
