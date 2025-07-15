@@ -61,10 +61,13 @@ public class MainFenetreController extends NotificationObserver implements Initi
         super(NotificationService.getInstance()); // Attachez l'observateur au service de notification
     }
 
+//    private Utilisateur utilisateurConnecte;
 
-    public void setCurrentUser(Utilisateur currentUser) {
-//        this.currentUser = currentUser;
-        NotificationService.getInstance().setUtilisateur(currentUser);
+    // Méthode pour définir l'utilisateur connecté (à appeler depuis votre écran de login)
+    public void setUtilisateurConnecte(Utilisateur utilisateur) {
+        this.currentUser = utilisateur;
+        NotificationService.getInstance().setUtilisateur(utilisateur); // IMPORTANT: Définit l'utilisateur actif dans le service
+        // Si votre NotificationService est un observateur lui-même, il va charger les notifications pour cet utilisateur.
     }
 
     @Override
@@ -168,27 +171,47 @@ public class MainFenetreController extends NotificationObserver implements Initi
             System.err.println("Failed to load view: " + fxmlPath);
         }
     }
-    void loadNotificationView(String fxmlPath) {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
-            Parent view = loader.load();
-            contentArea.getChildren().setAll(view);
+//    void loadNotificationView(String fxmlPath) {
+//        try {
+//            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+//            Parent view = loader.load();
+//            contentArea.getChildren().setAll(view);
+//
+//            AnchorPane.setTopAnchor(view, 0.0);
+//            AnchorPane.setBottomAnchor(view, 0.0);
+//            AnchorPane.setLeftAnchor(view, 0.0);
+//            AnchorPane.setRightAnchor(view, 0.0);
+//
+//            UINotificationController controller = loader.getController();
+//            controller.setCurrentUser(currentUser);
+//
+//            controller.setMainFenetreController(this);
+//
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.err.println("Failed to load notification view: " + fxmlPath);
+//        }
+//    }
+// Adaptez la méthode loadView pour passer l'utilisateur au contrôleur de la notification
+private void loadNotificationView(String fxmlPath) {
+    try {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+        Parent view = loader.load();
+        contentArea.getChildren().setAll(view); // Place la vue dans votre zone de contenu
 
-            AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setBottomAnchor(view, 0.0);
-            AnchorPane.setLeftAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
-
-            UINotificationController controller = loader.getController();
-            controller.setCurrentUser(currentUser);
-
-            controller.setMainFenetreController(this);
-
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.err.println("Failed to load notification view: " + fxmlPath);
+        // IMPORTANT: Passer l'utilisateur au contrôleur de UINotification.fxml
+        UINotificationController uiNotificationController = loader.getController();
+        if (uiNotificationController != null) {
+            uiNotificationController.setCurrentUser(currentUser); // Passe l'utilisateur
+            uiNotificationController.setMainFenetreController(this); // Si nécessaire
+            // L'appel à chargerNotifications() sera fait dans setCurrentUser() de UINotificationController
         }
+
+    } catch (IOException e) {
+        e.printStackTrace();
+        // Gérer l'erreur de chargement de la vue
     }
+}
 
     private void setSelectedButton(Button selectedButton) {
         dashboardButton.getStyleClass().remove("selected-menu-btn");
@@ -262,19 +285,12 @@ public class MainFenetreController extends NotificationObserver implements Initi
 //            updateNotificationButtonStyle(count);
 //        }
 //    }
-@Override
-public void update() {
-    // Cette méthode est appelée quand le NotificationService notifie ses observateurs.
-    // Ici, vous pouvez déclencher un rafraîchissement de l'UI des notifications.
-    System.out.println("MainFenetreController: Mise à jour des notifications reçue !");
-
-    // Si UINotificationController est inclus et que vous avez une référence :
-    // if (uiNotificationController != null) {
-    //     uiNotificationController.chargerNotifications(); // Appelez une méthode de rafraîchissement
-    // }
-
-    // Si le label est déjà lié (bind), il se mettra à jour automatiquement.
-    // Si vous avez d'autres éléments UI qui affichent les notifications directement,
-    // vous devriez les rafraîchir ici.
-}
+    @Override
+    public void update() {
+        if (notificationService != null) {
+            int count = notificationService.getUnreadCount();
+            updateNotificationButtonStyle(count); // Met à jour le style du bouton
+            // Si UINotificationController est affiché, il devrait se rafraîchir via son propre update()
+        }
+    }
 }
