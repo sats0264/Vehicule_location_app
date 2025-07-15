@@ -8,8 +8,9 @@ public interface IDao <T>{
 
     public void create (T entity) throws DAOException;
 
-    public T read (int id) throws DAOException;
-//    public T read (int id, T type) throws DAOException;
+    public T readById (int id) throws DAOException;
+
+    public T readByString (String value) throws DAOException;
 
     public List<T> list() throws DAOException;
 

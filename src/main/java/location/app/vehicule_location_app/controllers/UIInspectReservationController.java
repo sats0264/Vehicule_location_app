@@ -2,13 +2,15 @@ package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.models.Statut;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
-public class UIInspectReservationController{
+public class UIInspectReservationController extends Controller{
 
     private Reservation reservation;
     private List<Chauffeur> chauffeursSelectionnes;
@@ -63,6 +65,9 @@ public class UIInspectReservationController{
     private Button approuverButton;
     @FXML
     private Button rejeterButton;
+
+    public UIInspectReservationController() throws DAOException {
+    }
 
 //    @Override
 //    public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -162,6 +167,24 @@ public class UIInspectReservationController{
     private void handleApprouver() {
         if (reservation != null) {
             reservation.setStatut(StatutReservation.APPROUVEE);
+            if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
+                for (Chauffeur chauffeur : reservation.getChauffeurs()) {
+                    chauffeur.setStatut(Statut.INDISPONIBLE);
+                }
+            }
+            if (reservation.getVehicules() != null && !reservation.getVehicules().isEmpty()) {
+                for (Vehicule vehicule : reservation.getVehicules()) {
+                    vehicule.setStatut(Statut.INDISPONIBLE);
+                }
+            }
+            try {
+                updateObject(reservation, Reservation.class);
+
+                Stage stage = (Stage) approuverButton.getScene().getWindow();
+                stage.close();
+            } catch (DAOException e) {
+                throw new RuntimeException(e);
+            }
             showAlert(Alert.AlertType.INFORMATION, "Réservation approuvée.");
         }
     }
@@ -170,6 +193,23 @@ public class UIInspectReservationController{
     private void handleRejeter() {
         if (reservation != null) {
             reservation.setStatut(StatutReservation.REJETEE);
+            if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
+                for (Chauffeur chauffeur : reservation.getChauffeurs()) {
+                    chauffeur.setStatut(Statut.DISPONIBLE);
+                }
+            }
+            if (reservation.getVehicules() != null && !reservation.getVehicules().isEmpty()) {
+                for (Vehicule vehicule : reservation.getVehicules()) {
+                    vehicule.setStatut(Statut.DISPONIBLE);
+                }
+            }
+            try {
+                updateObject(reservation, Reservation.class);
+                Stage stage = (Stage) rejeterButton.getScene().getWindow();
+                stage.close();
+            } catch (DAOException e) {
+                throw new RuntimeException(e);
+            }
             showAlert(Alert.AlertType.INFORMATION, "Réservation rejetée.");
         }
     }

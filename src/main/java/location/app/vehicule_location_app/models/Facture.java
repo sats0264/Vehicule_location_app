@@ -2,6 +2,8 @@ package location.app.vehicule_location_app.models;
 
 import jakarta.persistence.*;
 
+import java.time.temporal.ChronoUnit;
+
 @Entity(name = "T_Facture")
 public class Facture {
 
