@@ -6,7 +6,9 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -16,6 +18,7 @@ import javafx.util.Duration;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Optional;
 
 public class MainFenetreController {
 
@@ -130,14 +133,26 @@ public class MainFenetreController {
     }
     @FXML
     private void handleLogoutClick() throws IOException {
-        // Logique de déconnexion
-        System.out.println("Déconnexion...");
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UILogin.fxml"));
-        Parent mainRoot = loader.load();
-        Stage stage = (Stage) logoutButton.getScene().getWindow();
-        stage.setScene(new Scene(mainRoot));
-        stage.centerOnScreen();
-        stage.setTitle("Connexion - Application de Location de Véhicules");
-        stage.show();
+        Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
+        alert.setTitle("Confirmation de Déconnexion");
+        alert.setHeaderText("Voulez-vous vraiment vous déconnecter ?");
+        alert.setContentText("Vous allez être redirigé vers la page de connexion.");
+
+        Optional<ButtonType> result = alert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            System.out.println("Déconnexion...");
+
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UILogin.fxml"));
+            Parent mainRoot = loader.load();
+
+            Stage stage = (Stage) logoutButton.getScene().getWindow();
+            stage.setScene(new Scene(mainRoot));
+            stage.centerOnScreen();
+            stage.setTitle("Connexion - Application de Location de Véhicules");
+            stage.show();
+        } else {
+            System.out.println("Déconnexion annulée.");
+        }
     }
+
 }

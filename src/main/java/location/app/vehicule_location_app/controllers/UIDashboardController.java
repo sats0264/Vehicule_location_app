@@ -58,14 +58,14 @@ public class UIDashboardController extends Controller {
     @FXML
     public void initialize() {
         System.out.println("Dashboard initialized");  // test
-        System.out.println(">>> Nombre de véhicules : " + vehiculeList.size());
-        System.out.println(">>> Nombre de clients : " + clientList.size());
-        System.out.println(">>> Nombre de réservations : " + reservationList.size());
+        System.out.println(">>> Nombre de véhicules : " + controllerVehiculeList.size());
+        System.out.println(">>> Nombre de clients : " + controllerClientList.size());
+        System.out.println(">>> Nombre de réservations : " + controllerReservationList.size());
 
-        voituresCountLabel.setText(String.valueOf(vehiculeList.size()));
-        clientsCountLabel.setText(String.valueOf(clientList.size()));
+        voituresCountLabel.setText(String.valueOf(controllerVehiculeList.size()));
+        clientsCountLabel.setText(String.valueOf(controllerClientList.size()));
 
-        double chiffreAffaires = reservationList.stream()
+        double chiffreAffaires = controllerReservationList.stream()
             .filter(r -> r.getFacture() != null)
             .mapToDouble(r -> r.getFacture().getMontant())
             .sum();
@@ -95,7 +95,7 @@ public class UIDashboardController extends Controller {
             return new ReadOnlyStringWrapper(c != null ? c.getPrenom() + " " + c.getNom() : "");
         });
 
-        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(reservationList);
+        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(controllerReservationList);
         reservedCarsTable.setItems(reservedCars);
 
 
@@ -116,11 +116,11 @@ public class UIDashboardController extends Controller {
             return new ReadOnlyObjectWrapper<>(total);
         });
 
-//        ObservableList<Client> topClientTable = FXCollections.observableArrayList(clientList);
+//        ObservableList<Client> topClientTable = FXCollections.observableArrayList(controllerClientList);
 //        topClientsTable.setItems(topClientTable);
 
         // Calculer le montant total des factures pour chaque client
-        List<Client> topClients = clientList.stream()
+        List<Client> topClients = controllerClientList.stream()
                 .sorted((c1, c2) -> {
                     double total1 = c1.getReservations().stream()
                             .filter(r -> r.getFacture() != null)
@@ -143,7 +143,7 @@ public class UIDashboardController extends Controller {
                         .sum() == 0.0);
 
         if (allZero) {
-            topClients = clientList.stream().limit(5).collect(Collectors.toList());
+            topClients = controllerClientList.stream().limit(5).collect(Collectors.toList());
         }
         // Mettre à jour le TableView
         topClientsTable.setItems(FXCollections.observableArrayList(topClients));
