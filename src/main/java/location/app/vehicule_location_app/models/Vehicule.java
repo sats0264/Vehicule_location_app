@@ -15,25 +15,25 @@ public class Vehicule {
     @JoinColumn(name = "reservation_id", nullable = true)
     private Reservation reservation;
 
+    private String immatriculation;
     private String marque;
     private String modele;
     private double tarif;
     @Enumerated(EnumType.STRING)
     private Statut statut;
-    private String immatriculation;
     private String photo;
 
     public Vehicule() {}
 
-    public Vehicule(String marque, String modele, double tarif,
-                    Statut statut, String immatriculation, String photo) {
+    public Vehicule(String immatriculation, String marque, String modele, double tarif, String photo) {
+        this.immatriculation = immatriculation;
         this.marque = marque;
         this.modele = modele;
         this.tarif = tarif;
-        this.statut = statut;
-        this.immatriculation = immatriculation;
         this.photo = photo;
+        this.setStatut(Statut.DISPONIBLE);
     }
+
     public Vehicule(int id, String marque, String modele, double tarif,
                     Statut statut, String immatriculation, String photo) {
         this.id = id;
