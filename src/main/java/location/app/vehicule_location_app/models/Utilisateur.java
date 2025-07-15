@@ -2,6 +2,9 @@ package location.app.vehicule_location_app.models;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "T_Utilisateur")
 public class Utilisateur {
 
@@ -15,6 +18,8 @@ public class Utilisateur {
     private Role role;
     private String login;
     private String password;
+    @OneToMany(mappedBy = "utilisateur", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<NotificationReception> notifications = new ArrayList<>();
 
     public Utilisateur() {}
 
@@ -26,6 +31,11 @@ public class Utilisateur {
         this.role = role;
         this.login = login;
         this.password = password;
+    }
+
+    public void addNotification(NotificationReception notification) {
+        notifications.add(notification);
+        notification.setUtilisateur(this);
     }
     public boolean estAdmin() {
         return this.role == Role.ADMIN;
@@ -81,5 +91,11 @@ public class Utilisateur {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+    public List<NotificationReception> getNotifications() {
+        return notifications;
+    }
+    public void setNotifications(List<NotificationReception> notifications) {
+        this.notifications = notifications;
     }
 }
