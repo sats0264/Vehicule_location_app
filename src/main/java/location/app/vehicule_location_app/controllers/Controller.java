@@ -6,7 +6,6 @@ import location.app.vehicule_location_app.factory.ConcreteFactory;
 import location.app.vehicule_location_app.factory.HibernateFactory;
 import location.app.vehicule_location_app.models.*;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 
 public class Controller {
@@ -15,9 +14,9 @@ public class Controller {
     protected HibernateObjectDaoImpl<Client> clientDao;
     protected HibernateObjectDaoImpl<Chauffeur> chauffeurDao;
     protected HibernateObjectDaoImpl<Reservation> reservationDao;
-    protected List<Vehicule> vehiculeList;
-    protected List<Client> clientList;
-    protected List<Reservation> reservationList;
+    protected List<Vehicule> controllerVehiculeList;
+    protected List<Client> controllerClientList;
+    protected List<Reservation> controllerReservationList;
 
     public Controller() throws DAOException {
         vehiculeDao = ConcreteFactory
@@ -36,9 +35,9 @@ public class Controller {
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(Reservation.class);
 
-        vehiculeList = vehiculeDao.list();
-        clientList = clientDao.list();
-        reservationList = reservationDao.list();
+        controllerVehiculeList = vehiculeDao.list();
+        controllerClientList = clientDao.list();
+        controllerReservationList = reservationDao.list();
     }
 
     public static <T> void ajouterObject(T entity, Class<T> entityClass) throws DAOException {
@@ -78,38 +77,61 @@ public class Controller {
 
     public static void creerDemoDonnees() throws DAOException {
 
-        var client1 = new Client("Dupont", "Jean", "jean.dupont@email.com","1 rue de Paris", "0600000000", "password");
-        var client2 = new Client("Martin", "Alice", "alice.martin@email.com","2 avenue Lyon", "0611111111", "password");
+//        var client1 = new Client("Dupont", "Jean", "jean.dupont@email.com","1 rue de Paris", "0600000000", "password");
+//        var client2 = new Client("Sarr", "Alice", "alice.martin@email.com","2 avenue Lyon", "0611111111", "password");
+//        var client3 = new Client("Diallo", "Mamadou", "dio@gmail.com","3 boulevard Marseille", "0622222222", "password");
+        var client4 = new Client("Traore", "Aissatou", "ad@dgfgf.com","4 place Toulouse", "0633333333", "password");
 
 
-        var vehicule1 = new Vehicule("Renault", "Clio", 300.0, Statut.DISPONIBLE, "AA-123-BB", null);
-        var vehicule2 = new Vehicule("Peugeot", "208", 350.0, Statut.DISPONIBLE, "CC-456-DD", null);
-        var vehicule3 = new Vehicule("Citroen", "C3", 320.0, Statut.DISPONIBLE, "EE-789-FF", null);
+        var vehicule1 = new Vehicule("AA-123-BB","Renault", "Clio", 300.0, null);
+        var vehicule2 = new Vehicule("CC-456-DD","Peugeot", "208", 350.0, null);
+        var vehicule3 = new Vehicule("EE-789-FF", "Citroen", "C3", 320.0, null);
+        var vehicule4 = new Vehicule("GG-101-HH", "Toyota", "Yaris", 4000.0, null);
 
         var chauffeur1 = new Chauffeur("Sow", "Moussa", Statut.DISPONIBLE, null);
         var chauffeur2 = new Chauffeur("Diallo", "Fatou", Statut.DISPONIBLE, null);
+        var chauffeur3 = new Chauffeur("Traore", "Aissatou", Statut.DISPONIBLE, null);
 
 
 
-        var reservationAvecChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(3),
+//        var reservationAvecChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(3),
+//                StatutReservation.EN_ATTENTE);
+//
+//        reservationAvecChauffeur.addVehicule(vehicule1);
+//        reservationAvecChauffeur.addVehicule(vehicule2);
+//        reservationAvecChauffeur.addChauffeur(chauffeur1);
+//        reservationAvecChauffeur.addChauffeur(chauffeur2);
+//
+//        var reservationAvecChauffeur2 = new Reservation(LocalDate.now(), LocalDate.now().plusDays(15),
+//                StatutReservation.EN_ATTENTE);
+//        reservationAvecChauffeur2.addVehicule(vehicule4);
+//        reservationAvecChauffeur2.addChauffeur(chauffeur3);
+//
+//        var reservationSansChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(2),
+//                StatutReservation.EN_ATTENTE);
+//        reservationSansChauffeur.addVehicule(vehicule3);
+
+        var reservationSansChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(6),
                 StatutReservation.EN_ATTENTE);
-
-        reservationAvecChauffeur.addVehicule(vehicule1);
-        reservationAvecChauffeur.addVehicule(vehicule2);
-        reservationAvecChauffeur.addChauffeur(chauffeur1);
-        reservationAvecChauffeur.addChauffeur(chauffeur2);
-
-        var reservationSansChauffeur = new Reservation(LocalDate.now(), LocalDate.now().plusDays(2),
-                StatutReservation.EN_ATTENTE);
+        reservationSansChauffeur.addVehicule(vehicule4);
         reservationSansChauffeur.addVehicule(vehicule3);
 
-        var facture1 = new Facture(reservationAvecChauffeur);
-        var facture2 = new Facture(reservationSansChauffeur);
+        var factureSansChauffeur = new Facture(reservationSansChauffeur);
 
-        client1.addReservation(reservationAvecChauffeur);
+        client4.addReservation(reservationSansChauffeur);
+//
+//        var facture1 = new Facture(reservationAvecChauffeur);
+//        var facture2 = new Facture(reservationSansChauffeur);
+//        var facture3 = new Facture(reservationAvecChauffeur2);
+//
+//        client1.addReservation(reservationAvecChauffeur);
+//        client3.addReservation(reservationAvecChauffeur2);
 
-        ajouterObject(client1, Client.class);
-        ajouterObject(client2, Client.class);
+
+//        ajouterObject(client1, Client.class);
+//        ajouterObject(client2, Client.class);
+//        ajouterObject(client3, Client.class);
+        ajouterObject(client4, Client.class);
 //        ajouterObject(facture1, Facture.class);
 //        ajouterObject(reservationAvecChauffeur, Reservation.class);
 
