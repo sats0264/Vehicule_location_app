@@ -10,10 +10,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
+import location.app.vehicule_location_app.exceptions.DAOException;
+import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Utilisateur;
 
 import java.io.IOException;
 
-public class UILoginController {
+public class UILoginController extends Controller {
 
     @FXML
     private TextField usernameField;
@@ -29,6 +32,12 @@ public class UILoginController {
 
     @FXML
     private Hyperlink createAccountLink;
+
+    private Utilisateur currentUser;
+    private Client currentClient;
+
+    public UILoginController() throws DAOException {
+    }
 
     /**
      * Méthode d'initialisation du contrôleur.
@@ -46,38 +55,53 @@ public class UILoginController {
      */
     @FXML
     private void handleLoginButton() {
-        String username = usernameField.getText();
+        String loginInput = usernameField.getText();
         String password = passwordField.getText();
 
-        // Logique de validation simple (pour l'exemple)
-        if (username.isEmpty() || password.isEmpty()) {
-            showAlert(Alert.AlertType.WARNING, "Champs manquants", "Veuillez entrer votre nom d'utilisateur/email et votre mot de passe.");
-        } else {
-            // Ici, vous intégreriez votre logique d'authentification réelle (base de données, API, etc.)
-            System.out.println("Tentative de connexion avec :");
-            System.out.println("Nom d'utilisateur/Email: " + username);
-            System.out.println("Mot de passe: " + password);
+        if (loginInput.isEmpty() || password.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Champs manquants", "Veuillez entrer votre identifiant et votre mot de passe.");
+            return;
+        }
 
-            // Simulation d'une connexion réussie ou échouée
-            if (username.equals("admin") && password.equals("passer")) {
-                showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + username + " !");
-                try {
-                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainFenetre.fxml"));
-                    Parent mainRoot = loader.load();
-                    Stage stage = (Stage) loginButton.getScene().getWindow();
-                    stage.setScene(new Scene(mainRoot));
-                    stage.centerOnScreen();
-                    stage.setTitle("Accueil - Application de Location de Véhicules");
-                    stage.show();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                    showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la fenêtre principale.");
+        try {
+            boolean authenticated = false;
+            boolean isClient = false;
+
+            if (isEmail(loginInput)) {
+                authenticated = authenticateClient(loginInput, password);
+//                currentClient = rechercherObjectByString(loginInput, Client.class);
+                isClient = true;
+            } else {
+                authenticated = authenticateUser(loginInput, password);
+                currentUser = rechercherObjectByString(loginInput, Utilisateur.class);
+            }
+
+            if (authenticated) {
+                showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + loginInput + " !");
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainFenetre.fxml"));
+                Parent mainRoot = loader.load();
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                stage.setScene(new Scene(mainRoot));
+                stage.centerOnScreen();
+                stage.setTitle("Accueil - Application de Location de Véhicules");
+                stage.show();
+
+                MainFenetreController controller = loader.getController();
+
+                if (isClient) {
+                } else {
+                    controller.setCurrentUser(currentUser);
                 }
             } else {
-                showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Nom d'utilisateur ou mot de passe incorrect.");
+                showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Identifiants incorrects.");
             }
+
+        } catch (DAOException | IOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'authentification : " + e.getMessage());
         }
     }
+
 
     /**
      * Gère l'action du bouton "Annuler".
@@ -124,4 +148,8 @@ public class UILoginController {
         alert.setContentText(message);
         alert.showAndWait();
     }
+    private boolean isEmail(String input) {
+        return input.matches("^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$");
+    }
+
 }
