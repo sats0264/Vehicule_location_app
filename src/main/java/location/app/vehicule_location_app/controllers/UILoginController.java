@@ -61,8 +61,6 @@ public class UILoginController {
             // Simulation d'une connexion réussie ou échouée
             if (username.equals("admin") && password.equals("passer")) {
                 showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + username + " !");
-                // Ici, vous navigueriez vers l'écran principal de l'application
-                // Par exemple: Stage stage = (Stage) loginButton.getScene().getWindow(); stage.close();
                 try {
                     FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainFenetre.fxml"));
                     Parent mainRoot = loader.load();
@@ -88,12 +86,8 @@ public class UILoginController {
     @FXML
     private void handleCancelButton() {
         System.out.println("Bouton Annuler cliqué.");
-        // Réinitialiser les champs
-        usernameField.clear();
-        passwordField.clear();
-        // Ou fermer la fenêtre
-        // Stage stage = (Stage) cancelButton.getScene().getWindow();
-        // stage.close();
+         Stage stage = (Stage) cancelButton.getScene().getWindow();
+         stage.close();
     }
 
     /**
@@ -104,11 +98,9 @@ public class UILoginController {
     private void handleCreateAccountLink() {
         System.out.println("Lien 'Créer en un' cliqué.");
         try {
-            // Charge le FXML de l'interface d'inscription
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIInscription.fxml"));
             Parent root = loader.load();
 
-            // Obtient la scène actuelle et la remplace par la nouvelle scène
             Stage stage = (Stage) createAccountLink.getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.setTitle("Inscription - Application de Location de Véhicules");
@@ -128,7 +120,7 @@ public class UILoginController {
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
-        alert.setHeaderText(null); // Pas d'en-tête pour les messages simples
+        alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
     }

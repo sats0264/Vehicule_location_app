@@ -65,58 +65,53 @@ public class UIReservationController extends Controller{
      */
 @FXML
 public void initialize() {
-    try {
-        // 1. Charger les réservations depuis la base
-        reservationList = FXCollections.observableArrayList(reservationDao.list());
+    // 1. Charger les réservations depuis la base
+    reservationList = FXCollections.observableArrayList(controllerReservationList);
 
-        // 2. Remplir les colonnes avec les données extraites de Reservation
-        resListStartDateColumn.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
-                        ? cellData.getValue().getDateDebut().format(dateFormatter)
-                        : ""));
+    // 2. Remplir les colonnes avec les données extraites de Reservation
+    resListStartDateColumn.setCellValueFactory(cellData ->
+            new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
+                    ? cellData.getValue().getDateDebut().format(dateFormatter)
+                    : ""));
 
-        resListEndDateColumn.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(cellData.getValue().getDateFin() != null
-                        ? cellData.getValue().getDateFin().format(dateFormatter)
-                        : ""));
+    resListEndDateColumn.setCellValueFactory(cellData ->
+            new ReadOnlyStringWrapper(cellData.getValue().getDateFin() != null
+                    ? cellData.getValue().getDateFin().format(dateFormatter)
+                    : ""));
 
-        resListStatutColumn.setCellValueFactory(cellData ->
-                new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
-                        ? cellData.getValue().getStatut().toString()
-                        : ""));
+    resListStatutColumn.setCellValueFactory(cellData ->
+            new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
+                    ? cellData.getValue().getStatut().toString()
+                    : ""));
 
-        resListFirstNameColumn.setCellValueFactory(cellData -> {
-            Client c = cellData.getValue().getClient();
-            return new ReadOnlyStringWrapper(c != null ? c.getPrenom() : "");
-        });
+    resListFirstNameColumn.setCellValueFactory(cellData -> {
+        Client c = cellData.getValue().getClient();
+        return new ReadOnlyStringWrapper(c != null ? c.getPrenom() : "");
+    });
 
-        resListLastNameColumn.setCellValueFactory(cellData -> {
-            Client c = cellData.getValue().getClient();
-            return new ReadOnlyStringWrapper(c != null ? c.getNom() : "");
-        });
+    resListLastNameColumn.setCellValueFactory(cellData -> {
+        Client c = cellData.getValue().getClient();
+        return new ReadOnlyStringWrapper(c != null ? c.getNom() : "");
+    });
 
-        resListMatriculeColumn.setCellValueFactory(cellData -> {
-            Vehicule v = getFirstVehicule(cellData.getValue());
-            return new ReadOnlyStringWrapper(v != null ? v.getImmatriculation() : "");
-        });
+    resListMatriculeColumn.setCellValueFactory(cellData -> {
+        Vehicule v = getFirstVehicule(cellData.getValue());
+        return new ReadOnlyStringWrapper(v != null ? v.getImmatriculation() : "");
+    });
 
-        resListModeleColumn.setCellValueFactory(cellData -> {
-            Vehicule v = getFirstVehicule(cellData.getValue());
-            return new ReadOnlyStringWrapper(v != null ? v.getModele() : "");
-        });
+    resListModeleColumn.setCellValueFactory(cellData -> {
+        Vehicule v = getFirstVehicule(cellData.getValue());
+        return new ReadOnlyStringWrapper(v != null ? v.getModele() : "");
+    });
 
-        resListMarqueColumn.setCellValueFactory(cellData -> {
-            Vehicule v = getFirstVehicule(cellData.getValue());
-            return new ReadOnlyStringWrapper(v != null ? v.getMarque() : "");
-        });
+    resListMarqueColumn.setCellValueFactory(cellData -> {
+        Vehicule v = getFirstVehicule(cellData.getValue());
+        return new ReadOnlyStringWrapper(v != null ? v.getMarque() : "");
+    });
 
-        // 3. Afficher dans le tableau
-        reservationsTable.setItems(reservationList);
+    // 3. Afficher dans le tableau
+    reservationsTable.setItems(reservationList);
 
-    } catch (DAOException e) {
-        e.printStackTrace();
-        showAlert(Alert.AlertType.ERROR, "Erreur de chargement", "Impossible de charger les réservations.");
-    }
 }
     // --- Event Handlers for Buttons ---
 
