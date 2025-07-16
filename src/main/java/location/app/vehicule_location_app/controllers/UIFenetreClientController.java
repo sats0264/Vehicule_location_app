@@ -11,6 +11,8 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import location.app.vehicule_location_app.dao.NotificationService;
+import location.app.vehicule_location_app.models.Client;
 
 import java.io.IOException;
 import java.text.SimpleDateFormat;
@@ -36,6 +38,9 @@ public class UIFenetreClientController {
     @FXML
     private Button logoutButton;
 
+
+    private Client currentClient;
+
     @FXML
     public void initialize() {
         updateDateTimeLabel();
@@ -59,6 +64,15 @@ public class UIFenetreClientController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
+
+            // Passe le client connecté au contrôleur des réservations
+            if ("/views/UIFenetreReservation.fxml".equals(fxmlPath)) {
+                Object controller = loader.getController();
+                if (controller instanceof UIFenetreReservationController && currentClient != null) {
+                    ((UIFenetreReservationController) controller).setClientConnecte(currentClient);
+                }
+            }
+
             contentArea.getChildren().setAll(view);
 
             AnchorPane.setTopAnchor(view, 0.0);
@@ -109,5 +123,10 @@ public class UIFenetreClientController {
         stage.centerOnScreen();
         stage.setTitle("Connexion - Application de Location de Véhicules");
         stage.show();
+    }
+
+    public void setCurrentClient(Client currentClient) {
+        this.currentClient = currentClient;
+        //NotificationService.getInstance().setUtilisateur(currentClient);
     }
 }

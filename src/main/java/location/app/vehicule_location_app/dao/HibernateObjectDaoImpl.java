@@ -5,6 +5,7 @@ import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.jdbc.HibernateConnection;
 import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.models.Utilisateur;
+import location.app.vehicule_location_app.models.Vehicule;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
@@ -140,6 +141,15 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
     } catch (Exception e) {
         e.printStackTrace();
         return java.util.Collections.emptyList();
+    }
+}
+
+    public T findById(int id) {
+    try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+        return session.find(type, id);
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
     }
 }
 }

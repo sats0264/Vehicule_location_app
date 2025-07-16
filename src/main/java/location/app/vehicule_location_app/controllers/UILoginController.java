@@ -69,14 +69,14 @@ public class UILoginController extends Controller {
 
             if (isEmail(loginInput)) {
                 authenticated = authenticateClient(loginInput, password);
-//                currentClient = rechercherObjectByString(loginInput, Client.class);
+                currentClient = rechercherObjectByString(loginInput, Client.class);
                 isClient = true;
             } else {
                 authenticated = authenticateUser(loginInput, password);
                 currentUser = rechercherObjectByString(loginInput, Utilisateur.class);
             }
 
-            if (authenticated) {
+            if (authenticated  && !isClient) {
                 showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + loginInput + " !");
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/MainFenetre.fxml"));
                 Parent mainRoot = loader.load();
@@ -88,11 +88,26 @@ public class UILoginController extends Controller {
 
                 MainFenetreController controller = loader.getController();
 
-                if (isClient) {
-                } else {
-                    controller.setCurrentUser(currentUser);
+                controller.setCurrentUser(currentUser);
+
+            } else if (isClient && authenticated) {
+                showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + loginInput + " !");
+                if (currentClient != null && currentClient.getEmail() != null) {
+                    System.setProperty("client.email", currentClient.getEmail());
                 }
-            } else {
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIFenetreClient.fxml"));
+                Parent mainRoot = loader.load();
+                Stage stage = (Stage) loginButton.getScene().getWindow();
+                stage.setScene(new Scene(mainRoot));
+                stage.centerOnScreen();
+                stage.setTitle("Accueil - Application de Location de Véhicules");
+                stage.show();
+
+                UIFenetreClientController controller = loader.getController();
+
+                controller.setCurrentClient(currentClient);
+            }
+            else {
                 showAlert(Alert.AlertType.ERROR, "Échec de la connexion", "Identifiants incorrects.");
             }
 
