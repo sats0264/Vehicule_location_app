@@ -1,6 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -8,6 +9,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Client;
@@ -180,7 +182,8 @@ public class UIFenetreReservationController{
                 modeleLbl.setStyle("-fx-font-size: 14px;");
                 Label immatLbl = new Label("Immatriculation : " + immatriculation);
                 immatLbl.setStyle("-fx-font-size: 14px;");
-                Label nbJoursLbl = new Label("Durée : " + nbJours + " jours");
+                Label nbJoursLbl = new Label("Durée : " + nbJours + " jours (" +
+                        reservation.getDateDebut() + " → " + reservation.getDateFin() + ")");
                 nbJoursLbl.setStyle("-fx-font-size: 13px;");
                 infos.getChildren().addAll(marqueLbl, modeleLbl, immatLbl, nbJoursLbl);
 
@@ -202,9 +205,162 @@ public class UIFenetreReservationController{
                 hbox.getChildren().addAll(imgView, infos, spacer, statutBox);
                 carte.getChildren().add(hbox);
 
+                // Ajout du double-clic pour afficher le popup détail/modifier/annuler
+                carte.setOnMouseClicked(event -> {
+                    if (event.getClickCount() == 2) {
+                        afficherPopupReservation(reservation, vehicule);
+                    }
+                });
+
                 reservationsListVBox.getChildren().add(carte);
             }
         }
+    }
+
+    /**
+     * Affiche un popup avec les infos du véhicule et deux boutons : Modifier et Annuler la réservation.
+     */
+    private void afficherPopupReservation(Reservation reservation, Vehicule vehicule) {
+        Stage popup = new Stage();
+        popup.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+        popup.setTitle("Détail de la réservation");
+
+        VBox root = new VBox(18);
+        root.setStyle("-fx-padding: 25; -fx-background-color: #fafafa;");
+        root.setAlignment(javafx.geometry.Pos.CENTER);
+
+        Label titre = new Label("Détail du véhicule");
+        titre.setStyle("-fx-font-size: 18px; -fx-font-weight: bold;");
+
+        // Ajout de la photo du véhicule
+        ImageView imgView = new ImageView();
+        imgView.setFitHeight(150);
+        imgView.setFitWidth(220);
+        imgView.setPreserveRatio(true);
+        if (vehicule != null && vehicule.getPhoto() != null && !vehicule.getPhoto().isEmpty()) {
+            try {
+                String photoName = vehicule.getPhoto();
+                if (photoName.contains("/")) photoName = photoName.substring(photoName.lastIndexOf('/') + 1);
+                else if (photoName.contains("\\")) photoName = photoName.substring(photoName.lastIndexOf('\\') + 1);
+                InputStream is = getClass().getResourceAsStream("/images/" + photoName);
+                if (is != null) imgView.setImage(new Image(is));
+                else imgView.setImage(new Image(vehicule.getPhoto(), true));
+            } catch (Exception e) {
+                imgView.setImage(null);
+            }
+        }
+
+        Label marque = new Label("Marque : " + (vehicule != null ? vehicule.getMarque() : ""));
+        Label modele = new Label("Modèle : " + (vehicule != null ? vehicule.getModele() : ""));
+        Label immat = new Label("Immatriculation : " + (vehicule != null ? vehicule.getImmatriculation() : ""));
+        Label statut = new Label("Statut : " + reservation.getStatut());
+        statut.setStyle("-fx-font-weight: bold;");
+
+        // Champs de dates pour modification (cachés par défaut)
+        javafx.scene.control.DatePicker dateDebutPicker = new javafx.scene.control.DatePicker();
+        javafx.scene.control.DatePicker dateFinPicker = new javafx.scene.control.DatePicker();
+        dateDebutPicker.setValue(reservation.getDateDebut());
+        dateFinPicker.setValue(reservation.getDateFin());
+        dateDebutPicker.setVisible(false);
+        dateFinPicker.setVisible(false);
+
+        Label dateDebutLabel = new Label("Nouvelle date début :");
+        Label dateFinLabel = new Label("Nouvelle date fin :");
+        dateDebutLabel.setVisible(false);
+        dateFinLabel.setVisible(false);
+
+        HBox boutons = new HBox(25);
+        boutons.setAlignment(javafx.geometry.Pos.CENTER);
+
+
+        javafx.scene.control.Button modifierBtn = new javafx.scene.control.Button("Modifier");
+        javafx.scene.control.Button annulerBtn = new javafx.scene.control.Button("Annuler la réservation");
+        javafx.scene.control.Button enregistrerBtn = new javafx.scene.control.Button("Enregistrer");
+        enregistrerBtn.setVisible(false);
+
+        // Action bouton Modifier
+        modifierBtn.setOnAction(e -> {
+            // Agrandir le popup et afficher les champs de modification
+            popup.setWidth(500);
+            popup.setHeight(600);
+            dateDebutPicker.setVisible(true);
+            dateFinPicker.setVisible(true);
+            dateDebutLabel.setVisible(true);
+            dateFinLabel.setVisible(true);
+            enregistrerBtn.setVisible(true);
+            modifierBtn.setDisable(true);
+        });
+
+        // Action bouton Enregistrer
+        enregistrerBtn.setOnAction(e -> {
+            if (dateDebutPicker.getValue() == null || dateFinPicker.getValue() == null) {
+                statut.setText("Veuillez choisir les deux dates.");
+                statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+                return;
+            }
+            if (dateFinPicker.getValue().isBefore(dateDebutPicker.getValue())) {
+                statut.setText("La date de fin doit être après la date de début.");
+                statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+                return;
+            }
+            // Met à jour la réservation dans la base
+            try {
+                HibernateObjectDaoImpl<Reservation> reservationDao = new HibernateObjectDaoImpl<>(Reservation.class);
+                reservation.setDateDebut(dateDebutPicker.getValue());
+                reservation.setDateFin(dateFinPicker.getValue());
+                reservationDao.update(reservation);
+                statut.setText("Modification enregistrée !");
+                statut.setStyle("-fx-text-fill: #43A047; -fx-font-weight: bold;");
+                enregistrerBtn.setDisable(true);
+                // Fermer le popup et rafraîchir la liste principale
+                popup.close();
+                afficherReservationsClient();
+            } catch (Exception ex) {
+                statut.setText("Erreur lors de la modification.");
+                statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+            }
+        });
+
+        // Action bouton Annuler
+        annulerBtn.setOnAction(e -> {
+            javafx.scene.control.Alert confirm = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.CONFIRMATION);
+            confirm.setTitle("Confirmation d'annulation");
+            confirm.setHeaderText("Annuler la réservation");
+            confirm.setContentText("Voulez-vous vraiment annuler cette réservation ?");
+            java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
+            if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
+                try {
+                    HibernateObjectDaoImpl<Reservation> reservationDao = new HibernateObjectDaoImpl<>(Reservation.class);
+                    reservationDao.delete(reservation.getId());
+                    statut.setText("Réservation annulée !");
+                    statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+                    new Thread(() -> {
+                        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+                        javafx.application.Platform.runLater(() -> {
+                            popup.close();
+                            afficherReservationsClient();
+                        });
+                    }).start();
+                } catch (Exception ex) {
+                    statut.setText("Erreur lors de l'annulation.");
+                    statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
+                }
+            }
+            // Sinon, ne rien faire, on reste sur le popup
+        });
+
+        boutons.getChildren().addAll(modifierBtn, enregistrerBtn, annulerBtn);
+
+        root.getChildren().addAll(
+            titre, imgView, marque, modele, immat, statut,
+            dateDebutLabel, dateDebutPicker,
+            dateFinLabel, dateFinPicker,
+            boutons
+        );
+
+        Scene scene = new Scene(root, 480, 520);
+        popup.setScene(scene);
+        popup.showAndWait();
     }
 
 //    public void loadReservation(int reservationId, Subject subject) {
