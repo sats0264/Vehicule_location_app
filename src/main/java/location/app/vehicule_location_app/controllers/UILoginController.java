@@ -88,7 +88,7 @@ public class UILoginController extends Controller {
 
                 MainFenetreController controller = loader.getController();
 
-                controller.setCurrentUser(currentUser);
+                controller.setUtilisateurConnecte(currentUser);
 
             } else if (isClient && authenticated) {
                 showAlert(Alert.AlertType.INFORMATION, "Connexion réussie", "Bienvenue, " + loginInput + " !");
