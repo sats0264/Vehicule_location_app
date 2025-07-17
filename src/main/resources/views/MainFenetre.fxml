@@ -77,8 +77,8 @@
 
     <center>
         <!-- This AnchorPane will hold the dynamically loaded content (e.g., dashboard, vehicle management) -->
-        <AnchorPane fx:id="contentArea" style="-fx-background-color: #ffffff; -fx-padding: 20;">
-            <!-- Initial content can be loaded here by the controller's initialize method -->
+        <AnchorPane fx:id="contentArea" prefHeight="1000.0" prefWidth="640.0" style="-fx-background-color: #ffffff;">
+
         </AnchorPane>
     </center>
 </BorderPane>
