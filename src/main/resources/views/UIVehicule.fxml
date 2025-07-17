@@ -6,25 +6,35 @@
 
 <AnchorPane prefHeight="640.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIVehiculeController">
 
-    <HBox prefHeight="640.0" prefWidth="1000.0" spacing="20.0" style="-fx-padding: 20;">
+    <HBox spacing="20.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+          style="-fx-padding: 20;">
 
-        <VBox prefHeight="571.0" prefWidth="960.0" spacing="10.0" style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;" HBox.hgrow="ALWAYS">
-            <Label text="Liste voitures" textFill="#424242">
-                <font>
-                    <Font name="System Bold" size="18.0" />
-                </font>
-            </Label>
-            <TableView fx:id="voituresTable" prefHeight="500.0" VBox.vgrow="ALWAYS">
+        <VBox spacing="10.0" prefWidth="960.0"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #e0e0e0;
+                     -fx-border-width: 1; -fx-border-radius: 5;"
+              HBox.hgrow="ALWAYS">
+            <HBox>
+            <children>
+                  <Label text="Liste voitures" textFill="#424242">
+                      <font>
+                          <Font name="System Bold" size="18.0" />
+                      </font>
+                  </Label>
+            </children>
+         </HBox>
+            <TableView fx:id="voituresTable" VBox.vgrow="ALWAYS">
                 <columns>
-                    <TableColumn fx:id="immatriculeColumn" prefWidth="100.0" text="Immatricule" />
-                    <TableColumn fx:id="tarifColumn" prefWidth="120.0" text="Tarif en FCFA" />
-                    <TableColumn fx:id="marqueColumn" prefWidth="100.0" text="Marque" />
-                    <TableColumn fx:id="modeleColumn" prefWidth="100.0" text="Modèle" />
-                    <TableColumn fx:id="photoColumn" prefWidth="100.0" text="URL Photo" />
+                    <TableColumn fx:id="immatriculeColumn" text="Immatricule" prefWidth="120.0"/>
+                    <TableColumn fx:id="tarifColumn" text="Tarif en FCFA" prefWidth="140.0"/>
+                    <TableColumn fx:id="marqueColumn" text="Marque" prefWidth="130.0"/>
+                    <TableColumn fx:id="modeleColumn" text="Modèle" prefWidth="130.0"/>
+                    <TableColumn fx:id="statutColumn" text="Statut" prefWidth="130.0"/>
+                    <TableColumn fx:id="photoColumn" text="URL Photo" prefWidth="160.0"/>
                 </columns>
-                <columnResizePolicy>
-                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-                </columnResizePolicy>
+            <columnResizePolicy>
+               <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+            </columnResizePolicy>
             </TableView>
          <HBox alignment="CENTER_RIGHT" spacing="20.0" style="-fx-padding: 10;">
             <children>
