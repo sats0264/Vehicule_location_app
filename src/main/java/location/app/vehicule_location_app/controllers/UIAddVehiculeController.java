@@ -35,7 +35,7 @@ public class UIAddVehiculeController{
 
     private File selectedPhotoFile;
 
-    public UIAddVehiculeController() throws DAOException {
+    public UIAddVehiculeController() {
     }
 
     @FXML
@@ -48,6 +48,8 @@ public class UIAddVehiculeController{
         marqueComboBox.setOnAction(e -> {
             String selected = marqueComboBox.getValue();
             modeleComboBox.getItems().clear();
+            if (selected == null) return;
+
             switch (selected) {
                 case "Renault" -> modeleComboBox.getItems().addAll("Clio", "Megane", "Captur", "Koleos");
                 case "Peugeot" -> modeleComboBox.getItems().addAll("208", "3008", "5008", "Partner");
@@ -82,21 +84,16 @@ public class UIAddVehiculeController{
                 Path targetPath = targetDir.resolve(file.getName());
                 Files.copy(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-                selectedPhotoFile = targetPath.toFile();
-
+                // On stocke uniquement le chemin classpath pour l'image
+                selectedPhotoFile = new File(file.getName());
                 photoField.setText(file.getName());
 
-                // Affiche l'image directement depuis le fichier copié (file URI)
+                // Chargement de l'image via classpath (recommandé)
                 Image image = new Image(targetPath.toUri().toString());
                 photoImageView.setImage(image);
 
             } catch (IOException e) {
-                e.printStackTrace();
-                Alert alert = new Alert(Alert.AlertType.ERROR);
-                alert.setTitle("Erreur");
-                alert.setHeaderText("Erreur lors de la copie de la photo");
-                alert.setContentText(e.getMessage());
-                alert.showAndWait();
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la copie de la photo : " + e.getMessage());
             }
         }
     }
@@ -104,15 +101,7 @@ public class UIAddVehiculeController{
     @FXML
     private void handleEnregistrer() {
         try {
-            String immatricule = immatriculeField.getText();
-            String marque = marqueComboBox.getValue();
-            String modele = modeleComboBox.getValue();
-            String tarifText = tarifField.getText();
-            double tarif = Double.parseDouble(tarifText);
-
-            String photo = selectedPhotoFile != null ? selectedPhotoFile.getName() : null;
-
-            Vehicule v = new Vehicule(immatricule,marque, modele, tarif, photo);
+            Vehicule v = getVehicule();
 
             ajouterObject(v, Vehicule.class);
             DashboardSubject.getInstance().notifyAllObservers();
@@ -130,6 +119,23 @@ public class UIAddVehiculeController{
         }
     }
 
+    private Vehicule getVehicule() {
+        String immatricule = immatriculeField.getText();
+        String marque = marqueComboBox.getValue();
+        String modele = modeleComboBox.getValue();
+        double tarif = Double.parseDouble(tarifField.getText());
+
+        String cheminPhoto = (selectedPhotoFile != null)
+                ? "/images/" + selectedPhotoFile.getName()
+                : "/images/car_logo.jpg";
+        if (immatricule.isEmpty() || marque == null || modele == null || tarifField.getText().isEmpty()) {
+            showAlert(Alert.AlertType.ERROR, "Champs manquants", "Veuillez remplir tous les champs obligatoires.");
+            return null;
+        }
+
+        return new Vehicule(immatricule, marque, modele, tarif, cheminPhoto);
+    }
+
     @FXML
     private void handleAnnuler() {
         Stage stage = (Stage) annulerButton.getScene().getWindow();
@@ -138,8 +144,10 @@ public class UIAddVehiculeController{
 
     private void clearForm() {
         immatriculeField.clear();
-        marqueComboBox.getSelectionModel().clearSelection();
-        modeleComboBox.getSelectionModel().clearSelection();
+        if (marqueComboBox.getSelectionModel() != null)
+            marqueComboBox.getSelectionModel().clearSelection();
+        if (modeleComboBox.getSelectionModel() != null)
+            modeleComboBox.getSelectionModel().clearSelection();
         tarifField.clear();
         photoField.clear();
         photoImageView.setImage(null);

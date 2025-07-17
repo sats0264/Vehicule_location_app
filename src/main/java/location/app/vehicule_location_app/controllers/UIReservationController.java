@@ -113,6 +113,22 @@ public void initialize() {
     reservationsTable.setItems(reservationList);
 
 }
+
+    public void selectReservationById(int reservationId) {
+        if (reservationsTable == null || reservationsTable.getItems().isEmpty()) {
+            System.err.println("Table des réservations non initialisée ou vide. Impossible de sélectionner.");
+            return;
+        }
+        for (Reservation reservation : reservationsTable.getItems()) {
+            if (reservation.getId() == reservationId) { // Assurez-vous que Reservation a une méthode getId()
+                reservationsTable.getSelectionModel().select(reservation);
+                reservationsTable.scrollTo(reservation);
+                System.out.println("Réservation sélectionnée: ID " + reservationId);
+                break;
+            }
+        }
+    }
+
     // --- Event Handlers for Buttons ---
 
 @FXML
@@ -123,14 +139,6 @@ private void handleInspectReservationButton() {
     } else {
         showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à inspecter.");
     }
-}
-
-
-@FXML
-private void handlePlusButton() {
-    System.out.println("Plus button clicked!");
-    showAlert(Alert.AlertType.INFORMATION, "Ajouter Réservation", "Logique pour ajouter une nouvelle réservation. (Ouvrir un formulaire)");
-    // This would typically open a form for new reservation entry.
 }
 
 @FXML
