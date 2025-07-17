@@ -9,12 +9,16 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
+import location.app.vehicule_location_app.observer.DashboardSubject;
+import location.app.vehicule_location_app.observer.Observer;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static location.app.vehicule_location_app.controllers.Controller.*;
+
 @SuppressWarnings("ClassEscapesDefinedScope")
-public class UIDashboardController extends Controller {
+public class UIDashboardController extends Observer {
 
     // --- Summary Labels ---
     @FXML
@@ -49,6 +53,8 @@ public class UIDashboardController extends Controller {
     private TableColumn<Client, Double> topClientAmountColumn;
 
     public UIDashboardController() throws DAOException {
+        this.subject = DashboardSubject.getInstance();
+        this.subject.attach(this);
     }
 
     /**
@@ -116,9 +122,6 @@ public class UIDashboardController extends Controller {
             return new ReadOnlyObjectWrapper<>(total);
         });
 
-//        ObservableList<Client> topClientTable = FXCollections.observableArrayList(controllerClientList);
-//        topClientsTable.setItems(topClientTable);
-
         // Calculer le montant total des factures pour chaque client
         List<Client> topClients = controllerClientList.stream()
                 .sorted((c1, c2) -> {
@@ -147,6 +150,23 @@ public class UIDashboardController extends Controller {
         }
         // Mettre à jour le TableView
         topClientsTable.setItems(FXCollections.observableArrayList(topClients));
+    }
+
+    @Override
+    public void update() {
+        // Recharger les statistiques ici
+        loadDashboardData();
+    }
+
+    private void loadDashboardData() {
+        // Nombre de véhicules, clients et liste des réservations
+        try {
+            controllerVehiculeList = listerObjects(Vehicule.class);
+            controllerClientList = listerObjects(Client.class);
+            controllerReservationList = listerObjects(Reservation.class);
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
     }
 
 }

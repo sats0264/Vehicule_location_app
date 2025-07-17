@@ -7,8 +7,9 @@ import javafx.scene.image.ImageView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.Statut;
 import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.observer.DashboardSubject;
+import location.app.vehicule_location_app.observer.VehiculeSubject;
 
 import java.io.File;
 import java.io.IOException;
@@ -16,9 +17,10 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
 
-public class UIAddVehiculeController extends Controller {
+import static location.app.vehicule_location_app.controllers.Controller.ajouterObject;
+
+public class UIAddVehiculeController{
 
     @FXML private TextField immatriculeField;
     @FXML private ComboBox<String> marqueComboBox;
@@ -113,6 +115,8 @@ public class UIAddVehiculeController extends Controller {
             Vehicule v = new Vehicule(immatricule,marque, modele, tarif, photo);
 
             ajouterObject(v, Vehicule.class);
+            DashboardSubject.getInstance().notifyAllObservers();
+            VehiculeSubject.getInstance().notifyAllObservers();
 
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Véhicule enregistré avec succès !");
             clearForm();

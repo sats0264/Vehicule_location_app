@@ -26,7 +26,7 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class MainFenetreController extends NotificationObserver implements Initializable {
+public class MainFenetreController extends Observer implements Initializable {
 
     @FXML
     private BorderPane mainBorderPane;
@@ -58,7 +58,8 @@ public class MainFenetreController extends NotificationObserver implements Initi
     private NotificationService notificationService;
 
     public MainFenetreController() {
-        super(NotificationService.getInstance()); // Attachez l'observateur au service de notification
+        this.subject = NotificationSubject.getInstance();
+        this.subject.attach(this);
     }
 
 //    private Utilisateur utilisateurConnecte;
@@ -90,12 +91,23 @@ public class MainFenetreController extends NotificationObserver implements Initi
         setSelectedButton(dashboardButton);
 
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0), event -> updateDateTimeLabel()),
+                new KeyFrame(Duration.seconds(0), e -> updateDateTimeLabel()),
                 new KeyFrame(Duration.seconds(1))
+
         );
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-
+        Timeline autoRefreshTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), e -> {
+                    // Cette ligne va forcer le rafraîchissement du compteur de notifications
+                    if (notificationService != null) {
+                        notificationService.reloadNotificationsFromDB();
+                        update();
+                    }
+                })
+        );
+        autoRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimeline.play();
 
         notificationCountLabel.textProperty().bind(notificationService.unreadCountProperty().asString());
         updateNotificationButtonStyle(notificationService.getUnreadCount());
@@ -290,7 +302,7 @@ private void loadNotificationView(String fxmlPath) {
         if (notificationService != null) {
             int count = notificationService.getUnreadCount();
             updateNotificationButtonStyle(count); // Met à jour le style du bouton
-            // Si UINotificationController est affiché, il devrait se rafraîchir via son propre update()
+//            notificationCountLabel.setText(String.valueOf(count));
         }
     }
 }

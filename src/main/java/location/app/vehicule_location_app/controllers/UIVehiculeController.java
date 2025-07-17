@@ -1,10 +1,8 @@
 package location.app.vehicule_location_app.controllers;
 
-import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -15,10 +13,14 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.VehiculeSubject;
 
 import java.io.IOException;
 
-public class UIVehiculeController extends Controller {
+import static location.app.vehicule_location_app.controllers.Controller.controllerVehiculeList;
+
+public class UIVehiculeController extends Observer {
 
     @FXML
     private TableView<Vehicule> voituresTable;
@@ -39,6 +41,9 @@ public class UIVehiculeController extends Controller {
     private TableColumn<Vehicule, String> photoColumn;
 
     @FXML
+    private TableColumn<Vehicule, String> statutColumn;
+
+    @FXML
     private Button addButton;
 
     @FXML
@@ -47,6 +52,8 @@ public class UIVehiculeController extends Controller {
     private ObservableList<Vehicule> vehiculeList = FXCollections.observableArrayList();
 
     public UIVehiculeController() throws DAOException {
+        this.subject = VehiculeSubject.getInstance();
+        this.subject.attach(this);
     }
 
     @FXML
@@ -73,6 +80,10 @@ public class UIVehiculeController extends Controller {
         photoColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getPhoto() != null
                         ? cellData.getValue().getPhoto() : ""));
+
+        statutColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
+                        ? cellData.getValue().getStatut().toString() : ""));
 
         // Remplir la table
         voituresTable.setItems(vehiculeList);
@@ -136,4 +147,8 @@ public class UIVehiculeController extends Controller {
     }
 
 
+    @Override
+    public void update() {
+        voituresTable.setItems(FXCollections.observableArrayList(controllerVehiculeList));
+    }
 }
