@@ -52,7 +52,7 @@ public class UIDetailVehiculeController {
         photoImageView.setImage(null); // Force le rafraîchissement
         try {
             // Essayer de charger depuis classpath /images/
-            InputStream is = getClass().getResourceAsStream("/images/" + vehicule.getPhoto());
+            InputStream is = getClass().getResourceAsStream(vehicule.getPhoto());
 
             Image image;
             if (is != null) {

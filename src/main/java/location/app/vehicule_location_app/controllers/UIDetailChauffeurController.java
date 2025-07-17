@@ -38,7 +38,7 @@ public class UIDetailChauffeurController {
             photoImageView.setImage(null); // Force le rafraîchissement
             try {
                 // Essayer de charger depuis classpath /images/
-                InputStream is = getClass().getResourceAsStream("/images/" + chauffeur.getPhoto());
+                InputStream is = getClass().getResourceAsStream(chauffeur.getPhoto());
 
                 Image image;
                 if (is != null) {

@@ -108,5 +108,6 @@ public class UIChauffeurController extends Observer {
     @Override
     public void update() {
         chauffeursTable.setItems(FXCollections.observableArrayList(controllerChauffeurList));
+        System.out.println("Chauffeur list updated.");
     }
 }

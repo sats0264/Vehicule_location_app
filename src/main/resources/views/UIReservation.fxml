@@ -6,7 +6,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="640.0" prefWidth="1000.0" style="-fx-background-color: #f8f8f8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIReservationController">
+<AnchorPane prefHeight="640.0" prefWidth="1000.0" style="-fx-background-color: #f8f8f8;" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="location.app.vehicule_location_app.controllers.UIReservationController">
     <padding>
         <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
     </padding>
@@ -62,7 +62,7 @@
                     <columns>
                         <TableColumn fx:id="resListStartDateColumn" prefWidth="100.0" text="Date de début" />
                         <TableColumn fx:id="resListEndDateColumn" prefWidth="100.0" text="Date de fin" />
-                  <TableColumn fx:id="resListStatutColumn" prefWidth="75.0" text="Statut" />
+                        <TableColumn fx:id="resListStatutColumn" prefWidth="75.0" text="Statut" />
                         <TableColumn fx:id="resListFirstNameColumn" prefWidth="100.0" text="Prénom" />
                         <TableColumn fx:id="resListLastNameColumn" prefWidth="100.0" text="Nom" />
                         <TableColumn fx:id="resListMatriculeColumn" prefWidth="100.0" text="Matricule" />
