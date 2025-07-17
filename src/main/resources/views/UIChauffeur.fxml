@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
+
+<AnchorPane prefHeight="640.0" prefWidth="1000.0"
+            xmlns="http://javafx.com/javafx/17.0.12"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="location.app.vehicule_location_app.controllers.UIChauffeurController">
+
+
+    <HBox spacing="20.0" AnchorPane.topAnchor="0.0" AnchorPane.bottomAnchor="0.0"
+          AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
+          style="-fx-padding: 20;">
+        <VBox spacing="10.0" prefWidth="960.0"
+              style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #e0e0e0;
+                     -fx-border-width: 1; -fx-border-radius: 5;"
+              HBox.hgrow="ALWAYS">
+
+            <HBox>
+                <children>
+                    <Label text="Liste des chauffeurs" textFill="#424242">
+                        <font>
+                            <Font name="System Bold" size="18.0" />
+                        </font>
+                    </Label>
+                </children>
+            </HBox>
+
+            <TableView fx:id="chauffeursTable" VBox.vgrow="ALWAYS">
+                <columns>
+                    <TableColumn fx:id="nomColumn" prefWidth="100.0" text="Nom" />
+                    <TableColumn fx:id="prenomColumn" prefWidth="100.0" text="Prénom" />
+                    <TableColumn fx:id="telephoneColumn" prefWidth="150.0" text="Téléphone" />
+                    <TableColumn fx:id="statutColumn" prefWidth="120.0" text="Statut" />
+                    <TableColumn fx:id="photoColumn" prefWidth="180.0" text="Nom photo" />
+                </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+
+            <HBox alignment="CENTER_RIGHT" spacing="20.0" style="-fx-padding: 10;">
+                <children>
+                    <Button fx:id="addButton" onAction="#handleAddChauffeur"
+                            style="-fx-background-color: #4caf50; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;"
+                            text="Ajouter">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </Button>
+
+                    <Button fx:id="detailButton" onAction="#handleDetailChauffeur"
+                            style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;"
+                            text="Détails">
+                        <font>
+                            <Font size="14.0" />
+                        </font>
+                    </Button>
+                </children>
+            </HBox>
+        </VBox>
+    </HBox>
+</AnchorPane>

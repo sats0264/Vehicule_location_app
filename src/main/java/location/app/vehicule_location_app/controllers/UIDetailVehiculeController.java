@@ -49,34 +49,22 @@ public class UIDetailVehiculeController {
         modeleComboBox.getItems().setAll(vehicule.getModele());
         modeleComboBox.setValue(vehicule.getModele());
 
-        // Chargement de l'image depuis ressources/images si possible
-        if (vehicule.getPhoto() != null && !vehicule.getPhoto().isEmpty()) {
-            String photoName = vehicule.getPhoto();
+        photoImageView.setImage(null); // Force le rafraîchissement
+        try {
+            // Essayer de charger depuis classpath /images/
+            InputStream is = getClass().getResourceAsStream("/images/" + vehicule.getPhoto());
 
-            // Extraire le nom de fichier si c'est un chemin complet (optionnel)
-            if (photoName.contains("/")) {
-                photoName = photoName.substring(photoName.lastIndexOf('/') + 1);
-            } else if (photoName.contains("\\")) {
-                photoName = photoName.substring(photoName.lastIndexOf('\\') + 1);
+            Image image;
+            if (is != null) {
+                image = new Image(is);
+            } else {
+                // Si non trouvé dans les ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
+                image = new Image(vehicule.getPhoto(), true);
             }
-
-            try {
-                // Essayer de charger depuis classpath /images/
-                InputStream is = getClass().getResourceAsStream("/images/" + photoName);
-
-                if (is != null) {
-                    Image image = new Image(is);
-                    photoImageView.setImage(image);
-                } else {
-                    // Si non trouvé dans ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
-                    Image image = new Image(vehicule.getPhoto(), true);
-                    photoImageView.setImage(image);
-                }
-            } catch (Exception e) {
-                photoImageView.setImage(null);
-            }
-        } else {
+            photoImageView.setImage(image);
+        } catch (Exception e) {
             photoImageView.setImage(null);
+            System.err.println("Erreur lors du chargement de l'image : " + e.getMessage());
         }
     }
 

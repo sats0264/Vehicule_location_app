@@ -18,6 +18,8 @@ import javafx.util.Duration;
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.Utilisateur;
 import location.app.vehicule_location_app.observer.NotificationObserver;
+import location.app.vehicule_location_app.observer.NotificationSubject;
+import location.app.vehicule_location_app.observer.Observer;
 
 import java.io.IOException;
 import java.net.URL;
@@ -26,17 +28,14 @@ import java.util.Date;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
-public class MainFenetreController extends NotificationObserver implements Initializable {
+public class MainFenetreController extends Observer implements Initializable {
 
     @FXML
     private BorderPane mainBorderPane;
-
     @FXML
     private AnchorPane contentArea;
-
     @FXML
     private Label dateTimeLabel;
-
     @FXML
     private Button dashboardButton;
     @FXML
@@ -46,6 +45,8 @@ public class MainFenetreController extends NotificationObserver implements Initi
     @FXML
     private Button voituresButton;
     @FXML
+    private Button chauffeursButton;
+    @FXML
     private Button notificationsButton;
     @FXML
     private Label notificationCountLabel; // Label to display unread count on the button
@@ -54,30 +55,24 @@ public class MainFenetreController extends NotificationObserver implements Initi
 
     private Utilisateur currentUser;
 
-
     private NotificationService notificationService;
 
     public MainFenetreController() {
-        super(NotificationService.getInstance()); // Attachez l'observateur au service de notification
+        this.subject = NotificationSubject.getInstance();
+        this.subject.attach(this);
     }
 
-
-    public void setCurrentUser(Utilisateur currentUser) {
-//        this.currentUser = currentUser;
-        NotificationService.getInstance().setUtilisateur(currentUser);
+    // Méthode pour définir l'utilisateur connecté (à appeler depuis votre écran de login)
+    public void setUtilisateurConnecte(Utilisateur utilisateur) {
+        this.currentUser = utilisateur;
+        NotificationService.getInstance().setUtilisateur(utilisateur); // IMPORTANT: Définit l'utilisateur actif dans le service
+        // Si votre NotificationService est un observateur lui-même, il va charger les notifications pour cet utilisateur.
     }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Lier le label au nombre de notifications non lues
-//        notificationCountLabel.textProperty().bind(NotificationService.getInstance().unreadCountProperty().asString());
-
-        // Assurez-vous que l'utilisateur actif est défini pour le NotificationService
-        // Ceci est un exemple, l'utilisateur doit être passé après la connexion
-        // NotificationService.getInstance().setUtilisateur(utilisateurConnecte); // À appeler après la connexion
         notificationService = NotificationService.getInstance();
         new NotificationObserver(notificationService);
-
 
         this.subject = notificationService;
         subject.attach(this);
@@ -87,12 +82,23 @@ public class MainFenetreController extends NotificationObserver implements Initi
         setSelectedButton(dashboardButton);
 
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0), event -> updateDateTimeLabel()),
+                new KeyFrame(Duration.seconds(0), e -> updateDateTimeLabel()),
                 new KeyFrame(Duration.seconds(1))
+
         );
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
-
+        Timeline autoRefreshTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), e -> {
+                    // Cette ligne va forcer le rafraîchissement du compteur de notifications
+                    if (notificationService != null) {
+                        notificationService.reloadNotificationsFromDB();
+                        update();
+                    }
+                })
+        );
+        autoRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimeline.play();
 
         notificationCountLabel.textProperty().bind(notificationService.unreadCountProperty().asString());
         updateNotificationButtonStyle(notificationService.getUnreadCount());
@@ -100,38 +106,6 @@ public class MainFenetreController extends NotificationObserver implements Initi
             updateNotificationButtonStyle(newVal.intValue());
         });
     }
-    /**
-     * Méthode d'initialisation du contrôleur.
-     * Appelée automatiquement après le chargement du fichier FXML.
-     */
-    @FXML
-    public void initialize() {
-//        notificationService = NotificationService.getInstance();
-//        new NotificationObserver(notificationService);
-//
-//
-//        this.subject = notificationService;
-//        subject.attach(this);
-//
-//        updateDateTimeLabel();
-//        loadView("/views/UIDashboard.fxml");
-//        setSelectedButton(dashboardButton);
-//
-//        Timeline timeline = new Timeline(
-//                new KeyFrame(Duration.seconds(0), event -> updateDateTimeLabel()),
-//                new KeyFrame(Duration.seconds(1))
-//        );
-//        timeline.setCycleCount(Timeline.INDEFINITE);
-//        timeline.play();
-//
-//
-//        notificationCountLabel.textProperty().bind(notificationService.unreadCountProperty().asString());
-//        updateNotificationButtonStyle(notificationService.getUnreadCount());
-//        notificationService.unreadCountProperty().addListener((obs, oldVal, newVal) -> {
-//            updateNotificationButtonStyle(newVal.intValue());
-//        });
-    }
-
     /**
      * Updates the date and time label in the top bar.
      */
@@ -168,25 +142,26 @@ public class MainFenetreController extends NotificationObserver implements Initi
             System.err.println("Failed to load view: " + fxmlPath);
         }
     }
-    void loadNotificationView(String fxmlPath) {
+
+    private void loadNotificationView() {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UINotification.fxml"));
             Parent view = loader.load();
             contentArea.getChildren().setAll(view);
 
-            AnchorPane.setTopAnchor(view, 0.0);
-            AnchorPane.setBottomAnchor(view, 0.0);
-            AnchorPane.setLeftAnchor(view, 0.0);
-            AnchorPane.setRightAnchor(view, 0.0);
+//            AnchorPane.setTopAnchor(view, 0.0);
+//            AnchorPane.setBottomAnchor(view, 0.0);
+//            AnchorPane.setLeftAnchor(view, 0.0);
+//            AnchorPane.setRightAnchor(view, 0.0);
 
-            UINotificationController controller = loader.getController();
-            controller.setCurrentUser(currentUser);
-
-            controller.setMainFenetreController(this);
+            UINotificationController uiNotificationController = loader.getController();
+            if (uiNotificationController != null) {
+                uiNotificationController.setCurrentUser(currentUser);
+                uiNotificationController.setMainFenetreController(this);
+            }
 
         } catch (IOException e) {
             e.printStackTrace();
-            System.err.println("Failed to load notification view: " + fxmlPath);
         }
     }
 
@@ -226,9 +201,15 @@ public class MainFenetreController extends NotificationObserver implements Initi
     }
 
     @FXML
+    private void handleChauffeursClick() {
+        setSelectedButton(chauffeursButton);
+        loadView("/views/UIChauffeur.fxml");
+    }
+
+    @FXML
     private void handleNotificationClick() {
         setSelectedButton(notificationsButton);
-        loadNotificationView("/views/UINotification.fxml");
+        loadNotificationView();
 
     }
     @FXML
@@ -255,26 +236,12 @@ public class MainFenetreController extends NotificationObserver implements Initi
         }
     }
 
-//    @Override
-//    public void update() {
-//        if (notificationService != null) {
-//            int count = notificationService.getUnreadCount();
-//            updateNotificationButtonStyle(count);
-//        }
-//    }
-@Override
-public void update() {
-    // Cette méthode est appelée quand le NotificationService notifie ses observateurs.
-    // Ici, vous pouvez déclencher un rafraîchissement de l'UI des notifications.
-    System.out.println("MainFenetreController: Mise à jour des notifications reçue !");
-
-    // Si UINotificationController est inclus et que vous avez une référence :
-    // if (uiNotificationController != null) {
-    //     uiNotificationController.chargerNotifications(); // Appelez une méthode de rafraîchissement
-    // }
-
-    // Si le label est déjà lié (bind), il se mettra à jour automatiquement.
-    // Si vous avez d'autres éléments UI qui affichent les notifications directement,
-    // vous devriez les rafraîchir ici.
-}
+    @Override
+    public void update() {
+        if (notificationService != null) {
+            int count = notificationService.getUnreadCount();
+            updateNotificationButtonStyle(count); // Met à jour le style du bouton
+//            notificationCountLabel.setText(String.valueOf(count));
+        }
+    }
 }

@@ -17,6 +17,8 @@ import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.models.NotificationType;
+import location.app.vehicule_location_app.observer.DashboardSubject;
+import location.app.vehicule_location_app.observer.NotificationSubject;
 
 import java.io.IOException;
 
@@ -96,6 +98,8 @@ public class UIInscriptionController extends Controller{
                     newClient.getId());
 
             notificationService.addNotification(notif);
+            DashboardSubject.getInstance().notifyAllObservers();
+            NotificationSubject.getInstance().notifyAllObservers();
 
             showAlert(Alert.AlertType.INFORMATION, "Inscription réussie", "Votre compte a été créé avec succès !");
         } catch (DAOException e) {

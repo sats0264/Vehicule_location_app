@@ -16,7 +16,7 @@ public class Chauffeur {
 
     private String nom;
     private String prenom;
-
+    private String telephone;
     @Enumerated(EnumType.STRING)
     private Statut statut;
     private String photo;
@@ -32,11 +32,12 @@ public class Chauffeur {
         this.photo = photo;
     }
 
-    public Chauffeur(String nom, String prenom, Statut statut, String photo) {
+    public Chauffeur(String nom, String prenom, String telephone, String photo) {
         this.nom = nom;
         this.prenom = prenom;
-        this.statut = statut;
+        this.telephone = telephone;
         this.photo = photo;
+        this.statut = Statut.DISPONIBLE;
     }
 
     public Chauffeur() {}
@@ -77,5 +78,13 @@ public class Chauffeur {
     }
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
+    }
+
+    public String getTelephone() {
+        return telephone;
+    }
+
+    public void setTelephone(String telephone) {
+        this.telephone = telephone;
     }
 }

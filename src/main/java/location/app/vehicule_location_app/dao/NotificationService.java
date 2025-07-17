@@ -1,151 +1,3 @@
-//package location.app.vehicule_location_app.dao;
-//
-//import javafx.beans.property.IntegerProperty;
-//import javafx.beans.property.SimpleIntegerProperty;
-//import javafx.collections.FXCollections;
-//import javafx.collections.ObservableList;
-//import location.app.vehicule_location_app.controllers.Controller;
-//import location.app.vehicule_location_app.exceptions.DAOException;
-//import location.app.vehicule_location_app.factory.ConcreteFactory;
-//import location.app.vehicule_location_app.factory.HibernateFactory;
-//import location.app.vehicule_location_app.models.Notification;
-//import location.app.vehicule_location_app.models.NotificationReception;
-//import location.app.vehicule_location_app.models.Utilisateur;
-//import location.app.vehicule_location_app.observer.Subject;
-//
-//import java.util.List;
-//import java.util.stream.Collectors;
-//
-//public class NotificationService extends Subject {
-//
-//    private static NotificationService instance;
-//
-//
-//    private Utilisateur utilisateurActif;
-//    private ObservableList<NotificationReception> receptions;
-//    private IntegerProperty unreadCount;
-//
-//    private NotificationService() {
-//        receptions = FXCollections.observableArrayList();
-//        unreadCount = new SimpleIntegerProperty(0);
-//    }
-//
-//    public static NotificationService getInstance() {
-//        if (instance == null) {
-//            instance = new NotificationService();
-//        }
-//        return instance;
-//    }
-//
-////    public void setUtilisateur(Utilisateur utilisateur) {
-////        this.utilisateurActif = utilisateur;
-////        chargerNotificationsUtilisateur();
-////    }
-//
-//    private void chargerNotificationsUtilisateur(Utilisateur utilisateur) {
-//        if (utilisateur == null) return;
-//
-//        try {
-//            var receptionDao = ConcreteFactory
-//                    .getFactory(HibernateFactory.class)
-//                    .getNotificationReceptionDaoImpl();
-//
-//            List<NotificationReception> list = receptionDao.findByUtilisateur(utilisateur);
-//            receptions.setAll(list);
-//            updateUnreadCount();
-//            notifyAllObservers();
-//
-//        } catch (DAOException e) {
-//            throw new RuntimeException("Erreur lors du chargement des notifications utilisateur", e);
-//        }
-//    }
-//
-//    public ObservableList<Notification> getNotifications() {
-//        return receptions.stream()
-//                .map(NotificationReception::getNotification)
-//                .collect(Collectors.toCollection(FXCollections::observableArrayList));
-//    }
-//
-//    public void markAsRead(Notification notification, Utilisateur utilisateur) {
-//        try {
-//            var receptionDao = ConcreteFactory
-//                    .getFactory(HibernateFactory.class)
-//                    .getNotificationReceptionDaoImpl();
-//
-//            NotificationReception reception = receptionDao.findByNotificationAndUser(notification, utilisateur);
-//            if (reception != null && !reception.isRead()) {
-//                utilisateur.getNotifications().forEach(
-//                        r -> {
-//                            if (r.getNotification().equals(notification) && !r.isRead()) {
-//                                r.setRead(true);
-//                            }
-//                        }
-//                );
-//                Controller.updateObject(utilisateur, Utilisateur.class);
-//                chargerNotificationsUtilisateur(utilisateur);
-//            }
-//
-//        } catch (DAOException e) {
-//            throw new RuntimeException("Erreur lors du marquage comme lu", e);
-//        }
-//    }
-//
-//    public void markAllAsRead(Utilisateur utilisateur) {
-//        if (utilisateur == null) return;
-//
-//        try {
-//            var receptionDao = ConcreteFactory
-//                    .getFactory(HibernateFactory.class)
-//                    .getHibernateObjectDaoImpl(NotificationReception.class);
-//
-//            for (NotificationReception reception : receptions) {
-//                if (!reception.isRead()) {
-//                    reception.setRead(true);
-//                }
-//            }
-//            Controller.updateObject(utilisateur, Utilisateur.class);
-//            chargerNotificationsUtilisateur(utilisateur); // Refresh for the current user
-//
-//        } catch (DAOException e) {
-//            throw new RuntimeException("Erreur lors du marquage global comme lu", e);
-//        }
-//    }
-//
-//    public void addNotification(Notification notification) {
-//        try {
-//            var userDao = ConcreteFactory
-//                    .getFactory(HibernateFactory.class)
-//                    .getHibernateObjectDaoImpl(Utilisateur.class);
-//
-//            List<Utilisateur> users = userDao.list();
-//
-//            for (Utilisateur user : users) {
-//                NotificationReception reception = new NotificationReception(notification, user);
-//                notification.addReception(reception);
-//                user.addNotification(reception);
-//
-//                Controller.ajouterObject(notification, Notification.class);
-//            }
-//            notifyAllObservers();
-//        } catch (DAOException e) {
-//            throw new RuntimeException("Erreur lors de la création de la notification", e);
-//        }
-//    }
-//
-//
-//    private void updateUnreadCount() {
-//        long count = receptions.stream().filter(r -> !r.isRead()).count();
-//        unreadCount.set((int) count);
-//    }
-//
-//    public IntegerProperty unreadCountProperty() {
-//        return unreadCount;
-//    }
-//
-//    public int getUnreadCount() {
-//        return unreadCount.get();
-//    }
-//}
 package location.app.vehicule_location_app.dao;
 
 import javafx.beans.property.IntegerProperty;
@@ -167,16 +19,29 @@ import java.util.stream.Collectors;
 public class NotificationService extends Subject {
 
     private static NotificationService instance;
-
     private Utilisateur utilisateurActif;
-    private ObservableList<NotificationReception> receptions;
-    private IntegerProperty unreadCount;
+    private final ObservableList<NotificationReception> receptions;
+    private final IntegerProperty unreadCount;
+
 
     private NotificationService() {
         receptions = FXCollections.observableArrayList();
         unreadCount = new SimpleIntegerProperty(0);
-    }
 
+
+        try {
+            var userDao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getHibernateObjectDaoImpl(Utilisateur.class);
+
+            var receptionDao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getHibernateObjectDaoImpl(NotificationReception.class);
+
+        } catch (DAOException e) {
+            throw new RuntimeException("Erreur lors de l'initialisation du NotificationService", e);
+        }
+    }
     public static NotificationService getInstance() {
         if (instance == null) {
             instance = new NotificationService();
@@ -195,9 +60,9 @@ public class NotificationService extends Subject {
         try {
             var receptionDao = ConcreteFactory
                     .getFactory(HibernateFactory.class)
-                    .getNotificationReceptionDaoImpl(); // Assuming this specific DAO exists
+                    .getNotificationReceptionDaoImpl();
 
-            List<NotificationReception> list = receptionDao.findByUtilisateur(utilisateurActif); // Assuming this method exists
+            List<NotificationReception> list = receptionDao.findByUtilisateur(utilisateurActif);
             receptions.setAll(list);
             updateUnreadCount();
             notifyAllObservers();
@@ -209,9 +74,14 @@ public class NotificationService extends Subject {
 
     public ObservableList<Notification> getNotifications() {
         return receptions.stream()
-                .map(NotificationReception::getNotification)
+                .map(reception -> {
+                    Notification notif = reception.getNotification();
+                    notif.getReceptions().add(reception); // force le lien
+                    return notif;
+                })
                 .collect(Collectors.toCollection(FXCollections::observableArrayList));
     }
+
 
     public void markAsRead(Notification notification) {
         if (utilisateurActif == null) return;
@@ -219,13 +89,13 @@ public class NotificationService extends Subject {
         try {
             var receptionDao = ConcreteFactory
                     .getFactory(HibernateFactory.class)
-                    .getNotificationReceptionDaoImpl(); // Assuming this specific DAO exists
+                    .getNotificationReceptionDaoImpl();
 
-            NotificationReception reception = receptionDao.findByNotificationAndUser(notification, utilisateurActif); // Assuming this method exists
+            NotificationReception reception = receptionDao.findByNotificationAndUser(notification, utilisateurActif);
             if (reception != null && !reception.isRead()) {
                 reception.setRead(true);
                 receptionDao.update(reception);
-                chargerNotificationsUtilisateur(); // Refresh the current user's notifications
+                chargerNotificationsUtilisateur();
             }
 
         } catch (DAOException e) {
@@ -247,7 +117,7 @@ public class NotificationService extends Subject {
                     receptionDao.update(reception);
                 }
             }
-            chargerNotificationsUtilisateur(); // Refresh for the current user
+            chargerNotificationsUtilisateur();
 
         } catch (DAOException e) {
             throw new RuntimeException("Erreur lors du marquage global comme lu", e);
@@ -256,10 +126,7 @@ public class NotificationService extends Subject {
 
     public void addNotification(Notification notification) {
         try {
-            // 1. Persist the Notification object first, once.
             Controller.ajouterObject(notification, Notification.class);
-
-            // Now that the notification is persisted, it has an ID and is managed by Hibernate.
 
             var userDao = ConcreteFactory
                     .getFactory(HibernateFactory.class)
@@ -267,8 +134,7 @@ public class NotificationService extends Subject {
 
             var receptionDao = ConcreteFactory
                     .getFactory(HibernateFactory.class)
-                    .getHibernateObjectDaoImpl(NotificationReception.class);
-
+                    .getNotificationReceptionDaoImpl();
 
             List<Utilisateur> users = userDao.list();
 
@@ -300,7 +166,6 @@ public class NotificationService extends Subject {
         }
     }
 
-
     private void updateUnreadCount() {
         long count = receptions.stream().filter(r -> !r.isRead()).count();
         unreadCount.set((int) count);
@@ -313,4 +178,23 @@ public class NotificationService extends Subject {
     public int getUnreadCount() {
         return unreadCount.get();
     }
+
+    public void reloadNotificationsFromDB() {
+        if (utilisateurActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getNotificationReceptionDaoImpl();
+
+                List<NotificationReception> list = receptionDao.findByUtilisateur(utilisateurActif);
+
+                receptions.setAll(list); // met à jour la vraie source observable
+                updateUnreadCount();     // met à jour le compteur
+                notifyAllObservers();    // notifie les interfaces
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du rechargement", e);
+            }
+        }
+    }
+
 }

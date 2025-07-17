@@ -16,9 +16,10 @@ public class Controller {
     protected HibernateObjectDaoImpl<Reservation> reservationDao;
     protected HibernateObjectDaoImpl<Facture> factureDao;
     protected HibernateObjectDaoImpl<Utilisateur> utilisateurDao;
-    protected List<Vehicule> controllerVehiculeList;
-    protected List<Client> controllerClientList;
-    protected List<Reservation> controllerReservationList;
+    protected static List<Vehicule> controllerVehiculeList;
+    protected static List<Chauffeur> controllerChauffeurList;
+    protected static List<Client> controllerClientList;
+    protected static List<Reservation> controllerReservationList;
 
     public Controller() throws DAOException {
         vehiculeDao = ConcreteFactory
@@ -48,6 +49,7 @@ public class Controller {
         controllerVehiculeList = vehiculeDao.list();
         controllerClientList = clientDao.list();
         controllerReservationList = reservationDao.list();
+        controllerChauffeurList = chauffeurDao.list();
     }
 
     public static <T> void ajouterObject(T entity, Class<T> entityClass) throws DAOException {
@@ -125,9 +127,9 @@ public class Controller {
         var vehicule3 = new Vehicule("EE-789-FF", "Citroen", "C3", 320.0, null);
         var vehicule4 = new Vehicule("GG-101-HH", "Toyota", "Yaris", 4000.0, null);
 
-        var chauffeur1 = new Chauffeur("Sow", "Moussa", Statut.DISPONIBLE, null);
-        var chauffeur2 = new Chauffeur("Diallo", "Fatou", Statut.DISPONIBLE, null);
-        var chauffeur3 = new Chauffeur("Traore", "Aissatou", Statut.DISPONIBLE, null);
+//        var chauffeur1 = new Chauffeur("Sow", "Moussa", Statut.DISPONIBLE, null);
+//        var chauffeur2 = new Chauffeur("Diallo", "Fatou", Statut.DISPONIBLE, null);
+//        var chauffeur3 = new Chauffeur("Traore", "Aissatou", Statut.DISPONIBLE, null);
 
 
 

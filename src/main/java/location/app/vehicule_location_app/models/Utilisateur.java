@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "T_Utilisateur")
 public class Utilisateur {
@@ -44,6 +45,19 @@ public class Utilisateur {
     public boolean estEmploye() {
         return this.role == Role.EMPLOYEE;
     }
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Utilisateur that = (Utilisateur) obj;
+        return this.id == that.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
 
     public int getId() {
         return id;

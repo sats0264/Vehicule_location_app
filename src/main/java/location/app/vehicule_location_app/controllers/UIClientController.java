@@ -62,6 +62,21 @@ public class UIClientController extends Controller {
         clientsTable.setItems(clientList);
     }
 
+    public void selectClientById(int clientId) {
+        if (clientsTable == null || clientsTable.getItems().isEmpty()) {
+            System.err.println("Table des clients non initialisée ou vide. Impossible de sélectionner.");
+            return;
+        }
+        for (Client client : clientsTable.getItems()) {
+            if (client.getId() == clientId) { // Assurez-vous que Client a une méthode getId()
+                clientsTable.getSelectionModel().select(client);
+                clientsTable.scrollTo(client);
+                System.out.println("Client sélectionné: " + client.getNom() + " (ID: " + clientId + ")");
+                break;
+            }
+        }
+    }
+
 
     /**
      * Affiche une boîte de dialogue d'alerte.
