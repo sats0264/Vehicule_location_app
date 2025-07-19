@@ -212,7 +212,29 @@ public class UIFenetreReservationController{
                             System.err.println("Erreur lors du chargement de la vue de facture : " + e.getMessage());
                         }
                     });
-                } else {
+                } else if (reservation.getStatut() == StatutReservation.APPROUVEE) {
+                    payementBtn.setText("Facture");
+                    payementBtn.setStyle("-fx-background-color: #43A047; -fx-text-fill: white; -fx-font-weight: bold;");
+                    payementBtn.setOnAction(event -> {
+                        System.out.println("Affichage de la facture pour la réservation ID: " + reservation.getId());
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIFacture.fxml"));
+                            Parent view = loader.load();
+                            UIFactureController factureController = loader.getController();
+
+                            factureController.setFacture(reservation.getFacture());
+
+                            Stage stage = new Stage();
+                            stage.setTitle("Facture Client");
+                            stage.setScene(new Scene(view));
+                            stage.show();
+                        }
+                        catch (IOException e) {
+                            System.err.println("Erreur lors du chargement de la vue de facture : " + e.getMessage());
+                        }
+                    });
+                }
+                else {
                     payementBtn.setVisible(false);
                 }
                 Label statutTitre = new Label("Statut de la demande :");
