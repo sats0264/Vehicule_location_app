@@ -12,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.observer.NotificationObserver;
 import location.app.vehicule_location_app.observer.Observer;
