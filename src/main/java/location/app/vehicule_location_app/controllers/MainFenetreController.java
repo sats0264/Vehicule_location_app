@@ -16,10 +16,11 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
 import location.app.vehicule_location_app.dao.NotificationService;
+import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Utilisateur;
 import location.app.vehicule_location_app.observer.NotificationObserver;
-import location.app.vehicule_location_app.observer.NotificationSubject;
 import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 import java.net.URL;
@@ -49,7 +50,7 @@ public class MainFenetreController extends Observer implements Initializable {
     @FXML
     private Button notificationsButton;
     @FXML
-    private Label notificationCountLabel; // Label to display unread count on the button
+    private Label notificationCountLabel;
     @FXML
     private Button logoutButton;
 
@@ -58,15 +59,13 @@ public class MainFenetreController extends Observer implements Initializable {
     private NotificationService notificationService;
 
     public MainFenetreController() {
-        this.subject = NotificationSubject.getInstance();
+        this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 
-    // Méthode pour définir l'utilisateur connecté (à appeler depuis votre écran de login)
     public void setUtilisateurConnecte(Utilisateur utilisateur) {
         this.currentUser = utilisateur;
-        NotificationService.getInstance().setUtilisateur(utilisateur); // IMPORTANT: Définit l'utilisateur actif dans le service
-        // Si votre NotificationService est un observateur lui-même, il va charger les notifications pour cet utilisateur.
+        NotificationService.getInstance().setUtilisateur(utilisateur);
     }
 
     @Override
@@ -124,44 +123,36 @@ public class MainFenetreController extends Observer implements Initializable {
 
     /**
      * Helper method to load FXML content into the contentArea.
+     *
      * @param fxmlPath The path to the FXML file to load.
+     * @return
      */
-    void loadView(String fxmlPath) {
+    Object loadView(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
-            contentArea.getChildren().setAll(view);
+            Object controller = loader.getController();
 
+            if (controller instanceof UIClientController uiClientController) {
+                uiClientController.setMainFenetreController(this);
+            } else if (controller instanceof UIHistoriqueClientController historiqueController) {
+                historiqueController.setMainFenetreController(this);
+            } else if (controller instanceof UINotificationController notificationController) {
+                notificationController.setMainFenetreController(this);
+                notificationController.setCurrentUser(currentUser);
+            }
+
+            contentArea.getChildren().setAll(view);
             AnchorPane.setTopAnchor(view, 0.0);
             AnchorPane.setBottomAnchor(view, 0.0);
             AnchorPane.setLeftAnchor(view, 0.0);
             AnchorPane.setRightAnchor(view, 0.0);
 
+            return controller;
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load view: " + fxmlPath);
-        }
-    }
-
-    private void loadNotificationView() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UINotification.fxml"));
-            Parent view = loader.load();
-            contentArea.getChildren().setAll(view);
-
-//            AnchorPane.setTopAnchor(view, 0.0);
-//            AnchorPane.setBottomAnchor(view, 0.0);
-//            AnchorPane.setLeftAnchor(view, 0.0);
-//            AnchorPane.setRightAnchor(view, 0.0);
-
-            UINotificationController uiNotificationController = loader.getController();
-            if (uiNotificationController != null) {
-                uiNotificationController.setCurrentUser(currentUser);
-                uiNotificationController.setMainFenetreController(this);
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
     }
 
@@ -194,6 +185,7 @@ public class MainFenetreController extends Observer implements Initializable {
         loadView("/views/UIClient.fxml");
     }
 
+
     @FXML
     private void handleVoituresClick() {
         setSelectedButton(voituresButton);
@@ -209,9 +201,19 @@ public class MainFenetreController extends Observer implements Initializable {
     @FXML
     private void handleNotificationClick() {
         setSelectedButton(notificationsButton);
-        loadNotificationView();
-
+        loadView("/views/UINotification.fxml");
     }
+
+    public void showUIHistoriqueClient (Client selectedClient) throws IOException {
+        setSelectedButton(notificationsButton);
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIHistoriqueClient.fxml"));
+        Parent view = loader.load();
+        contentArea.getChildren().setAll(view);
+        UIHistoriqueClientController uiHistoriqueClientController = loader.getController();
+        uiHistoriqueClientController.setMainFenetreController(this);
+        uiHistoriqueClientController.setClient(selectedClient);
+    }
+
     @FXML
     private void handleLogoutClick() throws IOException {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -240,8 +242,7 @@ public class MainFenetreController extends Observer implements Initializable {
     public void update() {
         if (notificationService != null) {
             int count = notificationService.getUnreadCount();
-            updateNotificationButtonStyle(count); // Met à jour le style du bouton
-//            notificationCountLabel.setText(String.valueOf(count));
+            updateNotificationButtonStyle(count);
         }
     }
 }

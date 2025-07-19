@@ -14,7 +14,7 @@ import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Vehicule;
 import location.app.vehicule_location_app.observer.Observer;
-import location.app.vehicule_location_app.observer.VehiculeSubject;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 
@@ -52,7 +52,7 @@ public class UIVehiculeController extends Observer {
     private ObservableList<Vehicule> vehiculeList = FXCollections.observableArrayList();
 
     public UIVehiculeController() throws DAOException {
-        this.subject = VehiculeSubject.getInstance();
+        this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 

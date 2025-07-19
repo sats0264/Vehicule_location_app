@@ -52,26 +52,24 @@
     </top>
 
     <left>
-        <!-- Navigation Sidebar (VBox) - Your main menu -->
         <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #3f51b5; -fx-padding: 15;">
             <Button fx:id="dashboardButton" onAction="#handleDashboardClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="TABLEAU DE BORD" />
             <Button fx:id="reservationsButton" onAction="#handleReservationsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="RESERVATIONS" />
             <Button fx:id="clientsButton" onAction="#handleClientsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="CLIENTS" />
             <Button fx:id="voituresButton" onAction="#handleVoituresClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="VOITURES" />
-         <Button fx:id="chauffeursButton" layoutX="25.0" layoutY="143.0" onAction="#handleChauffeursClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="CHAUFFEURS" />
-<!--            <Button fx:id="notificationsButton" layoutX="25.0" layoutY="261.0" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="NOTIFICATIONS" />-->
-            <!-- New Notifications Button -->
-            <Button fx:id="notificationsButton" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;">
-                <graphic>
-                    <HBox alignment="CENTER_LEFT" spacing="5">
-                        <Label text="NOTIFICATIONS" textFill="white" />
-                        <Label fx:id="notificationCountLabel" style="-fx-background-color: #ff5722; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-font-weight: bold; -fx-font-size: 10px;" text="0" />
-                    </HBox>
-                </graphic>
-            </Button>
-         <stylesheets>
-            <URL value="@../CSS/style.css" />
-         </stylesheets>
+            <Button fx:id="chauffeursButton" layoutX="25.0" layoutY="143.0" onAction="#handleChauffeursClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="CHAUFFEURS" />
+
+             <Button fx:id="notificationsButton" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;">
+                 <graphic>
+                     <HBox alignment="CENTER_LEFT" spacing="5">
+                         <Label text="NOTIFICATIONS" textFill="white" />
+                         <Label fx:id="notificationCountLabel" style="-fx-background-color: #ff5722; -fx-text-fill: white; -fx-background-radius: 10; -fx-padding: 2 6; -fx-font-weight: bold; -fx-font-size: 10px;" text="0" />
+                     </HBox>
+                 </graphic>
+             </Button>
+             <stylesheets>
+                 <URL value="@../CSS/style.css" />
+             </stylesheets>
         </VBox>
     </left>
 

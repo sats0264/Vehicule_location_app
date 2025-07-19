@@ -4,6 +4,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
@@ -13,13 +14,19 @@ import javafx.stage.Stage;
 import javafx.util.Duration;
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.observer.NotificationObserver;
+import location.app.vehicule_location_app.observer.Observer;
 
 import java.io.IOException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.ResourceBundle;
 
-public class UIFenetreClientController {
+public class UIFenetreClientController extends Observer implements Initializable {
 
+    @FXML
+    public Label notificationCountLabel;
     @FXML
     private AnchorPane contentArea;
 
@@ -40,27 +47,62 @@ public class UIFenetreClientController {
 
 
     private Client currentClient;
+    private NotificationService notificationService;
 
-    @FXML
-    public void initialize() {
+    @Override
+    public void initialize(URL location, ResourceBundle resources) {
+        notificationService = NotificationService.getInstance();
+        new NotificationObserver(notificationService);
+
+        this.subject = notificationService;
+        subject.attach(this);
+
         updateDateTimeLabel();
         loadView("/views/UIDashboardClient.fxml");
         setSelectedButton(dashboardButton);
 
         Timeline timeline = new Timeline(
-                new KeyFrame(Duration.seconds(0), event -> updateDateTimeLabel()),
+                new KeyFrame(Duration.seconds(0), e -> updateDateTimeLabel()),
                 new KeyFrame(Duration.seconds(1))
+
         );
         timeline.setCycleCount(Timeline.INDEFINITE);
         timeline.play();
+        Timeline autoRefreshTimeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), e -> {
+                    // Cette ligne va forcer le rafraîchissement du compteur de notifications
+                    if (notificationService != null) {
+                        notificationService.reloadNotificationsFromDB();
+                        update();
+                    }
+                })
+        );
+        autoRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimeline.play();
+
+        notificationCountLabel.textProperty().bind(notificationService.unreadCountProperty().asString());
+        updateNotificationButtonStyle(notificationService.getUnreadCount());
+        notificationService.unreadCountProperty().addListener((obs, oldVal, newVal) -> {
+            updateNotificationButtonStyle(newVal.intValue());
+        });
+
     }
+
 
     private void updateDateTimeLabel() {
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
         dateTimeLabel.setText(dateFormat.format(new Date()));
     }
 
-    private void loadView(String fxmlPath) {
+    private void updateNotificationButtonStyle(int unreadCount) {
+        if (unreadCount > 0) {
+            notificationsButton.setStyle("-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: #ff9800; -fx-font-size: 14px; -fx-font-weight: bold;"); // Highlight if unread
+        } else {
+            notificationsButton.setStyle("-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;");
+        }
+    }
+
+    Object loadView(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
@@ -70,6 +112,10 @@ public class UIFenetreClientController {
                 Object controller = loader.getController();
                 if (controller instanceof UIFenetreReservationController && currentClient != null) {
                     ((UIFenetreReservationController) controller).setClientConnecte(currentClient);
+                } else if (controller instanceof UINotificationController && currentClient != null) {
+                    ((UINotificationController) controller).setCurrentClient(currentClient);
+                    ((UINotificationController) controller).setUIFenetreClientController(this);
+
                 }
             }
 
@@ -80,9 +126,39 @@ public class UIFenetreClientController {
             AnchorPane.setLeftAnchor(view, 0.0);
             AnchorPane.setRightAnchor(view, 0.0);
 
+            return loader.getController();
+
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load view: " + fxmlPath);
+            return null; // Retourne null en cas d'erreur
+        }
+    }
+    Object loadNotificationView() {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UINotification.fxml"));
+            Parent view = loader.load();
+
+            // Passe le client connecté au contrôleur des notifications
+            Object controller = loader.getController();
+            if (controller instanceof UINotificationController && currentClient != null) {
+                ((UINotificationController) controller).setCurrentClient(currentClient);
+                ((UINotificationController) controller).setUIFenetreClientController(this);
+            }
+
+            contentArea.getChildren().setAll(view);
+
+            AnchorPane.setTopAnchor(view, 0.0);
+            AnchorPane.setBottomAnchor(view, 0.0);
+            AnchorPane.setLeftAnchor(view, 0.0);
+            AnchorPane.setRightAnchor(view, 0.0);
+
+            return controller;
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.err.println("Failed to load notification view.");
+            return null;
         }
     }
 
@@ -110,7 +186,7 @@ public class UIFenetreClientController {
     @FXML
     private void handleNotificationClick() {
         setSelectedButton(notificationsButton);
-        loadView("/views/UINotification.fxml");
+        loadNotificationView();
     }
     @FXML
     private void handleLogoutClick() throws IOException {
@@ -127,6 +203,14 @@ public class UIFenetreClientController {
 
     public void setCurrentClient(Client currentClient) {
         this.currentClient = currentClient;
-        //NotificationService.getInstance().setUtilisateur(currentClient);
+        NotificationService.getInstance().setClient(currentClient);
+    }
+
+    @Override
+    public void update() {
+        if (notificationService != null) {
+            int count = notificationService.getUnreadCount();
+            updateNotificationButtonStyle(count);
+        }
     }
 }

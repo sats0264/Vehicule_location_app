@@ -1,11 +1,14 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.models.Statut;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -18,37 +21,37 @@ public class UIInspectReservationController extends Controller{
 
     // --- Champs Client ---
     @FXML
-    private TextField clientLastNameField;
+    private Label clientLastNameField;
     @FXML
-    private TextField clientFirstNameField;
+    private Label clientFirstNameField;
     @FXML
-    private TextField clientPhoneField;
+    private Label clientPhoneField;
     @FXML
-    private TextField clientEmailField;
+    private Label clientEmailField;
     @FXML
-    private TextField clientAddressField;
+    private Label clientAddressField;
 
     // --- Champs Voiture ---
     @FXML
     private ComboBox<String> voitureImmatriculationField;
     @FXML
-    private TextField voitureModeleField;
+    private Label voitureModeleField;
     @FXML
-    private TextField voitureMarqueField;
+    private Label voitureMarqueField;
     @FXML
-    private TextField voitureTarifField;
+    private Label voitureTarifField;
     @FXML
-    private TextField voitureStatutField;
+    private Label voitureStatutField;
 
     // --- Champs Chauffeur ---
     @FXML
     private ComboBox<Integer> chauffeurIdComboBox;
     @FXML
-    private TextField chauffeurLastNameField;
+    private Label chauffeurLastNameField;
     @FXML
-    private TextField chauffeurFirstNameField;
+    private Label chauffeurFirstNameField;
     @FXML
-    private TextField chauffeurStatutField;
+    private Label chauffeurStatutField;
 
     // --- Champs Durée et Montant ---
     @FXML
@@ -56,23 +59,20 @@ public class UIInspectReservationController extends Controller{
     @FXML
     private DatePicker endDatePicker;
     @FXML
-    private TextField durationField;
+    private Label durationField;
     @FXML
-    private TextField amountField;
+    private Label amountField;
 
     // --- Boutons ---
     @FXML
     private Button approuverButton;
     @FXML
     private Button rejeterButton;
+    @FXML
+    private Button fermerButton;
 
     public UIInspectReservationController() throws DAOException {
     }
-
-//    @Override
-//    public void initialize(URL url, ResourceBundle resourceBundle) {
-//
-//    }
 
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
@@ -89,7 +89,7 @@ public class UIInspectReservationController extends Controller{
 
         // --- Véhicules ---
         if (reservation.getVehicules() != null && !reservation.getVehicules().isEmpty()) {
-            Vehicule v = reservation.getVehicules().get(0); // Juste le premier
+            Vehicule v = reservation.getVehicules().getFirst(); // Juste le premier
             voitureImmatriculationField.getItems().addAll(
                     reservation.getVehicules().stream().map(Vehicule::getImmatriculation).toList()
             );
@@ -115,13 +115,24 @@ public class UIInspectReservationController extends Controller{
             voitureMarqueField.setText(v.getMarque());
             voitureTarifField.setText(String.valueOf(v.getTarif()) + " FCFA");
             voitureStatutField.setText(v.getStatut().toString());
+
+            // --- Visibilité des boutons selon le statut
+            StatutReservation statut = reservation.getStatut();
+            if (statut != StatutReservation.EN_ATTENTE) {
+                approuverButton.setDisable(true);
+                rejeterButton.setDisable(true);
+            } else {
+                approuverButton.setDisable(false);
+                rejeterButton.setDisable(false);
+            }
+
         }
 
 
         // --- Chauffeur ---
 
         if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
-            Chauffeur ch = reservation.getChauffeurs().get(0);
+            Chauffeur ch = reservation.getChauffeurs().getFirst();
             chauffeurIdComboBox.getItems().addAll(
                     reservation.getChauffeurs().stream().map(Chauffeur::getId).toList()
             );
@@ -159,14 +170,15 @@ public class UIInspectReservationController extends Controller{
         if (reservation.getFacture() != null) {
             amountField.setText(String.format("%.0f FCFA", reservation.getFacture().getMontant()* duration));
         } else {
-            amountField.setText("0 FCFA");
+            amountField.setText(String.format("%.0f FCFA", reservation.getVehicules().stream().map(
+                    Vehicule::getTarif).reduce(0.0, Double::sum) * duration));
         }
     }
 
     @FXML
     private void handleApprouver() {
         if (reservation != null) {
-            reservation.setStatut(StatutReservation.APPROUVEE);
+            reservation.setStatut(StatutReservation.PAYEMENT_EN_ATTENTE);
             if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
                 for (Chauffeur chauffeur : reservation.getChauffeurs()) {
                     chauffeur.setStatut(Statut.INDISPONIBLE);
@@ -203,7 +215,7 @@ public class UIInspectReservationController extends Controller{
             } catch (DAOException e) {
                 throw new RuntimeException(e);
             }
-            showAlert(Alert.AlertType.INFORMATION, "Réservation approuvée.");
+            showAlert("Réservation approuvée.");
         }
     }
 
@@ -246,12 +258,19 @@ public class UIInspectReservationController extends Controller{
             } catch (DAOException e) {
                 throw new RuntimeException(e);
             }
-            showAlert(Alert.AlertType.INFORMATION, "Réservation rejetée.");
+            showAlert("Réservation rejetée.");
         }
     }
 
-    private void showAlert(Alert.AlertType type, String content) {
-        Alert alert = new Alert(type);
+    public void handleFermer(ActionEvent actionEvent) {
+        Stage stage = (Stage) fermerButton.getScene().getWindow();
+        if (stage != null) {
+            stage.close();
+        }
+    }
+
+    private void showAlert(String content) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Information");
         alert.setHeaderText(null);
         alert.setContentText(content);

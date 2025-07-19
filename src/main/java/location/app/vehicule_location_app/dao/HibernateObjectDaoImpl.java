@@ -9,6 +9,7 @@ import location.app.vehicule_location_app.models.Vehicule;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
+import java.util.Collections;
 import java.util.List;
 
 public class HibernateObjectDaoImpl<T> implements IDao<T> {
@@ -71,7 +72,6 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
     @Override
     public List<T> list() throws DAOException {
         try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-//            String hql = "from " + type.getSimpleName();
             String hql = "from " + type.getAnnotation(Entity.class).name();
 
             return session.createQuery(hql, type).getResultList();
@@ -140,7 +140,7 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
         return session.createQuery(hql, type).getResultList();
     } catch (Exception e) {
         e.printStackTrace();
-        return java.util.Collections.emptyList();
+        return Collections.emptyList();
     }
 }
 
@@ -152,4 +152,14 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
         return null;
     }
 }
+
+    public List<T> getAll() {
+        try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+            String hql = "from " + type.getAnnotation(Entity.class).name();
+            return session.createQuery(hql, type).getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Collections.emptyList();
+        }
+    }
 }

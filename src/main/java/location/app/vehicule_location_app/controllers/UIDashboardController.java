@@ -1,5 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,10 +9,11 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.util.Duration;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
-import location.app.vehicule_location_app.observer.DashboardSubject;
 import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -52,8 +55,8 @@ public class UIDashboardController extends Observer {
     @FXML
     private TableColumn<Client, Double> topClientAmountColumn;
 
-    public UIDashboardController() throws DAOException {
-        this.subject = DashboardSubject.getInstance();
+    public UIDashboardController() {
+        this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 
@@ -68,14 +71,8 @@ public class UIDashboardController extends Observer {
         System.out.println(">>> Nombre de clients : " + controllerClientList.size());
         System.out.println(">>> Nombre de réservations : " + controllerReservationList.size());
 
-        voituresCountLabel.setText(String.valueOf(controllerVehiculeList.size()));
-        clientsCountLabel.setText(String.valueOf(controllerClientList.size()));
-
-        double chiffreAffaires = controllerReservationList.stream()
-            .filter(r -> r.getFacture() != null)
-            .mapToDouble(r -> r.getFacture().getMontant())
-            .sum();
-        chiffreAffairesLabel.setText(String.format("%.0f FCFA", chiffreAffaires));
+        // --- Initialisation des labels de statistique ---
+        chargerStatistique();
 
         resMatriculeColumn.setCellValueFactory(cellData -> {
             List<Vehicule> vehicules = cellData.getValue().getVehicules();
@@ -101,7 +98,7 @@ public class UIDashboardController extends Observer {
             return new ReadOnlyStringWrapper(c != null ? c.getPrenom() + " " + c.getNom() : "");
         });
 
-        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(controllerReservationList);
+        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(reservationListActif);
         reservedCarsTable.setItems(reservedCars);
 
 
@@ -150,6 +147,32 @@ public class UIDashboardController extends Observer {
         }
         // Mettre à jour le TableView
         topClientsTable.setItems(FXCollections.observableArrayList(topClients));
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), e -> {
+                    loadDashboardData();
+                })
+        );
+    }
+
+    private void chargerStatistique() {
+        voituresCountLabel.setText(String.valueOf(controllerVehiculeList.size()));
+        clientsCountLabel.setText(String.valueOf(controllerClientList.size()));
+
+        double chiffreAffaires = controllerReservationList.stream()
+            .filter(r -> r.getFacture() != null)
+            .mapToDouble(r -> r.getFacture().getMontant())
+            .sum();
+        chiffreAffairesLabel.setText(String.format("%.0f FCFA", chiffreAffaires));
+    }
+
+    private void loadDashboardData() {
+        // Recharger les données des véhicules, clients et réservations
+        controllerVehiculeList = vehiculeDao.getAll();
+        controllerClientList = clientDao.getAll();
+        controllerReservationList = reservationDao.getAll();
+
+        chargerStatistique();
     }
 
     @Override
@@ -157,16 +180,4 @@ public class UIDashboardController extends Observer {
         // Recharger les statistiques ici
         loadDashboardData();
     }
-
-    private void loadDashboardData() {
-        // Nombre de véhicules, clients et liste des réservations
-        try {
-            controllerVehiculeList = listerObjects(Vehicule.class);
-            controllerClientList = listerObjects(Client.class);
-            controllerReservationList = listerObjects(Reservation.class);
-        } catch (DAOException e) {
-            e.printStackTrace();
-        }
-    }
-
 }

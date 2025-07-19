@@ -8,8 +8,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Vehicule;
-import location.app.vehicule_location_app.observer.DashboardSubject;
-import location.app.vehicule_location_app.observer.VehiculeSubject;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.File;
 import java.io.IOException;
@@ -104,8 +103,7 @@ public class UIAddVehiculeController{
             Vehicule v = getVehicule();
 
             ajouterObject(v, Vehicule.class);
-            DashboardSubject.getInstance().notifyAllObservers();
-            VehiculeSubject.getInstance().notifyAllObservers();
+            Subject.getInstance().notifyAllObservers();
 
             showAlert(Alert.AlertType.INFORMATION, "Succès", "Véhicule enregistré avec succès !");
             clearForm();

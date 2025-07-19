@@ -6,20 +6,22 @@ import location.app.vehicule_location_app.factory.ConcreteFactory;
 import location.app.vehicule_location_app.factory.HibernateFactory;
 import location.app.vehicule_location_app.models.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Controller {
 
-    protected HibernateObjectDaoImpl<Vehicule> vehiculeDao;
-    protected HibernateObjectDaoImpl<Client> clientDao;
-    protected HibernateObjectDaoImpl<Chauffeur> chauffeurDao;
-    protected HibernateObjectDaoImpl<Reservation> reservationDao;
-    protected HibernateObjectDaoImpl<Facture> factureDao;
-    protected HibernateObjectDaoImpl<Utilisateur> utilisateurDao;
+    protected static HibernateObjectDaoImpl<Vehicule> vehiculeDao;
+    protected static HibernateObjectDaoImpl<Client> clientDao;
+    protected static HibernateObjectDaoImpl<Chauffeur> chauffeurDao;
+    protected static HibernateObjectDaoImpl<Reservation> reservationDao;
+    protected static HibernateObjectDaoImpl<Facture> factureDao;
+    protected static HibernateObjectDaoImpl<Utilisateur> utilisateurDao;
     protected static List<Vehicule> controllerVehiculeList;
-    protected static List<Chauffeur> controllerChauffeurList;
+    protected static List<Chauffeur> controllerChauffeurList = new ArrayList<>();
     protected static List<Client> controllerClientList;
     protected static List<Reservation> controllerReservationList;
+    protected static List<Reservation> reservationListActif;
 
     public Controller() throws DAOException {
         vehiculeDao = ConcreteFactory
@@ -50,6 +52,10 @@ public class Controller {
         controllerClientList = clientDao.list();
         controllerReservationList = reservationDao.list();
         controllerChauffeurList = chauffeurDao.list();
+
+        reservationListActif = controllerReservationList.stream()
+                .filter(reservation -> reservation.getStatut() == StatutReservation.APPROUVEE )
+                .toList();
     }
 
     public static <T> void ajouterObject(T entity, Class<T> entityClass) throws DAOException {
@@ -71,7 +77,6 @@ public class Controller {
 
         return hibernateDao.readById(objectId);
     }
-
     public static <T> T rechercherObjectByString(String value, Class<T> entityClass) throws DAOException {
         HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
                 .getFactory(HibernateFactory.class)
@@ -79,7 +84,6 @@ public class Controller {
 
         return hibernateDao.readByString(value);
     }
-
     public static <T> void updateObject(T entity, Class<T> entityClass) throws DAOException {
         HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
                 .getFactory(HibernateFactory.class)
@@ -87,14 +91,12 @@ public class Controller {
 
         hibernateDao.update(entity);
     }
-
     public static <T> List<T> listerObjects(Class<T> entityClass) throws DAOException {
         HibernateObjectDaoImpl<T> hibernateDao = ConcreteFactory
                 .getFactory(HibernateFactory.class)
                 .getHibernateObjectDaoImpl(entityClass);
         return hibernateDao.list();
     }
-
     public boolean authenticateClient(String email, String password) throws DAOException {
         List<Client> clients = clientDao.list();
         for (Client client : clients) {
@@ -112,6 +114,17 @@ public class Controller {
             }
         }
         return false;
+    }
+
+    public static void refreshChauffeurs() {
+        try {
+            var dao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getHibernateObjectDaoImpl(Chauffeur.class);
+            controllerChauffeurList = dao.list();
+        } catch (DAOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static void creerDemoDonnees() throws DAOException {

@@ -3,13 +3,18 @@ package location.app.vehicule_location_app.controllers;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Client;
 
+import java.io.IOException;
+
 public class UIClientController extends Controller {
 
+    @FXML
+    public Button historiqueClientButton;
     // --- Clients List Table ---
     @FXML
     private TableView<Client> clientsTable;
@@ -27,14 +32,15 @@ public class UIClientController extends Controller {
     private TableColumn<Client, Integer> fideliteColumn;
 
     private ObservableList<location.app.vehicule_location_app.models.Client> clientList;
+    private MainFenetreController mainFenetreController;
 
     public UIClientController() throws DAOException {
     }
 
-    /**
-     * Méthode d'initialisation du contrôleur.
-     * Appelée automatiquement après le chargement du fichier FXML.
-     */
+    public void setMainFenetreController(MainFenetreController mainFenetreController) {
+        this.mainFenetreController = mainFenetreController;
+    }
+
     @FXML
     public void initialize() {
 
@@ -74,6 +80,20 @@ public class UIClientController extends Controller {
                 System.out.println("Client sélectionné: " + client.getNom() + " (ID: " + clientId + ")");
                 break;
             }
+        }
+    }
+
+    public void handleHistoriqueClient(ActionEvent actionEvent) {
+        Client selectedClient = clientsTable.getSelectionModel().getSelectedItem();
+        if (selectedClient == null) {
+            showAlert(Alert.AlertType.WARNING, "Aucun client sélectionné",
+                    "Veuillez sélectionner un client pour afficher son historique.");
+            return;
+        }
+        try {
+            mainFenetreController.showUIHistoriqueClient(selectedClient);
+        } catch (IOException e) {
+            throw new RuntimeException("Erreur lors de l'affichage de l'historique du client", e);
         }
     }
 

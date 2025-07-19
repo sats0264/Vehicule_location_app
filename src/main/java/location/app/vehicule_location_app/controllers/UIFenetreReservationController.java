@@ -1,7 +1,10 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
@@ -12,14 +15,16 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.Client;
-import location.app.vehicule_location_app.models.Reservation;
-import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.observer.Observer;
 import location.app.vehicule_location_app.observer.Subject;
 
+import javax.imageio.IIOException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+
+import static location.app.vehicule_location_app.controllers.Controller.reservationDao;
 
 public class UIFenetreReservationController{
 
@@ -82,16 +87,6 @@ public class UIFenetreReservationController{
             }
         }
     }
-
-    /**
-     * Méthode appelée automatiquement par le Subject lors d'un changement d'état.
-     */
-//    @Override
-//    public void update() {
-//        if (subject != null) {
-//            updateStatutFromState(subject.getState());
-//        }
-//    }
 
     /**
      * Met à jour le statut selon l'état du Subject.
@@ -192,15 +187,58 @@ public class UIFenetreReservationController{
 
                 // Statut à droite
                 VBox statutBox = new VBox(10);
+                final Button payementBtn = new Button("Payer");
                 statutBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
+                if (reservation.getStatut() == StatutReservation.PAYEMENT_EN_ATTENTE) {
+                    payementBtn.setStyle("-fx-background-color: #2196F3; -fx-text-fill: white; -fx-font-weight: bold;");
+                    payementBtn.setOnAction(event -> {
+                        System.out.println("Paiement en cours pour la réservation ID: " + reservation.getId());
+                        try {
+                            FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIFactureClient.fxml"));
+                            Parent view = loader.load();
+                            UIFactureClientController factureController = loader.getController();
+
+                            factureController.setFacture(reservation);
+
+                            Stage stage = new Stage();
+                            stage.setTitle("Facture Client");
+                            stage.setScene(new Scene(view));
+                            stage.show();
+                        }
+                        catch (IOException e) {
+                            System.err.println("Erreur lors du chargement de la vue de facture : " + e.getMessage());
+                        }
+                    });
+                } else {
+                    payementBtn.setVisible(false);
+                }
                 Label statutTitre = new Label("Statut de la demande :");
                 statutTitre.setStyle("-fx-font-size: 13px;");
                 Label statutLbl = new Label(reservation.getStatut().toString());
                 String color = "#a5a5a3ff";
-                if ("VALIDE".equalsIgnoreCase(reservation.getStatut().name())) color = "#43A047";
-                else if ("REJETE".equalsIgnoreCase(reservation.getStatut().name())) color = "#e53935";
+                if (reservation.getStatut() != null) {
+                    switch (reservation.getStatut()) {
+                        case EN_ATTENTE:
+                            color = "#ff9800"; // Orange pour en attente
+                            break;
+                        case APPROUVEE:
+                            color = "#43A047"; // Vert pour approuvée
+                            break;
+                        case REJETEE:
+                            color = "#e53935"; // Rouge pour rejetée
+                            break;
+                        case PAYEMENT_EN_ATTENTE:
+                            color = "#2196F3"; // Bleu pour paiement en attente
+                            break;
+                        case ANNULEE:
+                            color = "#e53935"; // Rouge pour annulée
+                            break;
+                        default:
+                            color = "#a5a5a3ff"; // Gris par défaut
+                    }
+                }
                 statutLbl.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
-                statutBox.getChildren().addAll(statutTitre, statutLbl);
+                statutBox.getChildren().addAll(statutTitre, statutLbl, payementBtn);
 
                 hbox.getChildren().addAll(imgView, infos, spacer, statutBox);
                 carte.getChildren().add(hbox);
@@ -330,7 +368,6 @@ public class UIFenetreReservationController{
             java.util.Optional<javafx.scene.control.ButtonType> result = confirm.showAndWait();
             if (result.isPresent() && result.get() == javafx.scene.control.ButtonType.OK) {
                 try {
-                    HibernateObjectDaoImpl<Reservation> reservationDao = new HibernateObjectDaoImpl<>(Reservation.class);
                     reservationDao.delete(reservation.getId());
                     statut.setText("Réservation annulée !");
                     statut.setStyle("-fx-text-fill: #e53935; -fx-font-weight: bold;");
@@ -362,34 +399,4 @@ public class UIFenetreReservationController{
         popup.setScene(scene);
         popup.showAndWait();
     }
-
-//    public void loadReservation(int reservationId, Subject subject) {
-//        try {
-//            HibernateObjectDaoImpl<Reservation> reservationDao = new HibernateObjectDaoImpl<>(Reservation.class);
-//            Reservation reservation = reservationDao.read(reservationId);
-//
-//            this.subject = subject;
-//            this.subject.attach(this);
-//
-//            marqueLabel.setText("Marque : " + reservation.getVehicules().get(0).getMarque());
-//            modeleLabel.setText("Modèle : " + reservation.getVehicules().get(0).getModele());
-//            immatriculationLabel.setText("Immatriculation : " + reservation.getVehicules().get(0).getImmatriculation());
-//            nbJoursLabel.setText(String.valueOf(
-//                java.time.temporal.ChronoUnit.DAYS.between(
-//                    reservation.getDateDebut(), reservation.getDateFin()
-//                )
-//            ));
-//            updateStatutFromState(subject.getState());
-//            try {
-//                String imageUrl = reservation.getVehicules().get(0).getPhoto(); // Utilise getPhoto()
-//                if (imageUrl != null) {
-//                    voitureImage.setImage(new Image(getClass().getResource(imageUrl).toExternalForm()));
-//                }
-//            } catch (Exception e) {
-//                voitureImage.setImage(null);
-//            }
-//        } catch (DAOException e) {
-//            // Gérer l'erreur (affichage, log, etc.)
-//        }
-//    }
 }

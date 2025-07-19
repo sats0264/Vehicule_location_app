@@ -1,11 +1,9 @@
 package location.app.vehicule_location_app.controllers;
 
-
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -16,8 +14,8 @@ import javafx.scene.control.TableView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.models.Chauffeur;
-import location.app.vehicule_location_app.observer.ChauffeurSubject;
 import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 
@@ -45,7 +43,7 @@ public class UIChauffeurController extends Observer {
     private ObservableList<Chauffeur> chauffeurList = FXCollections.observableArrayList();
 
     public UIChauffeurController() {
-        this.subject = ChauffeurSubject.getInstance();
+        this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 
@@ -69,10 +67,16 @@ public class UIChauffeurController extends Observer {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getPhoto()));
 
         chauffeursTable.setItems(chauffeurList);
+        chargerListChauffeurs();
     }
 
-    public void handleAddChauffeur(ActionEvent actionEvent) {
-        try{
+    private void chargerListChauffeurs() {
+        chauffeurList.setAll(controllerChauffeurList);
+        System.out.println("Chauffeurs list loaded with " + chauffeurList.size() + " chauffeurs.");
+    }
+
+    public void handleAddChauffeur() {
+        try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIAddChauffeur.fxml"));
             Parent root = loader.load();
             Stage stage = new Stage();
@@ -80,12 +84,16 @@ public class UIChauffeurController extends Observer {
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.setScene(new Scene(root));
             stage.showAndWait();
+
+            chargerListChauffeurs();
+
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void handleDetailChauffeur(ActionEvent actionEvent) {
+
+    public void handleDetailChauffeur() {
         Chauffeur selectedChauffeur = chauffeursTable.getSelectionModel().getSelectedItem();
         if (selectedChauffeur != null) {
             try {
@@ -107,7 +115,6 @@ public class UIChauffeurController extends Observer {
 
     @Override
     public void update() {
-        chauffeursTable.setItems(FXCollections.observableArrayList(controllerChauffeurList));
-        System.out.println("Chauffeur list updated.");
+        chargerListChauffeurs();
     }
 }

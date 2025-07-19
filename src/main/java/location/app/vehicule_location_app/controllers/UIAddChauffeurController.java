@@ -11,7 +11,7 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Chauffeur;
-import location.app.vehicule_location_app.observer.ChauffeurSubject;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.File;
 import java.io.IOException;
@@ -43,7 +43,7 @@ public class UIAddChauffeurController {
     private File selectedPhotoFile;
 
 
-    public UIAddChauffeurController() throws DAOException {
+    public UIAddChauffeurController()  {
     }
 
     @FXML
@@ -56,7 +56,9 @@ public class UIAddChauffeurController {
             Chauffeur chauffeur = getChauffeur();
 
             ajouterObject(chauffeur, Chauffeur.class);
-            ChauffeurSubject.getInstance().notifyAllObservers();
+            Controller.refreshChauffeurs();
+            Subject.getInstance().notifyAllObservers();
+
 
             showAlert(Alert.AlertType.INFORMATION, "Chauffeur ajouté", "Le chauffeur a été ajouté avec succès.");
             clearForm();

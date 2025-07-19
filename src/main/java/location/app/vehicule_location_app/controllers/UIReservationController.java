@@ -15,12 +15,15 @@ import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Reservation; // Import your Reservation model
 import location.app.vehicule_location_app.models.Client;     // Assuming you have a Client model
 import location.app.vehicule_location_app.models.Vehicule;   // Assuming you have a Vehicule model
+import location.app.vehicule_location_app.observer.Observer;
 // Assuming you have a Statut enum
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
-public class UIReservationController extends Controller{
+import static location.app.vehicule_location_app.controllers.Controller.*;
+
+public class UIReservationController extends Observer {
 
     // --- Action Buttons (now acting on the table selection) ---
     @FXML
@@ -35,84 +38,77 @@ public class UIReservationController extends Controller{
     // --- Reservations List Table ---
     @FXML
     private TableView<Reservation> reservationsTable;
-    // Removed resListCodeColumn as it's no longer in the FXML
     @FXML
     private TableColumn<Reservation, String> resListStartDateColumn;
     @FXML
     private TableColumn<Reservation, String> resListEndDateColumn;
     @FXML
-    private TableColumn<Reservation, String> resListStatutColumn; // New column for Statut
+    private TableColumn<Reservation, String> resListStatutColumn;
     @FXML
-    private TableColumn<Reservation, String> resListFirstNameColumn; // From Client
+    private TableColumn<Reservation, String> resListFirstNameColumn;
     @FXML
-    private TableColumn<Reservation, String> resListLastNameColumn;  // From Client
+    private TableColumn<Reservation, String> resListLastNameColumn;
     @FXML
-    private TableColumn<Reservation, String> resListMatriculeColumn; // From Vehicule
+    private TableColumn<Reservation, String> resListMatriculeColumn;
     @FXML
-    private TableColumn<Reservation, String> resListModeleColumn;    // From Vehicule
+    private TableColumn<Reservation, String> resListModeleColumn;
     @FXML
-    private TableColumn<Reservation, String> resListMarqueColumn;    // From Vehicule
+    private TableColumn<Reservation, String> resListMarqueColumn;
 
     private ObservableList<Reservation> reservationList;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
-    public UIReservationController() throws DAOException {
+    public UIReservationController() {
     }
 
-    /**
-     * Méthode d'initialisation du contrôleur.
-     * Appelée automatiquement après le chargement du fichier FXML.
-     */
-@FXML
-public void initialize() {
-    // 1. Charger les réservations depuis la base
-    reservationList = FXCollections.observableArrayList(controllerReservationList);
+    @FXML
+    public void initialize() {
 
-    // 2. Remplir les colonnes avec les données extraites de Reservation
-    resListStartDateColumn.setCellValueFactory(cellData ->
-            new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
-                    ? cellData.getValue().getDateDebut().format(dateFormatter)
-                    : ""));
+        reservationList = FXCollections.observableArrayList(controllerReservationList);
 
-    resListEndDateColumn.setCellValueFactory(cellData ->
-            new ReadOnlyStringWrapper(cellData.getValue().getDateFin() != null
-                    ? cellData.getValue().getDateFin().format(dateFormatter)
-                    : ""));
+        resListStartDateColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
+                        ? cellData.getValue().getDateDebut().format(dateFormatter)
+                        : ""));
 
-    resListStatutColumn.setCellValueFactory(cellData ->
-            new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
-                    ? cellData.getValue().getStatut().toString()
-                    : ""));
+        resListEndDateColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getDateFin() != null
+                        ? cellData.getValue().getDateFin().format(dateFormatter)
+                        : ""));
 
-    resListFirstNameColumn.setCellValueFactory(cellData -> {
-        Client c = cellData.getValue().getClient();
-        return new ReadOnlyStringWrapper(c != null ? c.getPrenom() : "");
-    });
+        resListStatutColumn.setCellValueFactory(cellData ->
+                new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
+                        ? cellData.getValue().getStatut().toString()
+                        : ""));
 
-    resListLastNameColumn.setCellValueFactory(cellData -> {
-        Client c = cellData.getValue().getClient();
-        return new ReadOnlyStringWrapper(c != null ? c.getNom() : "");
-    });
+        resListFirstNameColumn.setCellValueFactory(cellData -> {
+            Client c = cellData.getValue().getClient();
+            return new ReadOnlyStringWrapper(c != null ? c.getPrenom() : "");
+        });
 
-    resListMatriculeColumn.setCellValueFactory(cellData -> {
-        Vehicule v = getFirstVehicule(cellData.getValue());
-        return new ReadOnlyStringWrapper(v != null ? v.getImmatriculation() : "");
-    });
+        resListLastNameColumn.setCellValueFactory(cellData -> {
+            Client c = cellData.getValue().getClient();
+            return new ReadOnlyStringWrapper(c != null ? c.getNom() : "");
+        });
 
-    resListModeleColumn.setCellValueFactory(cellData -> {
-        Vehicule v = getFirstVehicule(cellData.getValue());
-        return new ReadOnlyStringWrapper(v != null ? v.getModele() : "");
-    });
+        resListMatriculeColumn.setCellValueFactory(cellData -> {
+            Vehicule v = getFirstVehicule(cellData.getValue());
+            return new ReadOnlyStringWrapper(v != null ? v.getImmatriculation() : "");
+        });
 
-    resListMarqueColumn.setCellValueFactory(cellData -> {
-        Vehicule v = getFirstVehicule(cellData.getValue());
-        return new ReadOnlyStringWrapper(v != null ? v.getMarque() : "");
-    });
+        resListModeleColumn.setCellValueFactory(cellData -> {
+            Vehicule v = getFirstVehicule(cellData.getValue());
+            return new ReadOnlyStringWrapper(v != null ? v.getModele() : "");
+        });
 
-    // 3. Afficher dans le tableau
-    reservationsTable.setItems(reservationList);
+        resListMarqueColumn.setCellValueFactory(cellData -> {
+            Vehicule v = getFirstVehicule(cellData.getValue());
+            return new ReadOnlyStringWrapper(v != null ? v.getMarque() : "");
+        });
 
-}
+        reservationsTable.setItems(reservationList);
+
+    }
 
     public void selectReservationById(int reservationId) {
         if (reservationsTable == null || reservationsTable.getItems().isEmpty()) {
@@ -120,7 +116,7 @@ public void initialize() {
             return;
         }
         for (Reservation reservation : reservationsTable.getItems()) {
-            if (reservation.getId() == reservationId) { // Assurez-vous que Reservation a une méthode getId()
+            if (reservation.getId() == reservationId) {
                 reservationsTable.getSelectionModel().select(reservation);
                 reservationsTable.scrollTo(reservation);
                 System.out.println("Réservation sélectionnée: ID " + reservationId);
@@ -131,51 +127,47 @@ public void initialize() {
 
     // --- Event Handlers for Buttons ---
 
-@FXML
-private void handleInspectReservationButton() {
-    Reservation selectedReservation = reservationsTable.getSelectionModel().getSelectedItem();
-    if (selectedReservation != null) {
-        openInspectReservationView(selectedReservation);
-    } else {
-        showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à inspecter.");
+    @FXML
+    private void handleInspectReservationButton() {
+        Reservation selectedReservation = reservationsTable.getSelectionModel().getSelectedItem();
+        if (selectedReservation != null) {
+            openInspectReservationView(selectedReservation);
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à inspecter.");
+        }
     }
-}
 
-@FXML
-private void handleRefreshButton() {
-    try {
-        reservationList = FXCollections.observableArrayList(reservationDao.list());
-        reservationsTable.setItems(reservationList);
-        showAlert(Alert.AlertType.INFORMATION, "Rafraîchir", "Liste des réservations rafraîchie.");
-    } catch (DAOException e) {
-        e.printStackTrace();
-        showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de rafraîchir les réservations.");
+    @FXML
+    private void handleRefreshButton() {
+        try {
+            reservationList = FXCollections.observableArrayList(reservationDao.list());
+            reservationsTable.setItems(reservationList);
+            showAlert(Alert.AlertType.INFORMATION, "Rafraîchir", "Liste des réservations rafraîchie.");
+        } catch (DAOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de rafraîchir les réservations.");
+        }
     }
-}
 
-
-@FXML
-private void handleSearchButton() {
-    System.out.println("Search button clicked!");
-    showAlert(Alert.AlertType.INFORMATION, "Rechercher Réservation", "Logique pour rechercher des réservations.");
-    // This would typically open a search dialog or filter the table.
-}
-
-@FXML
-private void handleDeleteButton() {
-    System.out.println("Delete button clicked!");
-    Reservation selectedReservation = reservationsTable.getSelectionModel().getSelectedItem();
-    if (selectedReservation != null) {
-        reservationList.remove(selectedReservation);
-        showAlert(Alert.AlertType.INFORMATION, "Suppression", "Réservation supprimée avec succès.");
-    } else {
-        showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à supprimer.");
+    @FXML
+    private void handleSearchButton() {
+        System.out.println("Search button clicked!");
+        showAlert(Alert.AlertType.INFORMATION, "Rechercher Réservation", "Logique pour rechercher des réservations.");
+        // This would typically open a search dialog or filter the table.
     }
-}
 
-    /**
-     * Affiche une boîte de dialogue d'alerte.
-     */
+    @FXML
+    private void handleDeleteButton() {
+        System.out.println("Delete button clicked!");
+        Reservation selectedReservation = reservationsTable.getSelectionModel().getSelectedItem();
+        if (selectedReservation != null) {
+            reservationList.remove(selectedReservation);
+            showAlert(Alert.AlertType.INFORMATION, "Suppression", "Réservation supprimée avec succès.");
+        } else {
+            showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à supprimer.");
+        }
+    }
+
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);
@@ -211,4 +203,8 @@ private void handleDeleteButton() {
         }
     }
 
+    @Override
+    public void update() {
+        reservationList.setAll(controllerReservationList);
+    }
 }
