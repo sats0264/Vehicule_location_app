@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.image.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="600.0" prefWidth="700.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIChauffeurSelectionController">
+    <ScrollPane fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <content>
+            <VBox alignment="TOP_CENTER" spacing="20.0" style="-fx-background-color: #f5f5f5; -fx-padding: 20px;">
+                <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Sélectionner un Chauffeur Disponible">
+                    <VBox.margin>
+                        <Insets bottom="10.0" />
+                    </VBox.margin>
+                </Label>
+
+                <!-- Container for dynamically added HBoxes of chauffeurs -->
+                <VBox fx:id="chauffeursDisplayContainer" alignment="TOP_CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
+                    <!-- Chauffeur HBoxes will be added here by the controller -->
+                </VBox>
+
+                <Label fx:id="noChauffeurMessage" text="Aucun chauffeur disponible pour les dates sélectionnées."
+                       visible="false" managed="false" style="-fx-font-size: 14px; -fx-text-fill: #e53935;" />
+
+                <HBox alignment="CENTER" spacing="20.0">
+                    <Button fx:id="selectChauffeurBtn" mnemonicParsing="false" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold;" text="Sélectionner">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+                    <Button fx:id="cancelBtn" mnemonicParsing="false" style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold;" text="Annuler">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+                </HBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>
