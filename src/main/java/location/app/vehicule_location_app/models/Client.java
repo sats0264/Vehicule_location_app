@@ -28,6 +28,9 @@ public class Client {
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<NotificationReception> notifications = new ArrayList<>();
 
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<CarteBancaire> cartesBancaires = new ArrayList<>();
+
     public Client() {}
     public Client(int id) {
         this.id = id;
@@ -74,6 +77,11 @@ public class Client {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public void addCarteBancaire(CarteBancaire carte) {
+        cartesBancaires.add(carte);
+        carte.setClient(this);
     }
 
     public int getId() {
@@ -154,5 +162,13 @@ public class Client {
 
     public void setNotifications(List<NotificationReception> notifications) {
         this.notifications = notifications;
+    }
+
+    public List<CarteBancaire> getCartesBancaires() {
+        return cartesBancaires;
+    }
+
+    public void setCartesBancaires(List<CarteBancaire> cartesBancaires) {
+        this.cartesBancaires = cartesBancaires;
     }
 }

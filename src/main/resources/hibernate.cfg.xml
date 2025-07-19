@@ -13,6 +13,7 @@
         <property name="hibernate.show_sql">true</property>
         <property name="hibernate.highlight_sql">true</property>
 
+        <mapping class="location.app.vehicule_location_app.models.CarteBancaire" />
         <mapping class="location.app.vehicule_location_app.models.Chauffeur" />
         <mapping class="location.app.vehicule_location_app.models.Client" />
         <mapping class="location.app.vehicule_location_app.models.Facture" />

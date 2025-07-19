@@ -2,7 +2,6 @@ package location.app.vehicule_location_app.runtime;
 
 import location.app.vehicule_location_app.controllers.Controller;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.jdbc.HibernateConnection;
 
 public class MainHbernate {
     public static void main(String[] args) {

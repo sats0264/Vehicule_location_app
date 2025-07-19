@@ -17,6 +17,9 @@ import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Reservation;
+import location.app.vehicule_location_app.models.Vehicule;
 import location.app.vehicule_location_app.observer.Subject;
 
 import javax.imageio.IIOException;
@@ -183,7 +186,7 @@ public class UIFenetreReservationController{
                 infos.getChildren().addAll(marqueLbl, modeleLbl, immatLbl, nbJoursLbl);
 
                 Region spacer = new Region();
-                HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                HBox.setHgrow(spacer, Priority.ALWAYS);
 
                 // Statut à droite
                 VBox statutBox = new VBox(10);

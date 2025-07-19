@@ -1,4 +1,4 @@
-//package location.app.vehicule_location_app.observer;
+package location.app.vehicule_location_app.observer;//package location.app.vehicule_location_app.observer;
 //
 //import location.app.vehicule_location_app.controllers.UIFenetreReservationController;
 //
