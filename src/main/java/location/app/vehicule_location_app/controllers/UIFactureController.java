@@ -151,6 +151,7 @@ public class UIFactureController {
 
         // The total amount comes from the Facture object
         totalMontantLabel.setText(String.format("%.2f XOF", facture.getMontant()));
+//        totalMontantLabel.setText(String.format("%.2f XOF", currentVehiculeSubtotal+ currentChauffeurFees + autresFrais));
         // Alternatively, if you want to recalculate the total here:
         // double totalRecalcule = currentVehiculeSubtotal + currentChauffeurFees + autresFrais;
         // totalMontantLabel.setText(String.format("%.2f XOF", totalRecalcule));
