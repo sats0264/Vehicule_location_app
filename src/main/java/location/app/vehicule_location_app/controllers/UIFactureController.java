@@ -54,7 +54,7 @@ public class UIFactureController {
     private Label totalMontantLabel;
 
     // Example daily fee for a chauffeur (in XOF)
-    private static final double CHAUFFEUR_DAILY_FEE = 5000.0;
+    private static final double CHAUFFEUR_DAILY_FEE = 7000.0;
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML

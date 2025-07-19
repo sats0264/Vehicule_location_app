@@ -77,7 +77,7 @@ public class UIFactureClientController {
     @FXML
     private Label totalMontantLabel;
 
-    private static final double CHAUFFEUR_DAILY_FEE = 5000.0; // Exemple de frais journaliers pour un chauffeur (en XOF)
+    private static final double CHAUFFEUR_DAILY_FEE = 7000.0;
 
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
     private Reservation reservation;
@@ -274,6 +274,7 @@ public class UIFactureClientController {
             payerButton.setDisable(true);
             reservation.setStatut(StatutReservation.APPROUVEE);
             var facture = new Facture(reservation);
+            facture.setMontant(montantTotal);
             ajouterObject(facture,Facture.class);
             updateObject(reservation, Reservation.class);
             int pointsActuels = reservation.getClient().getPointFidelite();

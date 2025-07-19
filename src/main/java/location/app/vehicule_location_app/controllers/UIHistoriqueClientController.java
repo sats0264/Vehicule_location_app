@@ -1,17 +1,24 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
+import location.app.vehicule_location_app.models.Chauffeur;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Facture;
 import location.app.vehicule_location_app.models.Reservation;
 
+import java.io.IOException;
 import java.net.URL;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -52,6 +59,7 @@ public class UIHistoriqueClientController {
                 private final Label chauffeurPrenomLabel = new Label();
                 private final Label chauffeurTelLabel = new Label();
                 private final Label statutLabel = new Label();
+                private final Button factureButton = new Button("Facture");
                 private final VBox centerBox = new VBox(5);
                 private final VBox chauffeurBox = new VBox(5);
                 private final HBox rootBox = new HBox(10);
@@ -92,9 +100,9 @@ public class UIHistoriqueClientController {
                     statutLabel.setMinWidth(150);
                     statutLabel.setAlignment(Pos.CENTER_RIGHT);
 
+                    factureButton.setStyle("-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;");
+
                     // ROOT CONTAINER
-//                    rootBox.getChildren().addAll(imageView, centerBox,imageViewChauffeur,chauffeurBox , statutLabel);
-                    rootBox.getChildren().addAll(imageView, centerBox, statutLabel);
                     rootBox.setPadding(new Insets(10));
                     rootBox.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; " +
                             "-fx-border-width: 1; -fx-border-radius: 8;");
@@ -120,14 +128,17 @@ public class UIHistoriqueClientController {
                         setGraphic(null);
                     } else {
                         // INFO
+
+                        long duree = ChronoUnit.DAYS.between(reservation.getDateDebut(),reservation.getDateFin()) +1;
+
                         dateDebutLabel.setText("Début : " + reservation.getDateDebut());
                         dateFinLabel.setText("Fin : " + reservation.getDateFin());
-                        dureeLabel.setText("Durée : " + ChronoUnit.DAYS.between(reservation.getDateDebut(),reservation.getDateFin()) + " jours");
+                        dureeLabel.setText("Durée : " + duree + " jours");
 
                         double prixTotal = reservation.getVehicules()
                                 .stream()
                                 .mapToDouble(v -> (Double) v.getTarif())
-                                .sum()* ChronoUnit.DAYS.between(reservation.getDateDebut(),reservation.getDateFin());
+                                .sum()* duree;
                         prixLabel.setText("Prix : " + prixTotal + " FCFA");
 
                         // STATUT & COULEUR
@@ -158,6 +169,55 @@ public class UIHistoriqueClientController {
                             System.err.println("Aucun véhicule associé à cette réservation.");
                         }
 
+                        // CHAUFFEURS
+                        List<Chauffeur> chauffeurs = reservation.getChauffeurs();
+                        if (chauffeurs != null && !chauffeurs.isEmpty()) {
+                            for (Chauffeur chauffeur : chauffeurs) {
+                                Label nom = new Label("Nom : " + chauffeur.getNom());
+                                nom.setStyle("-fx-font-weight: bold;");
+                                Label tel = new Label("Tél : " + chauffeur.getTelephone());
+                                tel.setStyle("-fx-text-fill: gray;");
+
+                                VBox infoChauffeurBox = new VBox(5, nom, tel);
+
+                                ImageView img = new ImageView();
+                                img.setFitWidth(100);
+                                img.setFitHeight(70);
+                                if (chauffeur.getPhoto() != null) {
+                                    URL chauffeurPhoto = getClass().getResource(chauffeur.getPhoto());
+                                    if (chauffeurPhoto != null) {
+                                        img.setImage(new Image(chauffeurPhoto.toExternalForm()));
+                                    } else {
+                                        System.err.println("Image chauffeur non trouvée : " + chauffeur.getPhoto());
+                                    }
+                                }
+
+                                HBox chauffeurItemBox = new HBox(10, img, infoChauffeurBox);
+                                chauffeurBox.getChildren().add(chauffeurItemBox);
+                            }
+                        }
+
+                        // Composition finale
+                        rootBox.getChildren().clear();
+                        rootBox.getChildren().addAll(imageView, centerBox);
+
+                        if (!chauffeurBox.getChildren().isEmpty()) {
+                            rootBox.getChildren().add(chauffeurBox);
+                        }
+
+                        if ("APPROUVEE".equals(statut)) {
+                            rootBox.getChildren().addAll(statutLabel, factureButton);
+                            factureButton.setOnAction(e -> {
+                                try {
+                                    handleVoirFacture(reservation.getFacture());
+                                } catch (IOException ex) {
+                                    ex.printStackTrace();
+                                }
+                            });
+                        } else {
+                            rootBox.getChildren().add(statutLabel);
+                        }
+
                         setGraphic(rootBox);
                     }
                 }
@@ -168,6 +228,19 @@ public class UIHistoriqueClientController {
     @FXML
     private void handleBack() {
         mainFenetreController.loadView("/views/UIClient.fxml");
+    }
+
+    private void handleVoirFacture(Facture facture) throws IOException {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIFacture.fxml"));
+        Parent view = loader.load();
+        UIFactureController factureController = loader.getController();
+
+        factureController.setFacture(facture);
+
+        Stage stage = new Stage();
+        stage.setTitle("Facture Client");
+        stage.setScene(new Scene(view));
+        stage.show();
     }
 
     private void handleReservationClick(Reservation selectedReservation) {

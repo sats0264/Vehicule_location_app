@@ -335,7 +335,7 @@ public class UIDashboardClientController {
 
                 // Récupération des prix
                 double prixSansChauffeur = v.getTarif();
-                double prixAvecChauffeur = v.getTarif() * 1.2;
+                double prixAvecChauffeur = v.getTarif() + 7000;
 
                 String statut = (v.getStatut() != null) ? v.getStatut().name() : "INCONNU";
                 String photoName = null;
