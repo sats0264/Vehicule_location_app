@@ -1,13 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<AnchorPane prefHeight="536.0" prefWidth="989.0" style="-fx-background-color: #f8f8f8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIInspectReservationController">
+<AnchorPane prefHeight="600.0" prefWidth="1000.0" style="-fx-background-color: #f8f8f8;" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIInspectReservationController">
     <children>
+        <Label layoutX="309.0" layoutY="15.0" text="Inspection de la Réservation" textFill="#424242">
+            <font>
+                <Font name="System Bold" size="26.0" />
+            </font>
+        </Label>
+
         <!-- Informations client & Informations voiture sections -->
-        <HBox layoutX="20.0" layoutY="34.0" prefHeight="215.0" prefWidth="949.0" spacing="40.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="34.0">
+        <HBox layoutX="20.0" layoutY="65.0" prefHeight="230.0" prefWidth="960.0" spacing="40.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="65.0">
             <!-- Informations client -->
             <VBox prefHeight="250.0" prefWidth="464.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
                 <children>
@@ -34,8 +41,8 @@
                         <Label fx:id="clientEmailField" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
-                        <Label prefWidth="80.0" text="Fidelite :" />
-                        <Label fx:id="clientAddressField" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                        <Label prefWidth="80.0" text="Fidélité :" />
+                        <Label fx:id="clientFideliteField" prefWidth="200.0" HBox.hgrow="ALWAYS" /> <!-- Renommé pour plus de clarté -->
                     </HBox>
                 </children>
             </VBox>
@@ -43,7 +50,7 @@
             <!-- Informations voiture -->
             <VBox prefWidth="482.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
                 <children>
-                    <Label text="Informations voiture" textFill="#424242">
+                    <Label text="Informations véhicule" textFill="#424242">
                         <font>
                             <Font name="System Bold" size="16.0" />
                         </font>
@@ -51,7 +58,6 @@
                     <Separator />
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Immatriculation :" />
-<!--                        <Label fx:id="voitureImmatriculationField" prefWidth="200.0" HBox.hgrow="ALWAYS" />-->
                         <ComboBox fx:id="voitureImmatriculationField" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
@@ -74,10 +80,10 @@
             </VBox>
         </HBox>
 
-        <!-- Informations chauffeur & Information duree section -->
-        <HBox layoutX="20.0" layoutY="266.0" prefHeight="177.0" prefWidth="949.0" spacing="40.0">
+        <!-- Informations chauffeur & Information durée section -->
+        <HBox layoutX="20.0" layoutY="310.0" prefHeight="230.0" prefWidth="960.0" spacing="40.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="310.0">
             <!-- Iformation chauffeur section     -->
-            <VBox layoutX="20.0" layoutY="298.0" prefHeight="177.0" prefWidth="495.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" AnchorPane.leftAnchor="20.0" AnchorPane.topAnchor="298.0">
+            <VBox prefHeight="177.0" prefWidth="495.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
                 <children>
                     <Label text="Informations chauffeur" textFill="#424242">
                         <font>
@@ -104,9 +110,9 @@
                 </children>
             </VBox>
             <!-- Informations duree section -->
-            <VBox layoutX="524.0" layoutY="298.0" prefHeight="177.0" prefWidth="513.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" AnchorPane.rightAnchor="20.0" AnchorPane.topAnchor="298.0">
+            <VBox prefHeight="177.0" prefWidth="513.0" spacing="10.0" style="-fx-background-color: white; -fx-background-radius: 8; -fx-padding: 15; -fx-border-color: #e0e0e0; -fx-border-width: 1;" HBox.hgrow="ALWAYS">
                 <children>
-                    <Label text="Informations durée" textFill="#424242">
+                    <Label text="Informations durée &amp; montant" textFill="#424242">
                         <font>
                             <Font name="System Bold" size="16.0" />
                         </font>
@@ -122,39 +128,52 @@
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Durée :" />
-                        <Label fx:id="durationField" prefWidth="200.0" text="37 jour(s)" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="durationField" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Montant :" />
-                        <Label fx:id="amountField" prefWidth="200.0" text="11100 DH" HBox.hgrow="ALWAYS" />
+                        <Label fx:id="amountField" prefWidth="200.0" HBox.hgrow="ALWAYS" />
                     </HBox>
                 </children>
             </VBox>
         </HBox>
-        <HBox alignment="CENTER" layoutX="149.0" layoutY="478.0" spacing="10.0" AnchorPane.leftAnchor="149.0" AnchorPane.rightAnchor="151.0">
-              <Button fx:id="approuverButton" onAction="#handleApprouver" style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver">
-                  <font>
-                      <Font size="14.0" />
-                  </font>
-              </Button>
-                <Region prefHeight="0.0" prefWidth="50.0" />
-              <Button fx:id="rejeterButton" onAction="#handleRejeter" style="-fx-background-color: #e91e63; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter">
-                  <font>
-                      <Font size="14.0" />
-                  </font>
-              </Button>
-                <Region prefHeight="0.0" prefWidth="50.0" />
-              <Button fx:id="fermerButton" onAction="#handleFermer" style="-fx-background-color: #9e9e9e; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Annuler">
-                  <font>
-                      <Font size="14.0" />
-                  </font>
-              </Button>
-
-          </HBox>
-      <Label layoutX="309.0" layoutY="-5.0" text="Informations de la reservation" textFill="#424242">
-         <font>
-            <Font name="System Bold" size="26.0" />
-         </font>
-      </Label>
+        <HBox alignment="CENTER" layoutX="20.0" layoutY="550.0" prefHeight="40.0" prefWidth="960.0" spacing="20.0" AnchorPane.leftAnchor="20.0" AnchorPane.rightAnchor="20.0">
+            <Button fx:id="approuverButton" onAction="#handleApprouver" style="-fx-background-color: #28a745; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="rejeterButton" onAction="#handleRejeter" style="-fx-background-color: #e53935; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <!-- Nouveaux boutons pour les demandes de modification/annulation -->
+            <Button fx:id="approuverModificationBtn" onAction="#handleApprouverModification" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Modif." visible="false" managed="false">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="rejeterModificationBtn" onAction="#handleRejeterModification" style="-fx-background-color: #ff5722; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Modif." visible="false" managed="false">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="approuverAnnulationBtn" onAction="#handleApprouverAnnulation" style="-fx-background-color: #673ab7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Annul." visible="false" managed="false">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="rejeterAnnulationBtn" onAction="#handleRejeterAnnulation" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Annul." visible="false" managed="false">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+            <Button fx:id="fermerButton" onAction="#handleFermer" style="-fx-background-color: #9e9e9e; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Fermer">
+                <font>
+                    <Font size="14.0" />
+                </font>
+            </Button>
+        </HBox>
     </children>
 </AnchorPane>
