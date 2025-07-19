@@ -180,6 +180,24 @@ public class UIInspectReservationController extends Controller{
             try {
                 updateObject(reservation, Reservation.class);
 
+                Subject.getInstance().notifyAllObservers();
+
+                Notification notification = new Notification(
+                        "Réservation Approuvée",
+                        "La reservation de " + reservation.getClient().getPrenom() + " " + reservation.getClient().getNom() + " a été approuvée.",
+                        NotificationType.RESERVATION_CONFIRMATION,
+                        reservation.getClient().getId()
+                );
+                NotificationService.getInstance().addNotification(notification);
+
+                Notification notificationToClient = new Notification(
+                        "Réservation Approuvée",
+                        "Votre réservation du " + reservation.getDateDebut() + " au " + reservation.getDateFin() + " a été approuvée."+
+                        "\nVeuillez procéder au paiement pour finaliser la réservation.",
+                        NotificationType.RESERVATION_CONFIRMATION,
+                        reservation.getClient().getId()
+                );
+                NotificationService.getInstance().addNotificationForClient(notificationToClient, reservation.getClient());
                 Stage stage = (Stage) approuverButton.getScene().getWindow();
                 stage.close();
             } catch (DAOException e) {
@@ -205,6 +223,24 @@ public class UIInspectReservationController extends Controller{
             }
             try {
                 updateObject(reservation, Reservation.class);
+
+                Subject.getInstance().notifyAllObservers();
+
+                //Envoyer une notification au client
+                Notification notification = new Notification(
+                        "Réservation Rejetée",
+                        "La reservation de " + reservation.getClient().getPrenom() + " " + reservation.getClient().getNom() + " a été rejetée.",
+                        NotificationType.RESERVATION_REFUSED,
+                        reservation.getClient().getId()
+                );
+                NotificationService.getInstance().addNotification(notification);
+                Notification notificationToClient = new Notification(
+                        "Réservation Rejetée",
+                        "Votre réservation du " + reservation.getDateDebut() + " au " + reservation.getDateFin() + " a été rejetée.",
+                        NotificationType.RESERVATION_REFUSED,
+                        reservation.getClient().getId()
+                );
+                NotificationService.getInstance().addNotificationForClient(notificationToClient, reservation.getClient());
                 Stage stage = (Stage) rejeterButton.getScene().getWindow();
                 stage.close();
             } catch (DAOException e) {

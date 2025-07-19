@@ -9,11 +9,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.control.Alert;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
+import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.Reservation;
-import location.app.vehicule_location_app.models.StatutReservation;
-import location.app.vehicule_location_app.models.Vehicule;
-import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.*;
 import org.hibernate.Transaction;
 
 import java.io.InputStream;
@@ -247,6 +245,23 @@ public class UIClientReservationController {
             transaction.commit();
 
             reservationId = reservation.getId();
+
+            // Envoi de la notification aux utilisateurs
+            Notification notificationToUser = new Notification(
+                    "Nouvelle Demande de réservation",
+                    "Le client " + attachedClient.getNom() + " " + attachedClient.getPrenom() +
+                            " a fait une demande",
+                    NotificationType.NEW_RESERVATION,
+                    reservationId
+            );
+            Notification notificationToClient = new Notification(
+                    "Demande de réservation enregistrée",
+                    "Votre demande de réservation a été enregistrée avec succès.",
+                    NotificationType.CLIENT_NEW_RESERVATION,
+                    reservationId
+            );
+            NotificationService.getInstance().addNotification(notificationToUser);
+            NotificationService.getInstance().addNotificationForClient(notificationToClient, client);
 
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Réservation confirmée");

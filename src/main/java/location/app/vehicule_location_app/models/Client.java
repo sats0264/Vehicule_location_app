@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "T_Client")
 public class Client {
@@ -23,6 +24,9 @@ public class Client {
 
     @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Reservation> reservations = new ArrayList<>();
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<NotificationReception> notifications = new ArrayList<>();
 
     public Client() {}
     public Client(int id) {
@@ -53,6 +57,23 @@ public class Client {
     public void addReservation(Reservation reservation) {
         reservations.add(reservation);
         reservation.setClient(this);
+    }
+
+    public void addNotification(NotificationReception notification) {
+        notifications.add(notification);
+        notification.setClient(this);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Client client = (Client) o;
+        return id == client.id;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public int getId() {
@@ -125,5 +146,13 @@ public class Client {
 
     public void setReservations(List<Reservation> reservations) {
         this.reservations = reservations;
+    }
+
+    public List<NotificationReception> getNotifications() {
+        return notifications;
+    }
+
+    public void setNotifications(List<NotificationReception> notifications) {
+        this.notifications = notifications;
     }
 }

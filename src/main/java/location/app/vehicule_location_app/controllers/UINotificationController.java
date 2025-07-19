@@ -12,29 +12,34 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.Utilisateur;
-import location.app.vehicule_location_app.observer.NotificationObserver;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class UINotificationController extends NotificationObserver implements Initializable {
+public class UINotificationController extends Observer implements Initializable {
 
     @FXML
     private ListView<Notification> notificationListView;
 
     private NotificationService notificationService;
     private MainFenetreController mainFenetreController;
-    private UIClientController uiClientController;
-    private UIReservationController uiReservationController;
 
-    private Utilisateur currentUser; // L'utilisateur actuellement connecté
+    private Object controller;
+
+    private Utilisateur currentUser;
+    private Client currentClient;
+    private UIFenetreClientController uiFenetreClientController;
 
     // Constructeur: s'attache au service de notification dès la création de l'instance
     public UINotificationController() {
-        super(NotificationService.getInstance());
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
     }
 
     /**
@@ -43,6 +48,9 @@ public class UINotificationController extends NotificationObserver implements In
      */
     public void setMainFenetreController(MainFenetreController mainFenetreController) {
         this.mainFenetreController = mainFenetreController;
+    }
+    public void setUIFenetreClientController(UIFenetreClientController uiClientController) {
+        this.uiFenetreClientController = uiClientController;
     }
 
     /**
@@ -54,18 +62,26 @@ public class UINotificationController extends NotificationObserver implements In
         NotificationService.getInstance().setUtilisateur(currentUser);
         chargerNotifications();
     }
+    public void setCurrentClient(Client currentClient) {
+        this.currentClient = currentClient;
+        NotificationService.getInstance().setClient(currentClient);
+        chargerNotificationsClient();
+    }
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         // Initialisation du service de notification
         notificationService = NotificationService.getInstance();
 
-        // Plus besoin de `new NotificationObserver(notificationService);`
-        // Ni de `this.subject = notificationService; subject.attach(this);` car le constructeur de la super-classe le fait déjà.
+        if (currentUser != null) {
+            chargerNotifications();
+        }else if (currentClient != null) {
+            chargerNotificationsClient();
+        } else {
+            System.err.println("Aucun utilisateur ou client n'est défini pour charger les notifications.");
+        }
 
-        // Chargement initial des notifications (elles seront vides si currentUser n'est pas encore défini)
-        // Les notifications seront rechargées correctement une fois setCurrentUser() appelé.
-        chargerNotifications();
+
     }
 
     /**
@@ -82,6 +98,23 @@ public class UINotificationController extends NotificationObserver implements In
             notificationListView.getItems().clear();
         }
 
+        chargerListView();
+    }
+
+    private void chargerNotificationsClient() {
+        if (notificationService != null && currentClient != null) {
+            System.out.println("Chargement des notifications pour le client: " + currentClient.getNom());
+            ObservableList<Notification> notifications = notificationService.getNotifications();
+            notificationListView.setItems(notifications);
+        } else {
+            System.err.println("Impossible de charger les notifications : NotificationService ou currentClient non initialisé.");
+            notificationListView.getItems().clear();
+        }
+
+        chargerListView();
+    }
+
+    private void chargerListView() {
         notificationListView.setCellFactory(lv -> new ListCell<Notification>() {
             private final Label titleLabel = new Label();
             private final Label messageLabel = new Label();
@@ -120,26 +153,55 @@ public class UINotificationController extends NotificationObserver implements In
                     messageLabel.setText(notification.getMessage());
                     timestampLabel.setText(notification.getTimestamp());
 
-                    boolean isReadForCurrentUser = currentUser != null &&
-                            notification.getReceptions().stream()
-                                    .anyMatch(r -> r.getUtilisateur() != null &&
-                                            r.getUtilisateur().equals(currentUser) &&
-                                            r.isRead());
+                    if (currentUser != null) {
+                        boolean isReadForCurrentUser = notification.getReceptions().stream()
+                                        .anyMatch(r -> r.getUtilisateur() != null &&
+                                                r.getUtilisateur().equals(currentUser) &&
+                                                r.isRead());
 
-                    if (isReadForCurrentUser) {
-                        // style GRIS clair (déjà lu)
-                        rootBox.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
-                        titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px; -fx-text-fill: #888888;");
-                        messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
-                        rootBox.setOnMouseClicked(null);
+                        if (isReadForCurrentUser) {
+                            // style GRIS clair (déjà lu)
+                            rootBox.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
+                            titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px; -fx-text-fill: #888888;");
+                            messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
+                            rootBox.setOnMouseClicked(null);
+                        } else {
+                            // style BLEU (non lu)
+                            rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2196f3; -fx-border-width: 2; -fx-border-radius: 5;");
+                            titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
+                            messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
+                        }
+
+                        setGraphic(rootBox);
+                    } else if (currentClient != null) {
+                        // Si currentClient est défini, on peut aussi vérifier les notifications pour le client
+                        boolean isReadForCurrentClient = notification.getReceptions().stream()
+                                .anyMatch(r -> r.getClient() != null &&
+                                        r.getClient().equals(currentClient) &&
+                                        r.isRead());
+
+                        if (isReadForCurrentClient) {
+                            // style GRIS clair (déjà lu)
+                            rootBox.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
+                            titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px; -fx-text-fill: #888888;");
+                            messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
+                            rootBox.setOnMouseClicked(null);
+                        } else {
+                            // style BLEU (non lu)
+                            rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2196f3; -fx-border-width: 2; -fx-border-radius: 5;");
+                            titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
+                            messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
+                        }
+
+                        setGraphic(rootBox);
                     } else {
-                        // style BLEU (non lu)
-                        rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2196f3; -fx-border-width: 2; -fx-border-radius: 5;");
-                        titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
-                        messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
-                    }
+                        // Si aucun utilisateur ou client n'est défini, on affiche un style neutre
+                        rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
+                        titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px;");
+                        messageLabel.setStyle("-fx-font-size: 12px;");
+                        setGraphic(rootBox);
 
-                    setGraphic(rootBox);
+                    }
                 }
             }
         });
@@ -157,11 +219,34 @@ public class UINotificationController extends NotificationObserver implements In
         System.out.println("Notification clicked: " + notification.getTitle()
                 + " (Type: " + notification.getType() + ", ID: " + notification.getEntityId() + ")");
 
+        // Gérer les notifications côté client
+        if (uiFenetreClientController != null) {
+            switch (notification.getType()) {
+                case CLIENT_NEW_RESERVATION:
+                case CLIENT_RESERVATION_MODIFICATION_REQUEST:
+                case CLIENT_RESERVATION_CANCELLATION:
+                case CLIENT_RESERVATION_CONFIRMATION:
+                    controller = uiFenetreClientController.loadView("/views/UIFenetreReservation.fxml");
+                    showAlert(Alert.AlertType.INFORMATION, "Réservation",
+                            "Naviguer vers la réservation ID " + notification.getEntityId());
+                    break;
+                case CLIENT_PAYMENT_SUCCESS:
+                    // TODO: Naviguer vers facture ou confirmation de paiement si nécessaire
+                    break;
+                default:
+                    showAlert(Alert.AlertType.INFORMATION, "Notification",
+                            "Type de notification client non géré : " + notification.getType());
+                    break;
+            }
+            return;
+        }
+
+        // Gérer les notifications côté admin
         if (mainFenetreController != null) {
             switch (notification.getType()) {
                 case NEW_CLIENT_REGISTRATION:
-                    mainFenetreController.loadView("/views/UIClient.fxml");
-                    if (uiClientController != null) {
+                    controller = mainFenetreController.loadView("/views/UIClient.fxml");
+                    if (controller instanceof UIClientController uiClientController) {
                         uiClientController.selectClientById(notification.getEntityId());
                     }
                     showAlert(Alert.AlertType.INFORMATION, "Nouveau Client",
@@ -170,22 +255,29 @@ public class UINotificationController extends NotificationObserver implements In
 
                 case NEW_RESERVATION:
                 case RESERVATION_MODIFICATION_REQUEST:
-                    mainFenetreController.loadView("/views/UIReservation.fxml");
-                    if (uiReservationController != null) {
+                case RESERVATION_CANCELLATION:
+                case RESERVATION_CONFIRMATION:
+                case RESERVATION_REFUSED:
+                    controller = mainFenetreController.loadView("/views/UIReservation.fxml");
+                    if (controller instanceof UIReservationController uiReservationController) {
                         uiReservationController.selectReservationById(notification.getEntityId());
                     }
                     showAlert(Alert.AlertType.INFORMATION, "Réservation",
                             "Naviguer vers la réservation ID " + notification.getEntityId());
                     break;
 
+                case PAYMENT_RECEIVED:
+                    controller = mainFenetreController.loadView("/views/UIFactureFinal.fxml");
+                    break;
+
                 default:
                     showAlert(Alert.AlertType.INFORMATION, "Notification",
-                            "Type de notification non géré : " + notification.getType());
+                            "Type de notification admin non géré : " + notification.getType());
                     break;
             }
         } else {
             showAlert(Alert.AlertType.ERROR, "Erreur de Navigation",
-                    "Le contrôleur principal n'est pas défini.");
+                    "Le contrôleur principal ou client n'est pas défini.");
         }
     }
 
@@ -198,9 +290,6 @@ public class UINotificationController extends NotificationObserver implements In
 
     @FXML
     private void handleClearAllNotifications() {
-        // Attention: notificationService.getNotifications().clear() ne supprime pas de la base de données.
-        // Cela efface seulement la liste ObservableList en mémoire du service.
-        // Si vous voulez supprimer de la DB, il faut une méthode dans NotificationService.
         notificationService.getNotifications().clear();
         showAlert(Alert.AlertType.INFORMATION, "Notifications", "Toutes les notifications ont été effacées de l'affichage.");
     }
@@ -215,20 +304,24 @@ public class UINotificationController extends NotificationObserver implements In
 
     @Override
     public void update() {
-        // Cette méthode est appelée par NotificationService quand il notifie ses observateurs.
-        // Elle doit rafraîchir la liste affichée.
         System.out.println("UINotificationController: Mise à jour reçue du NotificationService.");
-        // Assurez-vous que cette mise à jour se fait sur le thread d'application JavaFX
+
         javafx.application.Platform.runLater(() -> {
             if (notificationService != null) {
-                // Recharger les notifications pour l'utilisateur actuel
-                chargerNotifications();
-                // Si la ListView est déjà liée à l'ObservableList du service, `refresh()` est parfois nécessaire
-                // en plus de `setItems()` si la même liste est mise à jour mais les objets internes changent.
+                if (currentUser != null) {
+                    chargerNotifications();
+                } else if (currentClient != null) {
+                    chargerNotificationsClient();
+                } else {
+                    System.err.println("Aucun utilisateur ou client connecté lors de la mise à jour.");
+                    notificationListView.getItems().clear();
+                }
+
                 notificationListView.refresh();
             } else {
                 System.err.println("UINotificationController: NotificationService est null lors de la mise à jour.");
             }
         });
     }
+
 }

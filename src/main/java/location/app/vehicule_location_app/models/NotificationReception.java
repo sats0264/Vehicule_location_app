@@ -16,6 +16,9 @@ public class NotificationReception {
     @ManyToOne
     private Utilisateur utilisateur;
 
+    @ManyToOne
+    private Client client;
+
     private boolean isRead = false;
 
     public NotificationReception(Notification notification, Utilisateur user) {
@@ -25,6 +28,11 @@ public class NotificationReception {
 
     public NotificationReception() {
 
+    }
+
+    public NotificationReception(Notification notification, Client client) {
+        this.notification = notification;
+        this.client = client;
     }
 
     //getters and setters
@@ -53,4 +61,11 @@ public class NotificationReception {
         isRead = read;
     }
 
+    public Client getClient() {
+        return client;
+    }
+
+    public void setClient(Client clients) {
+        this.client = clients;
+    }
 }

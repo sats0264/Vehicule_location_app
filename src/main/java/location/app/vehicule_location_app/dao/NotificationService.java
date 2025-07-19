@@ -4,10 +4,10 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import location.app.vehicule_location_app.controllers.Controller; // Make sure this import is correct
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.factory.ConcreteFactory;
 import location.app.vehicule_location_app.factory.HibernateFactory;
+import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.models.NotificationReception;
 import location.app.vehicule_location_app.models.Utilisateur;
@@ -16,15 +16,19 @@ import location.app.vehicule_location_app.observer.Subject;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static location.app.vehicule_location_app.controllers.Controller.ajouterObject;
+
 public class NotificationService extends Subject {
 
     private static NotificationService instance;
     private Utilisateur utilisateurActif;
+    private Client clientActif;
     private final ObservableList<NotificationReception> receptions;
     private final IntegerProperty unreadCount;
 
 
     private NotificationService() {
+        super();
         receptions = FXCollections.observableArrayList();
         unreadCount = new SimpleIntegerProperty(0);
 
@@ -53,6 +57,28 @@ public class NotificationService extends Subject {
         this.utilisateurActif = utilisateur;
         chargerNotificationsUtilisateur();
     }
+    public void setClient(Client client) {
+        this.clientActif = client;
+        chargerNotificationsClient();
+    }
+
+    private void chargerNotificationsClient() {
+        if (clientActif == null) return;
+
+        try {
+            var receptionDao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getNotificationReceptionDaoImpl();
+
+            List<NotificationReception> list = receptionDao.findByClient(clientActif);
+            receptions.setAll(list);
+            updateUnreadCount();
+            notifyAllObservers();
+
+        } catch (DAOException e) {
+            throw new RuntimeException("Erreur lors du chargement des notifications client", e);
+        }
+    }
 
     private void chargerNotificationsUtilisateur() {
         if (utilisateurActif == null) return;
@@ -72,6 +98,24 @@ public class NotificationService extends Subject {
         }
     }
 
+    private void chargerNotificationsClientClient() {
+        if (clientActif == null) return;
+
+        try {
+            var receptionDao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getNotificationReceptionDaoImpl();
+
+            List<NotificationReception> list = receptionDao.findByClient(clientActif);
+            receptions.setAll(list);
+            updateUnreadCount();
+            notifyAllObservers();
+
+        } catch (DAOException e) {
+            throw new RuntimeException("Erreur lors du chargement des notifications client", e);
+        }
+    }
+
     public ObservableList<Notification> getNotifications() {
         return receptions.stream()
                 .map(reception -> {
@@ -84,49 +128,105 @@ public class NotificationService extends Subject {
 
 
     public void markAsRead(Notification notification) {
-        if (utilisateurActif == null) return;
+        if (utilisateurActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getHibernateObjectDaoImpl(NotificationReception.class);
 
-        try {
-            var receptionDao = ConcreteFactory
-                    .getFactory(HibernateFactory.class)
-                    .getNotificationReceptionDaoImpl();
+                // Find the reception for the active user and the given notification
+                NotificationReception reception = receptions.stream()
+                        .filter(r -> r.getNotification().equals(notification) && r.getUtilisateur().equals(utilisateurActif))
+                        .findFirst()
+                        .orElse(null);
 
-            NotificationReception reception = receptionDao.findByNotificationAndUser(notification, utilisateurActif);
-            if (reception != null && !reception.isRead()) {
-                reception.setRead(true);
-                receptionDao.update(reception);
-                chargerNotificationsUtilisateur();
+                if (reception != null && !reception.isRead()) {
+                    reception.setRead(true);
+                    receptionDao.update(reception);
+                    updateUnreadCount();
+                    notifyAllObservers();
+                }
+
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du marquage comme lu", e);
             }
+        }
+        else if (clientActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getNotificationReceptionDaoImpl();
 
-        } catch (DAOException e) {
-            throw new RuntimeException("Erreur lors du marquage comme lu", e);
+                // Find the reception for the active client and the given notification
+                NotificationReception reception = receptions.stream()
+                        .filter(r -> r.getNotification().equals(notification) && r.getClient().equals(clientActif))
+                        .findFirst()
+                        .orElse(null);
+
+                if (reception != null && !reception.isRead()) {
+                    reception.setRead(true);
+                    receptionDao.update(reception);
+                    updateUnreadCount();
+                    notifyAllObservers();
+                }
+
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du marquage comme lu", e);
+            }
+        }
+        else {
+            throw new IllegalStateException("Aucun utilisateur ou client actif pour marquer la notification comme lue");
         }
     }
 
     public void markAllAsRead() {
-        if (utilisateurActif == null) return;
+        if (utilisateurActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getNotificationReceptionDaoImpl();
 
-        try {
-            var receptionDao = ConcreteFactory
-                    .getFactory(HibernateFactory.class)
-                    .getHibernateObjectDaoImpl(NotificationReception.class);
-
-            for (NotificationReception reception : receptions) {
-                if (!reception.isRead()) {
-                    reception.setRead(true);
-                    receptionDao.update(reception);
+                // Mark all receptions for the active user as read
+                for (NotificationReception reception : receptions) {
+                    if (reception.getUtilisateur().equals(utilisateurActif) && !reception.isRead()) {
+                        reception.setRead(true);
+                        receptionDao.update(reception);
+                    }
                 }
-            }
-            chargerNotificationsUtilisateur();
+                updateUnreadCount();
+                notifyAllObservers();
 
-        } catch (DAOException e) {
-            throw new RuntimeException("Erreur lors du marquage global comme lu", e);
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du marquage de toutes les notifications comme lues", e);
+            }
+        }else if (clientActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getNotificationReceptionDaoImpl();
+
+                // Mark all receptions for the active client as read
+                for (NotificationReception reception : receptions) {
+                    if (reception.getClient().equals(clientActif) && !reception.isRead()) {
+                        reception.setRead(true);
+                        receptionDao.update(reception);
+                    }
+                }
+                updateUnreadCount();
+                notifyAllObservers();
+
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du marquage de toutes les notifications comme lues", e);
+            }
+        }
+        else {
+            throw new IllegalStateException("Aucun utilisateur actif ou client actif pour marquer les notifications comme lues");
         }
     }
 
     public void addNotification(Notification notification) {
         try {
-            Controller.ajouterObject(notification, Notification.class);
+            ajouterObject(notification, Notification.class);
 
             var userDao = ConcreteFactory
                     .getFactory(HibernateFactory.class)
@@ -139,23 +239,10 @@ public class NotificationService extends Subject {
             List<Utilisateur> users = userDao.list();
 
             for (Utilisateur user : users) {
-                // Create NotificationReception, referencing the already persisted Notification
                 NotificationReception reception = new NotificationReception(notification, user);
-
-                // 2. Explicitly persist each NotificationReception.
-                //    (Consider configuring CascadeType.ALL on Notification's 'receptions' collection
-                //    in your entity mappings if you want this to be handled automatically when Notification is persisted.)
                 receptionDao.create(reception);
-
-                // These lines are for managing in-memory collections;
-                // they are not strictly necessary for persistence if you explicitly save reception.
-                // If you use CascadeType.ALL, these would trigger persistence.
-                // notification.addReception(reception);
-                // user.addNotification(reception);
             }
 
-            // 3. After all database operations for this notification are complete,
-            //    refresh the active user's view and notify observers.
             if (utilisateurActif != null) {
                 chargerNotificationsUtilisateur();
             }
@@ -163,6 +250,26 @@ public class NotificationService extends Subject {
 
         } catch (DAOException e) {
             throw new RuntimeException("Erreur lors de la création de la notification", e);
+        }
+    }
+    public void addNotificationForClient(Notification notification, Client client) {
+        try {
+            ajouterObject(notification, Notification.class);
+
+            var receptionDao = ConcreteFactory
+                    .getFactory(HibernateFactory.class)
+                    .getNotificationReceptionDaoImpl();
+
+            NotificationReception reception = new NotificationReception(notification, client);
+            receptionDao.create(reception);
+
+            if (clientActif != null && clientActif.equals(client)) {
+                chargerNotificationsClient();
+            }
+            notifyAllObservers();
+
+        } catch (DAOException e) {
+            throw new RuntimeException("Erreur lors de la création de la notification pour le client", e);
         }
     }
 
@@ -194,6 +301,23 @@ public class NotificationService extends Subject {
             } catch (DAOException e) {
                 throw new RuntimeException("Erreur lors du rechargement", e);
             }
+        }else if (clientActif != null) {
+            try {
+                var receptionDao = ConcreteFactory
+                        .getFactory(HibernateFactory.class)
+                        .getNotificationReceptionDaoImpl();
+
+                List<NotificationReception> list = receptionDao.findByClient(clientActif);
+
+                receptions.setAll(list); // met à jour la vraie source observable
+                updateUnreadCount();     // met à jour le compteur
+                notifyAllObservers();    // notifie les interfaces
+            } catch (DAOException e) {
+                throw new RuntimeException("Erreur lors du rechargement", e);
+            }
+        }
+        else {
+            throw new IllegalStateException("Aucun utilisateur ou client actif pour recharger les notifications");
         }
     }
 

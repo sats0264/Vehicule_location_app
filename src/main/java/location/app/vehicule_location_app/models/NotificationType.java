@@ -1,10 +1,20 @@
 package location.app.vehicule_location_app.models;
 
 public enum NotificationType {
+
+        // CLient Notifications
+        CLIENT_NEW_RESERVATION,
+        CLIENT_RESERVATION_MODIFICATION_REQUEST,
+        CLIENT_RESERVATION_CANCELLATION,
+        CLIENT_PAYMENT_SUCCESS,
+        CLIENT_RESERVATION_CONFIRMATION,
+
+        // User Notifications
         NEW_CLIENT_REGISTRATION,
         NEW_RESERVATION,
         RESERVATION_MODIFICATION_REQUEST,
         RESERVATION_CANCELLATION,
         RESERVATION_CONFIRMATION,
+        RESERVATION_REFUSED,
         PAYMENT_RECEIVED
     }
