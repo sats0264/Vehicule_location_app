@@ -11,9 +11,8 @@ import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
-
-import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.dao.NotificationService;
+import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.models.Utilisateur;
 import location.app.vehicule_location_app.observer.NotificationObserver;
 

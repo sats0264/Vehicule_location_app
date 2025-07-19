@@ -7,15 +7,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.Reservation; // Import your Reservation model
-import location.app.vehicule_location_app.models.Client;     // Assuming you have a Client model
-import location.app.vehicule_location_app.models.Vehicule;   // Assuming you have a Vehicule model
-// Assuming you have a Statut enum
+import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Reservation;
+import location.app.vehicule_location_app.models.Vehicule;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;

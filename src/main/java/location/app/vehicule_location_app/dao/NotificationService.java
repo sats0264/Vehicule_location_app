@@ -4,7 +4,7 @@ import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import location.app.vehicule_location_app.controllers.Controller; // Make sure this import is correct
+import location.app.vehicule_location_app.controllers.Controller;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.factory.ConcreteFactory;
 import location.app.vehicule_location_app.factory.HibernateFactory;

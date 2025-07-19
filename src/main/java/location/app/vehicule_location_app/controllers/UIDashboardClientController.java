@@ -1,29 +1,22 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import javafx.scene.control.ComboBox;
-import javafx.scene.control.RadioButton;
-import javafx.scene.control.ToggleGroup;
-import javafx.scene.control.Button;
+import javafx.scene.control.*;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.image.ImageView;
-import javafx.scene.control.Label;
-import javafx.geometry.Pos;
-import javafx.scene.image.Image;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Vehicule;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.*;
 
@@ -229,8 +222,8 @@ public class UIDashboardClientController {
     private Vehicule findVehiculeByInfos(String marque, String modele, String immatriculation, String imageUrl) {
         try {
             // Utilise le DAO pour récupérer le véhicule existant
-            location.app.vehicule_location_app.dao.HibernateObjectDaoImpl<Vehicule> vehiculeDao =
-                new location.app.vehicule_location_app.dao.HibernateObjectDaoImpl<>(Vehicule.class);
+            HibernateObjectDaoImpl<Vehicule> vehiculeDao =
+                new HibernateObjectDaoImpl<>(Vehicule.class);
 
             // Ici, on suppose que l'immatriculation est unique
             List<Vehicule> vehicules = vehiculeDao.readAll();

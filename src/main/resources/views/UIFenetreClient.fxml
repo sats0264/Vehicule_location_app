@@ -51,6 +51,7 @@
             <Button fx:id="dashboardButton" onAction="#handleDashboardClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="TABLEAU DE BORD" />
             <Button fx:id="reservationsButton" onAction="#handleReservationsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="RESERVATIONS" />
             <Button fx:id="notificationsButton" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="NOTIFICATIONS" />
+            <Button fx:id="walletButton" onAction="#handleWalletClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="PORTEFEUILLE" />
             <stylesheets>
                 <URL value="@../CSS/style.css" />
             </stylesheets>

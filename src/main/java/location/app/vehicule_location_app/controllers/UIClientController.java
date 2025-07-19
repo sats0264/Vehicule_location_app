@@ -1,10 +1,13 @@
 package location.app.vehicule_location_app.controllers;
 
-import javafx.beans.property.*;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Client;
 
@@ -26,7 +29,7 @@ public class UIClientController extends Controller {
     @FXML
     private TableColumn<Client, Integer> fideliteColumn;
 
-    private ObservableList<location.app.vehicule_location_app.models.Client> clientList;
+    private ObservableList<Client> clientList;
 
     public UIClientController() throws DAOException {
     }

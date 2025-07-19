@@ -5,7 +5,6 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
-import location.app.vehicule_location_app.models.Statut;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;

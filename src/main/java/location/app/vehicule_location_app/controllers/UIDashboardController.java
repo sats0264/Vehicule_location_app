@@ -1,6 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
-import javafx.beans.property.*;
+import javafx.beans.property.ReadOnlyObjectWrapper;
+import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -8,7 +9,9 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.*;
+import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Reservation;
+import location.app.vehicule_location_app.models.Vehicule;
 import location.app.vehicule_location_app.observer.DashboardSubject;
 import location.app.vehicule_location_app.observer.Observer;
 

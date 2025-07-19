@@ -11,11 +11,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
-import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Reservation;
 import location.app.vehicule_location_app.models.Vehicule;
-import location.app.vehicule_location_app.observer.Observer;
 import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.InputStream;
@@ -83,15 +81,6 @@ public class UIFenetreReservationController{
         }
     }
 
-    /**
-     * Méthode appelée automatiquement par le Subject lors d'un changement d'état.
-     */
-//    @Override
-//    public void update() {
-//        if (subject != null) {
-//            updateStatutFromState(subject.getState());
-//        }
-//    }
 
     /**
      * Met à jour le statut selon l'état du Subject.
@@ -188,7 +177,7 @@ public class UIFenetreReservationController{
                 infos.getChildren().addAll(marqueLbl, modeleLbl, immatLbl, nbJoursLbl);
 
                 Region spacer = new Region();
-                HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
+                HBox.setHgrow(spacer, Priority.ALWAYS);
 
                 // Statut à droite
                 VBox statutBox = new VBox(10);

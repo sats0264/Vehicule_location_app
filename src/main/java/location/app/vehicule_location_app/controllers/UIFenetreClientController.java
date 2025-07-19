@@ -11,7 +11,6 @@ import javafx.scene.control.Label;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import javafx.util.Duration;
-import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.Client;
 
 import java.io.IOException;
@@ -34,6 +33,9 @@ public class UIFenetreClientController {
 
     @FXML
     private Button notificationsButton;
+
+    @FXML
+    private Button walletButton;
 
     @FXML
     private Button logoutButton;
@@ -64,6 +66,14 @@ public class UIFenetreClientController {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
+
+            // Passe le client connecté au contrôleur du portefeuille
+            if ("/views/UIWallet.fxml".equals(fxmlPath)) {
+                Object controller = loader.getController();
+                if (controller instanceof UIWalletController && currentClient != null) {
+                    ((UIWalletController) controller).setClientConnecte(currentClient);
+                }
+            }
 
             // Passe le client connecté au contrôleur des réservations
             if ("/views/UIFenetreReservation.fxml".equals(fxmlPath)) {
@@ -112,6 +122,13 @@ public class UIFenetreClientController {
         setSelectedButton(notificationsButton);
         loadView("/views/UINotification.fxml");
     }
+
+    @FXML
+    private void handleWalletClick() {
+        setSelectedButton(walletButton);
+        loadView("/views/UIWallet.fxml");
+    }
+
     @FXML
     private void handleLogoutClick() throws IOException {
         // Logique de déconnexion

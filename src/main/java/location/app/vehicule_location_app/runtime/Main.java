@@ -4,9 +4,6 @@ import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
-import location.app.vehicule_location_app.controllers.Controller;
-import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.jdbc.HibernateConnection;
 
 import java.io.IOException;
 
