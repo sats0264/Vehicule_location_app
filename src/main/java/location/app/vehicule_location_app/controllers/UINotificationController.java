@@ -224,7 +224,7 @@ public class UINotificationController extends Observer implements Initializable 
             switch (notification.getType()) {
                 case CLIENT_NEW_RESERVATION:
                 case CLIENT_RESERVATION_MODIFICATION_REQUEST:
-                case CLIENT_RESERVATION_CANCELLATION:
+                case CLIENT_RESERVATION_ANNULATION_REQUEST:
                 case CLIENT_RESERVATION_CONFIRMATION:
                     controller = uiFenetreClientController.loadView("/views/UIFenetreReservation.fxml");
                     showAlert(Alert.AlertType.INFORMATION, "Réservation",
@@ -255,7 +255,7 @@ public class UINotificationController extends Observer implements Initializable 
 
                 case NEW_RESERVATION:
                 case RESERVATION_MODIFICATION_REQUEST:
-                case RESERVATION_CANCELLATION:
+                case CLIENT_RESERVATION_ANNULATION_REFUSED:
                 case RESERVATION_CONFIRMATION:
                 case RESERVATION_REFUSED:
                     controller = mainFenetreController.loadView("/views/UIReservation.fxml");
