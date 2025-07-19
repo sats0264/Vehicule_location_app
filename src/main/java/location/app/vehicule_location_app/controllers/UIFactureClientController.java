@@ -9,11 +9,21 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
 import javafx.collections.FXCollections;
 import javafx.beans.property.ReadOnlyStringWrapper;
+import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
+import location.app.vehicule_location_app.dao.NotificationService;
+import location.app.vehicule_location_app.exceptions.DAOException;
+import location.app.vehicule_location_app.factory.ConcreteFactory;
+import location.app.vehicule_location_app.factory.HibernateFactory;
 import location.app.vehicule_location_app.models.*;
+import location.app.vehicule_location_app.observer.Subject;
+
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
+import java.util.*;
+
+import static location.app.vehicule_location_app.controllers.Controller.ajouterObject;
+import static location.app.vehicule_location_app.controllers.Controller.updateObject;
 
 public class UIFactureClientController {
 
@@ -70,6 +80,7 @@ public class UIFactureClientController {
     private static final double CHAUFFEUR_DAILY_FEE = 5000.0; // Exemple de frais journaliers pour un chauffeur (en XOF)
 
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+    private Reservation reservation;
 
     @FXML
     public void initialize() {
@@ -91,6 +102,8 @@ public class UIFactureClientController {
     }
 
     public void setFacture(Reservation reservation) {
+        this.reservation = reservation;
+
         if (reservation == null || reservation.getClient() == null) {
             // Gérer le cas où les données sont nulles (afficher un message d'erreur ou vider les champs)
             System.err.println("Réservation ou client non trouvé.");
@@ -184,10 +197,114 @@ public class UIFactureClientController {
     }
 
     private void handlePayerButton() {
-        System.out.println("Bouton Payer cliqué !");
+        // Demander confirmation
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Confirmation de Paiement");
+        confirm.setHeaderText(null);
+        confirm.setContentText("Voulez-vous confirmer le paiement de cette facture ?");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) {
+            return;
+        }
 
-        showAlert(Alert.AlertType.INFORMATION, "Paiement", "Fonctionnalité de paiement à implémenter.");
+        // Récupération du montant total
+        double montantTotal = 0.0;
+        try {
+            montantTotal = parseMontant(totalMontantLabel.getText());
+        } catch (NumberFormatException ex) {
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Montant invalide !");
+            return;
+        }
+
+
+        // Demande à l'utilisateur de choisir une carte bancaire
+        List<CarteBancaire> cartes = new HibernateObjectDaoImpl<>(CarteBancaire.class)
+                .findByField("client.id", reservation.getClient().getId());
+
+        if (cartes.isEmpty()) {
+            showAlert(Alert.AlertType.WARNING, "Aucune carte", "Aucune carte n'est enregistrée pour ce client.");
+            return;
+        }
+
+        // 2. Créer une Map entre affichage (String) et objet CarteBancaire
+        Map<String, CarteBancaire> carteAffichageMap = new HashMap<>();
+        List<String> affichages = new ArrayList<>();
+
+        for (CarteBancaire carte : cartes) {
+            String affichage = carte.getNumeroCarte() + " (Solde : " + String.format("%.2f", carte.getSolde()) + " FCFA)";
+            affichages.add(affichage);
+            carteAffichageMap.put(affichage, carte);
+        }
+
+        ChoiceDialog<String> dialog = new ChoiceDialog<>(affichages.get(0), affichages);
+        dialog.setTitle("Choix de la carte");
+        dialog.setHeaderText("Veuillez sélectionner une carte pour le paiement");
+
+        Optional<String> resultat = dialog.showAndWait();
+        if (resultat.isEmpty()) return;
+
+        CarteBancaire selectedCarte = carteAffichageMap.get(resultat.get());
+
+        if (selectedCarte == null) {
+            return;
+        }
+
+        // Vérification du solde
+        if (selectedCarte.getSolde() < montantTotal) {
+            showAlert(Alert.AlertType.WARNING, "Solde insuffisant",
+                    String.format("Le solde de %.2f FCFA est insuffisant pour le paiement de %.2f FCFA.",
+                            selectedCarte.getSolde(), montantTotal));
+
+            return;
+        }
+
+        // Déduction du solde et mise à jour
+        selectedCarte.setSolde(selectedCarte.getSolde() - montantTotal);
+        try {
+//            new HibernateObjectDaoImpl<>(CarteBancaire.class).update(selectedCarte);
+            var daoCarte = ConcreteFactory.getFactory(HibernateFactory.class)
+                    .getHibernateObjectDaoImpl(CarteBancaire.class);
+            daoCarte.update(selectedCarte);
+
+            // Afficher un message de succès
+            showAlert(Alert.AlertType.INFORMATION, "Paiement effectué",
+                    String.format("Le paiement de %.2f FCFA a été effectué avec succès avec la carte %s.",
+                            montantTotal, selectedCarte.getNumeroCarte()));
+
+            // Mettre à jour la réservation
+            payerButton.setDisable(true);
+            reservation.setStatut(StatutReservation.APPROUVEE);
+            var facture = new Facture(reservation);
+            ajouterObject(facture,Facture.class);
+            updateObject(reservation, Reservation.class);
+            int pointsActuels = reservation.getClient().getPointFidelite();
+            int pointsGagnes = ((int) montantTotal / 10000) * 10;
+            reservation.getClient().setPointFidelite(pointsActuels + pointsGagnes);
+            updateObject(reservation.getClient(), Client.class);
+
+
+            Notification notificationUser = new Notification(
+                    "Paiement effectué",
+                    "Le paiement de " + clientNomPrenomLabel.getText() + " pour la reservation de " + dateDebutLabel.getText() +
+                            "->"+ dateFinLabel.getText()+" a été effectué avec succès.",
+                    NotificationType.PAYMENT_RECEIVED,
+                    reservation.getId());
+            Notification notificationClient = new Notification(
+                    "Paiement reçu",
+                    "Votre paiement de " + montantTotal + " FCFA pour la réservation du " + dateDebutLabel.getText() +
+                            " au " + dateFinLabel.getText() + " a été reçu avec succès.",
+                    NotificationType.CLIENT_PAYMENT_SUCCESS,
+                    reservation.getId());
+            NotificationService.getInstance().addNotification(notificationUser);
+            NotificationService.getInstance().addNotificationForClient(notificationClient, reservation.getClient());
+
+            Subject.getInstance().notifyAllObservers();
+
+        } catch (DAOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de la mise à jour de la carte.");
+        }
     }
+
 
     private void clearAllFields() {
         // Méthode utilitaire pour réinitialiser l'interface
@@ -198,6 +315,17 @@ public class UIFactureClientController {
         chauffeurDetailsBox.setManaged(false);
         chauffeurGrid.getChildren().clear();
     }
+
+    private double parseMontant(String montantStr) throws NumberFormatException {
+        // Nettoyer : enlever les espaces, puis convertir la virgule en point
+        String cleaned = montantStr
+                .replace("\u202f", "") // supprime espace insécable (fréquent)
+                .replace(" ", "")      // supprime espace normal
+                .replace(",", ".")     // convertit séparateur décimal
+                .replaceAll("[^\\d.]", ""); // garde uniquement chiffres et point
+        return Double.parseDouble(cleaned);
+    }
+
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
