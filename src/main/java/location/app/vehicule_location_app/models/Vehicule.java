@@ -3,6 +3,9 @@ package location.app.vehicule_location_app.models;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity(name = "T_Vehicule")
 public class Vehicule {
 
@@ -11,9 +14,8 @@ public class Vehicule {
     @Column(name = "id_vehicule")
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "reservation_id", nullable = true)
-    private Reservation reservation;
+    @ManyToMany(mappedBy = "vehicules")
+    private List<Reservation> reservations = new ArrayList<>();
 
     private String immatriculation;
     private String marque;
@@ -51,14 +53,6 @@ public class Vehicule {
 
     public void setId(int id) {
         this.id = id;
-    }
-
-    public Reservation getReservation() {
-        return reservation;
-    }
-
-    public void setReservation(Reservation reservation) {
-        this.reservation = reservation;
     }
 
     public String getMarque() {
@@ -107,5 +101,13 @@ public class Vehicule {
 
     public void setPhoto(String photo) {
         this.photo = photo;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
+    }
+
+    public void setReservations(List<Reservation> reservations) {
+        this.reservations = reservations;
     }
 }

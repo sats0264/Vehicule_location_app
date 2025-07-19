@@ -28,7 +28,7 @@ public class Reservation {
     @JoinColumn(name = "facture_id")
     private Facture facture;
 
-    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST, CascadeType.REFRESH})
     private List<Vehicule> vehicules = new ArrayList<>();
 
     @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -46,10 +46,9 @@ public class Reservation {
         this.statut = statut;
     }
 
-    // Méthodes d'ajout
     public void addVehicule(Vehicule car) {
         vehicules.add(car);
-        car.setReservation(this);
+        car.getReservations().add(this);
     }
 
     public void addChauffeur(Chauffeur chauffeur) {
