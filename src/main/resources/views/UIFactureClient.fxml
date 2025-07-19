@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="700.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.UIFactureClientController">
+    <ScrollPane fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <content>
+            <VBox alignment="TOP_CENTER" spacing="15.0" style="-fx-background-color: #ffffff; -fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px;">
+                <padding>
+                    <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
+                </padding>
+
+                <HBox alignment="CENTER_LEFT" spacing="10.0">
+                    <Label style="-fx-font-size: 24px; -fx-font-weight: bold;" text="Resume de la RESERVATION ">
+                        <HBox.margin>
+                            <Insets right="20.0" />
+                        </HBox.margin>
+                    </Label>
+                    <Region HBox.hgrow="ALWAYS" />
+                    <Label text="Date:">
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Label>
+                    <Label fx:id="factureDateLabel" text="[Date du jour]" />
+                </HBox>
+                <Separator />
+
+                <VBox alignment="TOP_LEFT" spacing="5.0">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Informations Client" />
+                    <GridPane hgap="10.0" vgap="5.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" minWidth="100.0" prefWidth="120.0" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="Nom &amp; Prénom :" />
+                            <Label fx:id="clientNomPrenomLabel" text="[Nom Prénom Client]" GridPane.columnIndex="1" />
+                            <Label text="Adresse :" GridPane.rowIndex="1" />
+                            <Label fx:id="clientAdresseLabel" text="[Adresse Client]" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label text="Téléphone :" GridPane.rowIndex="2" />
+                            <Label fx:id="clientTelephoneLabel" text="[Téléphone Client]" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label text="Email :" GridPane.rowIndex="3" />
+                            <Label fx:id="clientEmailLabel" text="[Email Client]" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        </children>
+                    </GridPane>
+                </VBox>
+                <Separator />
+
+                <VBox alignment="TOP_LEFT" spacing="5.0">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Détails de la Réservation" />
+                    <GridPane hgap="10.0" vgap="5.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" minWidth="100.0" prefWidth="120.0" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="N° Réservation :" />
+                            <Label fx:id="reservationIdLabel" text="[ID Réservation]" GridPane.columnIndex="1" />
+                            <Label text="Date début :" GridPane.rowIndex="1" />
+                            <Label fx:id="dateDebutLabel" text="[Date Début]" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label text="Date fin :" GridPane.rowIndex="2" />
+                            <Label fx:id="dateFinLabel" text="[Date Fin]" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label text="Statut :" GridPane.rowIndex="3" />
+                            <Label fx:id="reservationStatutLabel" text="[Statut Réservation]" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        </children>
+                    </GridPane>
+
+                    <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 0 5 0;" text="Véhicules :" />
+                    <TableView fx:id="vehiculesTable" prefHeight="150.0" prefWidth="500.0">
+                        <columns>
+                            <TableColumn fx:id="marqueColumn" prefWidth="120.0" text="Marque" />
+                            <TableColumn fx:id="modeleColumn" prefWidth="120.0" text="Modèle" />
+                            <TableColumn fx:id="immatriculationColumn" prefWidth="120.0" text="Immatriculation" />
+                            <TableColumn fx:id="tarifJourColumn" prefWidth="140.0" text="Tarif/jour" />
+                        </columns>
+                    </TableView>
+
+                    <VBox fx:id="chauffeurDetailsBox" alignment="TOP_LEFT" spacing="5.0">
+                        <Label style="-fx-font-size: 14px; -fx-font-weight: bold; -fx-padding: 10 0 5 0;" text="Chauffeur(s) :" />
+                        <GridPane fx:id="chauffeurGrid" hgap="10.0" vgap="5.0">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="NEVER" minWidth="100.0" prefWidth="120.0" />
+                                <ColumnConstraints hgrow="ALWAYS" />
+                            </columnConstraints>
+                        </GridPane>
+                    </VBox>
+                </VBox>
+                <Separator />
+
+                <VBox alignment="TOP_RIGHT" spacing="5.0">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="Récapitulatif des coûts" />
+                    <GridPane hgap="10.0" vgap="5.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" halignment="RIGHT" minWidth="150.0" prefWidth="180.0" />
+                            <ColumnConstraints hgrow="ALWAYS" halignment="RIGHT" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="Sous-total Véhicule(s) :" />
+                            <Label fx:id="sousTotalVehiculeLabel" text="0.00 XOF" GridPane.columnIndex="1" />
+                            <Label text="Frais Chauffeur(s) :" GridPane.rowIndex="1" />
+                            <Label fx:id="fraisChauffeurLabel" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label text="Autres frais :" GridPane.rowIndex="2" />
+                            <Label fx:id="autresFraisLabel" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label style="-fx-font-size: 16px; -fx-font-weight: bold;" text="TOTAL :" GridPane.rowIndex="3" />
+                            <Label fx:id="totalMontantLabel" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #007bff;" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        </children>
+                    </GridPane>
+                </VBox>
+                <Separator />
+                <HBox alignment="CENTER" spacing="10.0" style="-fx-padding: 20 0 0 0;">
+                    <Button fx:id="payerButton" mnemonicParsing="false" style="-fx-background-color: #4CAF50; -fx-text-fill: white; -fx-font-weight: bold;" text="Payer" >
+                        <font>
+                            <Font name="System Bold" size="14.0" />
+                        </font>
+                    </Button>
+                </HBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>
