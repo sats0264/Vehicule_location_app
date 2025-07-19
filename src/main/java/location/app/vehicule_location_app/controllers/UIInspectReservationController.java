@@ -163,7 +163,7 @@ public class UIInspectReservationController extends Controller{
         endDatePicker.setValue(reservation.getDateFin());
 
         // --- Durée ---
-        long duration = ChronoUnit.DAYS.between(reservation.getDateDebut(), reservation.getDateFin());
+        long duration = ChronoUnit.DAYS.between(reservation.getDateDebut(), reservation.getDateFin()) + 1;
         durationField.setText(duration + " jour(s)");
 
         // --- Montant ---
