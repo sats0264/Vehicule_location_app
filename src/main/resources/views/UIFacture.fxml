@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import javafx.scene.shape.Line?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.image.Image?>
+
+<AnchorPane prefHeight="800.0" prefWidth="650.0" xmlns="[http://javafx.com/javafx/17.0.12](http://javafx.com/javafx/17.0.12)" xmlns:fx="[http://javafx.com/fxml/1](http://javafx.com/fxml/1)" fx:controller="location.app.vehicule_location_app.controllers.UIFactureController">
+    <ScrollPane fitToWidth="true" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <content>
+            <VBox alignment="TOP_CENTER" spacing="25.0" style="-fx-background-color: #f8f8f8; -fx-border-color: #e0e0e0; -fx-border-width: 1px; -fx-border-radius: 8px;">
+                <padding>
+                    <Insets bottom="30.0" left="30.0" right="30.0" top="30.0" />
+                </padding>
+
+                <!-- Header Section: Logo, Company Info, Invoice Title -->
+                <HBox alignment="CENTER_LEFT" spacing="20.0">
+                    <ImageView fitHeight="60.0" fitWidth="60.0" preserveRatio="true">
+                        <image>
+                            <!-- Placeholder for your company logo -->
+                            <Image url="@../images/company_logo.png" />
+                        </image>
+                    </ImageView>
+                    <VBox alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
+                        <Label style="-fx-font-size: 28px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Votre Société de Location" />
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="123 Rue de la Location, Ville, Pays" />
+                        <Label style="-fx-font-size: 14px; -fx-text-fill: #666666;" text="contact@votresociete.com | +123 456 7890" />
+                    </VBox>
+                    <VBox alignment="TOP_RIGHT" spacing="5.0">
+                        <Label style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #007bff;" text="FACTURE" />
+                        <Label text="N° Facture:">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="factureIdLabel" text="[ID Facture]" style="-fx-font-size: 14px;" />
+                        <Label text="Date:">
+                            <font>
+                                <Font name="System Bold" size="14.0" />
+                            </font>
+                        </Label>
+                        <Label fx:id="factureDateLabel" text="[Date du jour]" style="-fx-font-size: 14px;" />
+                    </VBox>
+                </HBox>
+                <Line endX="550.0" startX="-100.0" stroke="#cccccc" />
+
+                <!-- Bill To Section -->
+                <VBox alignment="TOP_LEFT" spacing="8.0">
+                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Facturé à :" />
+                    <Label fx:id="clientNomPrenomLabel" style="-fx-font-size: 14px; -fx-font-weight: bold;" text="[Nom Prénom Client]" />
+                    <Label fx:id="clientAdresseLabel" style="-fx-font-size: 14px;" text="[Adresse Client]" />
+                    <Label fx:id="clientTelephoneLabel" style="-fx-font-size: 14px;" text="[Téléphone Client]" />
+                    <Label fx:id="clientEmailLabel" style="-fx-font-size: 14px;" text="[Email Client]" />
+                </VBox>
+                <Line endX="550.0" startX="-100.0" stroke="#cccccc" />
+
+                <!-- Reservation Details Section -->
+                <VBox alignment="TOP_LEFT" spacing="8.0">
+                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Détails de la Réservation :" />
+                    <GridPane hgap="15.0" vgap="8.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" minWidth="120.0" prefWidth="150.0" />
+                            <ColumnConstraints hgrow="ALWAYS" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="N° Réservation :" />
+                            <Label fx:id="reservationIdLabel" text="[ID Réservation]" GridPane.columnIndex="1" />
+                            <Label text="Date début :" GridPane.rowIndex="1" />
+                            <Label fx:id="dateDebutLabel" text="[Date Début]" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label text="Date fin :" GridPane.rowIndex="2" />
+                            <Label fx:id="dateFinLabel" text="[Date Fin]" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Label text="Statut :" GridPane.rowIndex="3" />
+                            <Label fx:id="reservationStatutLabel" text="[Statut Réservation]" GridPane.columnIndex="1" GridPane.rowIndex="3" />
+                        </children>
+                    </GridPane>
+                </VBox>
+                <Line endX="550.0" startX="-100.0" stroke="#cccccc" />
+
+                <!-- Items Section: Vehicles and Chauffeurs -->
+                <VBox alignment="TOP_LEFT" spacing="10.0">
+                    <Label style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Articles Loués :" />
+                    <GridPane hgap="15.0" vgap="8.0" style="-fx-background-color: #f0f0f0; -fx-padding: 10px; -fx-border-radius: 5px;">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="ALWAYS" prefWidth="200.0" />
+                            <ColumnConstraints hgrow="NEVER" prefWidth="80.0" />
+                            <ColumnConstraints hgrow="NEVER" prefWidth="100.0" />
+                            <ColumnConstraints hgrow="NEVER" prefWidth="100.0" />
+                        </columnConstraints>
+                        <children>
+                            <Label style="-fx-font-weight: bold;" text="Description" />
+                            <Label style="-fx-font-weight: bold;" text="Quantité" GridPane.columnIndex="1" />
+                            <Label style="-fx-font-weight: bold;" text="Prix Unitaire" GridPane.columnIndex="2" />
+                            <Label style="-fx-font-weight: bold;" text="Total" GridPane.columnIndex="3" />
+                            <Line endX="550.0" startX="-100.0" stroke="#cccccc" GridPane.columnSpan="4" GridPane.rowIndex="1" />
+                        </children>
+                        <VBox fx:id="itemsGridContent" GridPane.columnSpan="4" GridPane.rowIndex="2">
+                            <!-- Véhicules et chauffeurs seront ajoutés ici dynamiquement -->
+                        </VBox>
+                    </GridPane>
+                </VBox>
+                <Line endX="550.0" startX="-100.0" stroke="#cccccc" />
+
+                <!-- Summary Section -->
+                <VBox alignment="TOP_RIGHT" spacing="10.0">
+                    <GridPane hgap="15.0" vgap="8.0">
+                        <columnConstraints>
+                            <ColumnConstraints hgrow="NEVER" halignment="RIGHT" minWidth="180.0" prefWidth="200.0" />
+                            <ColumnConstraints hgrow="ALWAYS" halignment="RIGHT" />
+                        </columnConstraints>
+                        <children>
+                            <Label text="Sous-total Véhicule(s) :" />
+                            <Label fx:id="sousTotalVehiculeLabel" text="0.00 XOF" GridPane.columnIndex="1" />
+                            <Label text="Frais Chauffeur(s) :" GridPane.rowIndex="1" />
+                            <Label fx:id="fraisChauffeurLabel" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                            <Label text="Autres frais :" GridPane.rowIndex="2" />
+                            <Label fx:id="autresFraisLabel" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+                            <Line endX="150.0" startX="0.0" stroke="#cccccc" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+                            <Label style="-fx-font-size: 22px; -fx-font-weight: bold; -fx-text-fill: #007bff;" text="MONTANT TOTAL :" GridPane.rowIndex="4" />
+                            <Label fx:id="totalMontantLabel" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #007bff;" text="0.00 XOF" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+                        </children>
+                    </GridPane>
+                </VBox>
+
+                <!-- Paid Status Indicator -->
+                <HBox alignment="CENTER" style="-fx-background-color: #d4edda; -fx-border-color: #28a745; -fx-border-width: 1px; -fx-border-radius: 5px; -fx-padding: 10px 20px;">
+                    <Label style="-fx-font-size: 20px; -fx-font-weight: bold; -fx-text-fill: #28a745;" text="PAYÉE" />
+                </HBox>
+
+                <Line endX="550.0" startX="-100.0" stroke="#cccccc" />
+
+                <!-- Footer Section -->
+                <VBox alignment="CENTER" spacing="5.0">
+                    <Label style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: #333333;" text="Merci pour votre confiance !" />
+                    <Label style="-fx-font-size: 12px; -fx-text-fill: #666666;" text="Pour toute question, contactez-nous." />
+                </VBox>
+            </VBox>
+        </content>
+    </ScrollPane>
+</AnchorPane>
