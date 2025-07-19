@@ -50,6 +50,7 @@
         <VBox alignment="TOP_CENTER" prefWidth="200.0" spacing="10.0" style="-fx-background-color: #3f51b5; -fx-padding: 15;">
             <Button fx:id="dashboardButton" onAction="#handleDashboardClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="TABLEAU DE BORD" />
             <Button fx:id="reservationsButton" onAction="#handleReservationsClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="RESERVATIONS" />
+            <Button fx:id="walletButton" onAction="#handleWalletClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;" text="PORTEFEUILLE" />
             <Button fx:id="notificationsButton" onAction="#handleNotificationClick" prefWidth="Infinity" style="-fx-alignment: BASELINE_LEFT; -fx-text-fill: white; -fx-background-color: transparent; -fx-font-size: 14px;">
                 <graphic>
                     <HBox alignment="CENTER_LEFT" spacing="5">
