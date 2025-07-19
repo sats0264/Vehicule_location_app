@@ -2,6 +2,8 @@ package location.app.vehicule_location_app.models;
 
 import jakarta.persistence.*;
 
+import java.time.temporal.ChronoUnit;
+
 @Entity(name = "T_Facture")
 public class Facture {
 
@@ -27,7 +29,7 @@ public class Facture {
         this.setReservation(reservation);
         this.setMontant(reservation.getVehicules().stream()
                 .mapToDouble(Vehicule::getTarif)
-                .sum());
+                .sum()* (ChronoUnit.DAYS.between(reservation.getDateDebut(), reservation.getDateFin()) +1));
     }
 
     public int getId() {
