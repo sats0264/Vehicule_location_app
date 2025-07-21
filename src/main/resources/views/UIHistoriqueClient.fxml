@@ -10,7 +10,6 @@
                 <Button fx:id="backButton" onAction="#handleBack" style="-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;" text="← Retour" />
                 <Label style="-fx-font-size: 18px; -fx-font-weight: bold;" text="Historique des Réservations" />
             </HBox>
-
             <ListView fx:id="reservationListView" VBox.vgrow="ALWAYS" />
         </VBox>
     </children>

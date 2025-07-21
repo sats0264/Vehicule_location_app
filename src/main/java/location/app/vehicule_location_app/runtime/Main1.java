@@ -19,7 +19,7 @@ public class Main1 extends Application {
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("Connexion - Application de Location de Véhicules");
         stage.setScene(scene);
-        stage.setResizable(false); // Empêche le redimensionnement pour une interface de connexion fixe
+        stage.setResizable(false);
         stage.show();
     }
 }

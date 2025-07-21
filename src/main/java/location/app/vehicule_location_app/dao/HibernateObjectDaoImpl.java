@@ -25,12 +25,10 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
             session.persist(entity);
             transaction.commit();
         } catch (Exception e) {
-            // ❗️ Ajoute cette sécurité
             if (transaction != null && transaction.isActive()) {
                 try {
                     transaction.rollback();
                 } catch (Exception rollbackEx) {
-                    // Logging secondaire
                     System.err.println("Erreur rollback : " + rollbackEx.getMessage());
                 }
             }
@@ -116,39 +114,15 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
         }
     }
 
-
-    public int getAllEntitiesCount() throws DAOException {
-        Transaction transaction = null;
-        try(Session session = HibernateConnection.getSessionFactory().openSession()) {
-            transaction = session.beginTransaction();
-            String hql = "select count(*) from " + type.getSimpleName();
-            Long count = session.createQuery(hql, Long.class).uniqueResult();
-            transaction.commit();
-            return count != null ? count.intValue() : 0;
+    public List<T> readAll() {
+        try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+            String hql = "from " + type.getAnnotation(Entity.class).name();
+            return session.createQuery(hql, type).getResultList();
         } catch (Exception e) {
-            if (transaction != null) transaction.rollback();
-            throw new DAOException("Erreur comptage des entités : " + e.getMessage());
+            e.printStackTrace();
+            return Collections.emptyList();
         }
     }
-
-    public List<T> readAll() {
-    try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-        String hql = "from " + type.getAnnotation(Entity.class).name();
-        return session.createQuery(hql, type).getResultList();
-    } catch (Exception e) {
-        e.printStackTrace();
-        return Collections.emptyList();
-    }
-}
-
-    public T findById(int id) {
-    try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-        return session.find(type, id);
-    } catch (Exception e) {
-        e.printStackTrace();
-        return null;
-    }
-}
 
     public List<T> getAll() {
         try (Session session = HibernateConnection.getSessionFactory().openSession()) {
@@ -161,17 +135,16 @@ public class HibernateObjectDaoImpl<T> implements IDao<T> {
     }
 
     public List<T> findByField(String fieldName, int id) {
-    try (Session session = HibernateConnection.getSessionFactory().openSession()) {
-        String entityName = type.getAnnotation(Entity.class).name();
-        String hql = "from " + entityName + " where " + fieldName + " = :id";
-        return session.createQuery(hql, type)
-                .setParameter("id", id)
-                .getResultList();
-    } catch (Exception e) {
-        e.printStackTrace();
-        return java.util.Collections.emptyList();
+        try (Session session = HibernateConnection.getSessionFactory().openSession()) {
+            String entityName = type.getAnnotation(Entity.class).name();
+            String hql = "from " + entityName + " where " + fieldName + " = :id";
+            return session.createQuery(hql, type)
+                    .setParameter("id", id)
+                    .getResultList();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return java.util.Collections.emptyList();
+        }
     }
-}
-
 
 }

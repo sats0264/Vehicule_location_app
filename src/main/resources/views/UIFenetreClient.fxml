@@ -67,7 +67,6 @@
 
     <center>
         <AnchorPane fx:id="contentArea" style="-fx-background-color: #ffffff;">
-            <!-- Le contenu dynamique sera chargé ici -->
         </AnchorPane>
     </center>
 </BorderPane>

@@ -6,7 +6,6 @@ public class ConcreteFactory {
 
         AbstractFactory factory = new HibernateFactoryImpl();
 
-        //HibernateFactory
         if(factoryClass == HibernateFactory.class){
             return factoryClass.cast(factory.getHibernateFactory());
         }

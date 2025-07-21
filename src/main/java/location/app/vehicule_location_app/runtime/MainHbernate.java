@@ -10,9 +10,6 @@ public class MainHbernate {
             System.out.println("✔ Données de démonstration insérées avec succès !");
         } catch (DAOException e) {
             e.printStackTrace();
-        } finally {
-            // Ferme proprement les ressources Hibernate
-//            HibernateConnection.shutdown();
-        }
+        } finally {}
     }
 }

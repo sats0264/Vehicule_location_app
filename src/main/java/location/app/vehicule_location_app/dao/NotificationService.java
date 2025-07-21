@@ -134,7 +134,6 @@ public class NotificationService extends Subject {
                         .getFactory(HibernateFactory.class)
                         .getHibernateObjectDaoImpl(NotificationReception.class);
 
-                // Find the reception for the active user and the given notification
                 NotificationReception reception = receptions.stream()
                         .filter(r -> r.getNotification().equals(notification) && r.getUtilisateur().equals(utilisateurActif))
                         .findFirst()
@@ -157,7 +156,6 @@ public class NotificationService extends Subject {
                         .getFactory(HibernateFactory.class)
                         .getNotificationReceptionDaoImpl();
 
-                // Find the reception for the active client and the given notification
                 NotificationReception reception = receptions.stream()
                         .filter(r -> r.getNotification().equals(notification) && r.getClient().equals(clientActif))
                         .findFirst()
@@ -186,7 +184,6 @@ public class NotificationService extends Subject {
                         .getFactory(HibernateFactory.class)
                         .getNotificationReceptionDaoImpl();
 
-                // Mark all receptions for the active user as read
                 for (NotificationReception reception : receptions) {
                     if (reception.getUtilisateur().equals(utilisateurActif) && !reception.isRead()) {
                         reception.setRead(true);
@@ -205,7 +202,6 @@ public class NotificationService extends Subject {
                         .getFactory(HibernateFactory.class)
                         .getNotificationReceptionDaoImpl();
 
-                // Mark all receptions for the active client as read
                 for (NotificationReception reception : receptions) {
                     if (reception.getClient().equals(clientActif) && !reception.isRead()) {
                         reception.setRead(true);
@@ -295,9 +291,9 @@ public class NotificationService extends Subject {
 
                 List<NotificationReception> list = receptionDao.findByUtilisateur(utilisateurActif);
 
-                receptions.setAll(list); // met à jour la vraie source observable
-                updateUnreadCount();     // met à jour le compteur
-                notifyAllObservers();    // notifie les interfaces
+                receptions.setAll(list);
+                updateUnreadCount();
+                notifyAllObservers();
             } catch (DAOException e) {
                 throw new RuntimeException("Erreur lors du rechargement", e);
             }
@@ -309,9 +305,9 @@ public class NotificationService extends Subject {
 
                 List<NotificationReception> list = receptionDao.findByClient(clientActif);
 
-                receptions.setAll(list); // met à jour la vraie source observable
-                updateUnreadCount();     // met à jour le compteur
-                notifyAllObservers();    // notifie les interfaces
+                receptions.setAll(list);
+                updateUnreadCount();
+                notifyAllObservers();
             } catch (DAOException e) {
                 throw new RuntimeException("Erreur lors du rechargement", e);
             }
