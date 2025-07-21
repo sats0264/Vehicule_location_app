@@ -13,7 +13,6 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.models.*;
@@ -28,7 +27,6 @@ import java.io.InputStream;
 import java.util.List;
 
 import static javafx.stage.Modality.APPLICATION_MODAL;
-import static location.app.vehicule_location_app.controllers.Controller.reservationDao;
 
 public class UIFenetreReservationController extends Observer {
 
@@ -47,7 +45,7 @@ public class UIFenetreReservationController extends Observer {
     @FXML
     private VBox reservationsListVBox;
 
-    private Client clientConnecte;// à initialiser lors de la connexion
+    private Client clientConnecte;
     private Vehicule vehicule;
 
     public UIFenetreReservationController() {
@@ -55,9 +53,6 @@ public class UIFenetreReservationController extends Observer {
         this.subject.attach(this);
     }
 
-    /**
-     * Setter à appeler AVANT affichage pour initialiser le client connecté et afficher ses réservations.
-     */
     public void setClientConnecte(Client client) {
         this.clientConnecte = client;
         afficherReservationsClient();
@@ -86,13 +81,11 @@ public class UIFenetreReservationController extends Observer {
                 );
                 if (nbJours <= 0) nbJours = 1;
 
-                // Crée dynamiquement la carte réservation
                 VBox carte = new VBox(5);
                 carte.setStyle("-fx-border-color: lightgray; -fx-border-width: 1; -fx-padding: 20; -fx-background-radius: 5; -fx-background-color: #fafafa;");
                 HBox hbox = new HBox(30);
                 hbox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-                // Image véhicule
                 ImageView imgView = new ImageView();
                 imgView.setFitHeight(120);
                 imgView.setFitWidth(180);
@@ -110,7 +103,6 @@ public class UIFenetreReservationController extends Observer {
                     }
                 }
 
-                // Infos véhicule
                 VBox infos = new VBox(8);
                 infos.setAlignment(javafx.geometry.Pos.CENTER);
                 Label marqueLbl = new Label("Marque : " + marque);
@@ -124,7 +116,6 @@ public class UIFenetreReservationController extends Observer {
                 nbJoursLbl.setStyle("-fx-font-size: 13px;");
                 infos.getChildren().addAll(marqueLbl, modeleLbl, immatLbl, nbJoursLbl);
 
-                // Ajout du/des chauffeurs
                 if (!reservation.getChauffeurs().isEmpty()) {
                     Chauffeur chauffeur = reservation.getChauffeurs().getFirst();
                     Label chauffeurLbl = new Label("Chauffeur : " + chauffeur.getPrenom() + " " + chauffeur.getNom());
@@ -138,7 +129,6 @@ public class UIFenetreReservationController extends Observer {
                 Region spacer = new Region();
                 HBox.setHgrow(spacer, Priority.ALWAYS);
 
-                // Statut à droite
                 VBox statutBox = new VBox(10);
                 final Button payementBtn = new Button("Payer");
                 statutBox.setAlignment(javafx.geometry.Pos.CENTER_RIGHT);
@@ -195,13 +185,13 @@ public class UIFenetreReservationController extends Observer {
                 String color = "#a5a5a3ff";
                 if (reservation.getStatut() != null) {
                     color = switch (reservation.getStatut()) {
-                        case EN_ATTENTE -> "#ff9800"; // Orange pour en attente
-                        case MODIFICATION_EN_ATTENTE, ANNULATION_EN_ATTENTE -> "#6f42c1"; // Violet
-                        case APPROUVEE -> "#43A047"; // Vert pour approuvée
-                        case REJETEE -> "#e53935"; // Rouge pour rejetée
-                        case PAYEMENT_EN_ATTENTE -> "#2196F3"; // Bleu pour paiement en attente
-                        case ANNULEE -> "#e53935"; // Rouge pour annulée
-                        default -> "#a5a5a3ff"; // Gris par défaut
+                        case EN_ATTENTE -> "#ff9800";
+                        case MODIFICATION_EN_ATTENTE, ANNULATION_EN_ATTENTE -> "#6f42c1";
+                        case APPROUVEE -> "#43A047";
+                        case REJETEE -> "#e53935";
+                        case PAYEMENT_EN_ATTENTE -> "#2196F3";
+                        case ANNULEE -> "#e53935";
+                        default -> "#a5a5a3ff";
                     };
                 }
                 statutLbl.setStyle("-fx-font-size: 15px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
@@ -210,7 +200,6 @@ public class UIFenetreReservationController extends Observer {
                 hbox.getChildren().addAll(imgView, infos, spacer, statutBox);
                 carte.getChildren().add(hbox);
 
-                // Ajout du double-clic pour afficher le popup détail/modifier/annuler
                 carte.setOnMouseClicked(event -> {
                     if (event.getClickCount() == 2) {
                         showReservationDetailsPopup(reservation, vehicule);
@@ -222,44 +211,31 @@ public class UIFenetreReservationController extends Observer {
         }
     }
 
-    // This method would replace your old 'afficherPopupReservation'
     private void showReservationDetailsPopup(Reservation reservation, Vehicule vehicule) {
         try {
-            // Load the FXML for the new popup
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIReservationDetailPopup.fxml"));
             Parent root = loader.load();
 
-            // Get the controller for the loaded FXML
             UIReservationDetailPopupController controller = loader.getController();
 
-            // Create a new Stage for the popup
             Stage popupStage = new Stage();
-            popupStage.initModality(APPLICATION_MODAL); // Make it modal
+            popupStage.initModality(APPLICATION_MODAL);
             popupStage.setTitle("Détail de la Réservation N°" + reservation.getId());
 
-            // Pass the Stage to the controller so it can close itself
             controller.setDialogStage(popupStage);
 
-            // Set the reservation and vehicle data in the popup controller
             controller.setReservationAndVehicule(reservation, vehicule);
 
-            // Set the scene and show the popup
             Scene scene = new Scene(root);
             popupStage.setScene(scene);
-            popupStage.showAndWait(); // Show and wait until the popup is closed
+            popupStage.showAndWait();
 
-            // After the popup is closed, you might want to refresh the parent view
-            // if any changes were made (e.g., status update after cancellation/modification request)
-            // For example:
-            // refreshReservationsList(); // Call a method in your parent controller to refresh
         } catch (Exception e) {
             e.printStackTrace();
-            // Handle any errors during popup loading
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible d'afficher les détails de la réservation.");
         }
     }
 
-    // You would also need a showAlert method in this class if it doesn't exist
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

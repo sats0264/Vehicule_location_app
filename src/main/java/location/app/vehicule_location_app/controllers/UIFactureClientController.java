@@ -1,9 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
@@ -12,8 +10,6 @@ import javafx.beans.property.ReadOnlyStringWrapper;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.factory.ConcreteFactory;
-import location.app.vehicule_location_app.factory.HibernateFactory;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.observer.Subject;
 
@@ -32,7 +28,7 @@ public class UIFactureClientController {
     @FXML
     private Label factureDateLabel;
     @FXML
-    private Button payerButton; // Bouton pour l'action de paiement
+    private Button payerButton;
 
     @FXML
     private Label clientNomPrenomLabel;
@@ -64,16 +60,16 @@ public class UIFactureClientController {
     private TableColumn<Vehicule, String> tarifJourColumn;
 
     @FXML
-    private VBox chauffeurDetailsBox; // Conteneur pour les détails du chauffeur
+    private VBox chauffeurDetailsBox;
     @FXML
-    private GridPane chauffeurGrid; // GridPane dynamique pour les chauffeurs
+    private GridPane chauffeurGrid;
 
     @FXML
     private Label sousTotalVehiculeLabel;
     @FXML
     private Label fraisChauffeurLabel;
     @FXML
-    private Label autresFraisLabel; // Si vous avez d'autres frais
+    private Label autresFraisLabel;
     @FXML
     private Label totalMontantLabel;
 
@@ -84,20 +80,16 @@ public class UIFactureClientController {
 
     @FXML
     public void initialize() {
-        // Initialisation des CellValueFactory pour la TableView des véhicules
         marqueColumn.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getMarque()));
         modeleColumn.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getModele()));
         immatriculationColumn.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(cellData.getValue().getImmatriculation()));
         tarifJourColumn.setCellValueFactory(cellData -> new ReadOnlyStringWrapper(String.format("%.2f XOF", cellData.getValue().getTarif())));
 
-        // Cache la section chauffeur par défaut
         chauffeurDetailsBox.setVisible(false);
-        chauffeurDetailsBox.setManaged(false); // N'occupe pas d'espace si invisible
+        chauffeurDetailsBox.setManaged(false);
 
-        // Événement pour le bouton Payer (à implémenter)
         payerButton.setOnAction(event -> handlePayerButton());
 
-        // Initialiser la date de facture à la date du jour
         factureDateLabel.setText(LocalDate.now().format(dateFormatter));
     }
 
@@ -197,7 +189,6 @@ public class UIFactureClientController {
     }
 
     private void handlePayerButton() {
-        // Demander confirmation
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Confirmation de Paiement");
         confirm.setHeaderText(null);
@@ -206,7 +197,6 @@ public class UIFactureClientController {
             return;
         }
 
-        // Récupération du montant total
         double montantTotal = 0.0;
         try {
             montantTotal = parseMontant(totalMontantLabel.getText());
@@ -216,7 +206,6 @@ public class UIFactureClientController {
         }
 
 
-        // Demande à l'utilisateur de choisir une carte bancaire
         List<CarteBancaire> cartes = new HibernateObjectDaoImpl<>(CarteBancaire.class)
                 .findByField("client.id", reservation.getClient().getId());
 
@@ -225,7 +214,6 @@ public class UIFactureClientController {
             return;
         }
 
-        // 2. Créer une Map entre affichage (String) et objet CarteBancaire
         Map<String, CarteBancaire> carteAffichageMap = new HashMap<>();
         List<String> affichages = new ArrayList<>();
 
@@ -248,7 +236,6 @@ public class UIFactureClientController {
             return;
         }
 
-        // Vérification du solde
         if (selectedCarte.getSolde() < montantTotal) {
             showAlert(Alert.AlertType.WARNING, "Solde insuffisant",
                     String.format("Le solde de %.2f FCFA est insuffisant pour le paiement de %.2f FCFA.",
@@ -260,16 +247,12 @@ public class UIFactureClientController {
         try {
             double newSolde = selectedCarte.getSolde() - montantTotal;
             selectedCarte.setSolde(newSolde);
-//            var daoCarte = ConcreteFactory.getFactory(HibernateFactory.class)
-//                    .getHibernateObjectDaoImpl(CarteBancaire.class);
             updateObject(selectedCarte, CarteBancaire.class);
 
-            // Afficher un message de succès
             showAlert(Alert.AlertType.INFORMATION, "Paiement effectué",
                     String.format("Le paiement de %.2f FCFA a été effectué avec succès avec la carte %s.",
                             montantTotal, selectedCarte.getNumeroCarte()));
 
-            // Mettre à jour la réservation
             payerButton.setDisable(true);
             reservation.setStatut(StatutReservation.APPROUVEE);
             var facture = new Facture(reservation);
@@ -308,9 +291,7 @@ public class UIFactureClientController {
 
 
     private void clearAllFields() {
-        // Méthode utilitaire pour réinitialiser l'interface
         factureIdLabel.setText("");
-        // ... (vider tous les autres labels)
         vehiculesTable.getItems().clear();
         chauffeurDetailsBox.setVisible(false);
         chauffeurDetailsBox.setManaged(false);
@@ -318,12 +299,11 @@ public class UIFactureClientController {
     }
 
     private double parseMontant(String montantStr) throws NumberFormatException {
-        // Nettoyer : enlever les espaces, puis convertir la virgule en point
         String cleaned = montantStr
-                .replace("\u202f", "") // supprime espace insécable (fréquent)
-                .replace(" ", "")      // supprime espace normal
-                .replace(",", ".")     // convertit séparateur décimal
-                .replaceAll("[^\\d.]", ""); // garde uniquement chiffres et point
+                .replace("\u202f", "")
+                .replace(" ", "")
+                .replace(",", ".")
+                .replaceAll("[^\\d.]", "");
         return Double.parseDouble(cleaned);
     }
 

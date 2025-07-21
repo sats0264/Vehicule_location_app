@@ -73,7 +73,6 @@ public class UIFenetreClientController extends Observer implements Initializable
         timeline.play();
         Timeline autoRefreshTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(10), e -> {
-                    // Cette ligne va forcer le rafraîchissement du compteur de notifications
                     if (notificationService != null) {
                         notificationService.reloadNotificationsFromDB();
                         update();
@@ -117,7 +116,6 @@ public class UIFenetreClientController extends Observer implements Initializable
                 }
             }
 
-            // Passe le client connecté au contrôleur du portefeuille
             if ("/views/UIWallet.fxml".equals(fxmlPath)) {
                 Object controller = loader.getController();
                 if (controller instanceof UIWalletController && currentClient != null) {
@@ -125,7 +123,6 @@ public class UIFenetreClientController extends Observer implements Initializable
                 }
             }
 
-            // Passe le client connecté au contrôleur des réservations
             if ("/views/UIFenetreReservation.fxml".equals(fxmlPath)) {
                 Object controller = loader.getController();
                 if (controller instanceof UIFenetreReservationController && currentClient != null) {
@@ -149,7 +146,7 @@ public class UIFenetreClientController extends Observer implements Initializable
         } catch (IOException e) {
             e.printStackTrace();
             System.err.println("Failed to load view: " + fxmlPath);
-            return null; // Retourne null en cas d'erreur
+            return null;
         }
     }
     Object loadNotificationView() {
@@ -157,7 +154,6 @@ public class UIFenetreClientController extends Observer implements Initializable
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UINotification.fxml"));
             Parent view = loader.load();
 
-            // Passe le client connecté au contrôleur des notifications
             Object controller = loader.getController();
             if (controller instanceof UINotificationController && currentClient != null) {
                 ((UINotificationController) controller).setCurrentClient(currentClient);
@@ -185,7 +181,6 @@ public class UIFenetreClientController extends Observer implements Initializable
         reservationsButton.getStyleClass().remove("selected-menu-btn");
         notificationsButton.getStyleClass().remove("selected-menu-btn");
 
-        // Ajoute la classe au bouton sélectionné
         selectedButton.getStyleClass().add("selected-menu-btn");
     }
 
@@ -215,7 +210,6 @@ public class UIFenetreClientController extends Observer implements Initializable
 
     @FXML
     private void handleLogoutClick() throws IOException {
-        // Logique de déconnexion
         System.out.println("Déconnexion...");
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UILogin.fxml"));
         Parent mainRoot = loader.load();

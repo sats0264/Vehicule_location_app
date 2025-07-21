@@ -8,7 +8,6 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
-import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.CarteBancaire;
 import location.app.vehicule_location_app.models.Client;
@@ -116,7 +115,7 @@ public class UIAddCardController {
 
         CarteBancaire carte = new CarteBancaire(
             titulaire,
-            numeroCarteField.getText(), // garde le format avec espaces pour l'affichage
+            numeroCarteField.getText(),
             Integer.parseInt(cvcStr),
             expiration,
             clientConnecte,
@@ -154,7 +153,6 @@ public class UIAddCardController {
     private void closeWindow() {
         Stage stage = (Stage) buttonAdd.getScene().getWindow();
         stage.close();
-        // Ici, tu peux ajouter la logique pour retourner à UIWallet si besoin
     }
 
 }

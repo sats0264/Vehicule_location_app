@@ -120,12 +120,6 @@ public class MainFenetreController extends Observer implements Initializable {
         }
     }
 
-    /**
-     * Helper method to load FXML content into the contentArea.
-     *
-     * @param fxmlPath The path to the FXML file to load.
-     * @return
-     */
     Object loadView(String fxmlPath) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));

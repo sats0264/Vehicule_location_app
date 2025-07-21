@@ -54,7 +54,7 @@ public class UIVehiculeController extends Observer {
 
     private ObservableList<Vehicule> vehiculeList = FXCollections.observableArrayList();
 
-    public UIVehiculeController() throws DAOException {
+    public UIVehiculeController() {
         this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
@@ -88,7 +88,6 @@ public class UIVehiculeController extends Observer {
                 new ReadOnlyStringWrapper(cellData.getValue().getStatut() != null
                         ? cellData.getValue().getStatut().toString() : ""));
 
-        // Remplir la table
         voituresTable.setItems(vehiculeList);
     }
 
@@ -101,10 +100,9 @@ public class UIVehiculeController extends Observer {
             Stage stage = new Stage();
             stage.setTitle("Ajouter un véhicule");
             stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL); // Bloque l'interaction avec la fenêtre principale
-            stage.showAndWait(); // Attend la fermeture
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
 
-            // Après fermeture, recharger la liste ?
             voituresTable.setItems(FXCollections.observableArrayList(controllerVehiculeList));
 
         } catch (IOException e) {
@@ -122,7 +120,6 @@ public class UIVehiculeController extends Observer {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIDetailVehicule.fxml"));
                 Parent root = loader.load();
 
-                // Récupérer le contrôleur et passer le véhicule sélectionné
                 UIDetailVehiculeController controller = loader.getController();
                 controller.setVehicule(selected);
 

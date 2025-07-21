@@ -246,7 +246,6 @@ public class UIReservationController extends Observer {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la vue de détails de la réservation.");
         }
     }
-// ...
 
     @Override
     public void update() {

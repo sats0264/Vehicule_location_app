@@ -13,7 +13,6 @@ import java.io.InputStream;
 
 public class UIDetailVehiculeController {
 
-    // Champs FXML liés à la vue
     @FXML
     private TextField immatriculeField;
 
@@ -35,9 +34,6 @@ public class UIDetailVehiculeController {
     @FXML
     private Button annulerButton;
 
-    /**
-     * Méthode pour injecter les données d’un véhicule dans les champs
-     */
     public void setVehicule(Vehicule vehicule) {
         if (vehicule == null) return;
 
@@ -51,16 +47,14 @@ public class UIDetailVehiculeController {
         modeleComboBox.getItems().setAll(vehicule.getModele());
         modeleComboBox.setValue(vehicule.getModele());
 
-        photoImageView.setImage(null); // Force le rafraîchissement
+        photoImageView.setImage(null);
         try {
-            // Essayer de charger depuis classpath /images/
             InputStream is = getClass().getResourceAsStream(vehicule.getPhoto());
 
             Image image;
             if (is != null) {
                 image = new Image(is);
             } else {
-                // Si non trouvé dans les ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
                 image = new Image(vehicule.getPhoto(), true);
             }
             photoImageView.setImage(image);
@@ -70,10 +64,6 @@ public class UIDetailVehiculeController {
         }
     }
 
-
-    /**
-     * Ferme la fenêtre actuelle
-     */
     @FXML
     private void handleAnnuler() {
         Stage stage = (Stage) annulerButton.getScene().getWindow();
