@@ -65,7 +65,6 @@ public class UIHistoriqueClientController {
                 private final HBox rootBox = new HBox(10);
 
                 {
-                    // IMAGE
                     imageView.setFitWidth(120);
                     imageView.setFitHeight(80);
                     imageView.setStyle("-fx-effect: dropshadow(gaussian, lightgray, 5, 0, 0, 1); " +
@@ -76,7 +75,6 @@ public class UIHistoriqueClientController {
                     imageViewChauffeur.setStyle("-fx-effect: dropshadow(gaussian, lightgray, 5, 0, 0, 1); " +
                             "-fx-border-radius: 10; -fx-background-radius: 10;");
 
-                    // CENTER INFO
                     dateDebutLabel.setStyle("-fx-font-weight: bold;");
                     dateFinLabel.setStyle("-fx-font-style: italic;");
                     dureeLabel.setStyle("-fx-font-weight: bold;");
@@ -88,25 +86,21 @@ public class UIHistoriqueClientController {
                     centerBox.setStyle("-fx-spacing: 10;");
                     HBox.setHgrow(centerBox, Priority.ALWAYS);
 
-                    // CHAUFFEUR INFO
                     chauffeurNomLabel.setStyle("-fx-font-weight: bold;");
                     chauffeurPrenomLabel.setStyle("-fx-font-style: italic;");
                     chauffeurTelLabel.setStyle("-fx-text-fill: gray;");
                     chauffeurBox.getChildren().addAll(chauffeurNomLabel, chauffeurTelLabel);
 
-                    // dans l'initialiseur (hors updateItem)
                     chauffeurBox.setAlignment(Pos.CENTER_LEFT);
                     chauffeurBox.setSpacing(5);
                     HBox.setHgrow(chauffeurBox, Priority.NEVER);
 
-                    // STATUT
                     statutLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
                     statutLabel.setMinWidth(150);
                     statutLabel.setAlignment(Pos.CENTER_RIGHT);
 
                     factureButton.setStyle("-fx-background-color: #2196f3; -fx-text-fill: white; -fx-font-weight: bold;");
 
-                    // ROOT CONTAINER
                     rootBox.setPadding(new Insets(10));
                     rootBox.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; " +
                             "-fx-border-width: 1; -fx-border-radius: 8;");
@@ -124,8 +118,6 @@ public class UIHistoriqueClientController {
                     } else {
                         chauffeurBox.getChildren().clear();
 
-                        // INFO
-
                         long duree = ChronoUnit.DAYS.between(reservation.getDateDebut(),reservation.getDateFin()) +1;
 
                         dateDebutLabel.setText("Début : " + reservation.getDateDebut());
@@ -138,7 +130,6 @@ public class UIHistoriqueClientController {
                                 .sum()* duree;
                         prixLabel.setText("Prix : " + prixTotal + " FCFA");
 
-                        // STATUT & COULEUR
                         String statut = reservation.getStatut().toString();
                         statutLabel.setText(statut);
 
@@ -152,7 +143,6 @@ public class UIHistoriqueClientController {
                         };
                         statutLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
 
-                        // IMAGE
                         if (!reservation.getVehicules().isEmpty()) {
                             String imagePath = reservation.getVehicules().getFirst().getPhoto();
                             URL resource = getClass().getResource(imagePath);
@@ -163,11 +153,10 @@ public class UIHistoriqueClientController {
                                 System.err.println("Image non trouvée : " + imagePath);
                             }
                         } else {
-                            imageView.setImage(null); // ou une image par défaut
+                            imageView.setImage(null);
                             System.err.println("Aucun véhicule associé à cette réservation.");
                         }
 
-                        // CHAUFFEUR
                         chauffeurBox.getChildren().clear();
 
                         List<Chauffeur> chauffeurs = reservation.getChauffeurs();
@@ -187,18 +176,15 @@ public class UIHistoriqueClientController {
                                     }
                                 }
 
-//                            HBox chauffeurRow = new HBox(10, imageViewChauffeur, new VBox(chauffeurNomLabel, chauffeurTelLabel));
                             VBox chauffeurRow = new VBox(10, chauffeurNomLabel, chauffeurTelLabel);
                             chauffeurBox.getChildren().add(chauffeurRow);
                         }
 
 
-                        // Composition finale
                         rootBox.getChildren().clear();
                         rootBox.getChildren().addAll(imageView, centerBox);
 
                         if (!chauffeurBox.getChildren().isEmpty()) {
-//                            rootBox.getChildren().add(chauffeurBox);
                             rootBox.getChildren().addAll(imageViewChauffeur, chauffeurBox);
                         }
 

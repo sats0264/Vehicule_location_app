@@ -16,9 +16,7 @@
                     </VBox.margin>
                 </Label>
 
-                <!-- Container for dynamically added HBoxes of chauffeurs -->
                 <VBox fx:id="chauffeursDisplayContainer" alignment="TOP_CENTER" spacing="15.0" HBox.hgrow="ALWAYS">
-                    <!-- Chauffeur HBoxes will be added here by the controller -->
                 </VBox>
 
                 <Label fx:id="noChauffeurMessage" text="Aucun chauffeur disponible pour les dates sélectionnées."

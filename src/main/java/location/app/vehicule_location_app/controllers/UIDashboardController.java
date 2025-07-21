@@ -149,7 +149,7 @@ public class UIDashboardController extends Observer {
                             .filter(r -> r.getFacture() != null)
                             .mapToDouble(r -> r.getFacture().getMontant())
                             .sum();
-                    return Double.compare(total2, total1); // Tri décroissant
+                    return Double.compare(total2, total1);
                 })
                 .limit(5)
                 .collect(Collectors.toList());

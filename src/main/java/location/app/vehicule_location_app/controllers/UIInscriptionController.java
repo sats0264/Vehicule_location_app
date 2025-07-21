@@ -21,7 +21,7 @@ public class UIInscriptionController extends Controller{
 
 
     @FXML
-    private AnchorPane registrationAnchorPane; // Reference to the root pane
+    private AnchorPane registrationAnchorPane;
 
     @FXML
     private TextField lastNameField;
@@ -50,10 +50,6 @@ public class UIInscriptionController extends Controller{
     public UIInscriptionController() throws DAOException {
     }
 
-    /**
-     * Gère l'action du bouton "S'inscrire".
-     * Récupère les informations et simule une tentative d'inscription.
-     */
     @FXML
     private void handleRegisterButton() {
         String lastName = lastNameField.getText();
@@ -64,7 +60,6 @@ public class UIInscriptionController extends Controller{
         String password = passwordField.getText();
         String confirmPassword = confirmPasswordField.getText();
 
-        // Logique de validation
         if (lastName.isEmpty() || firstName.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
             showAlert(Alert.AlertType.WARNING, "Champs manquants", "Veuillez remplir tous les champs.");
             return;
@@ -75,7 +70,6 @@ public class UIInscriptionController extends Controller{
             return;
         }
 
-        // Validation simple de l'email (peut être améliorée avec des expressions régulières)
         if (!email.contains("@") || !email.contains(".")) {
             showAlert(Alert.AlertType.ERROR, "Email invalide", "Veuillez entrer une adresse email valide.");
             return;
@@ -104,28 +98,19 @@ public class UIInscriptionController extends Controller{
         System.out.println("Nom: " + lastName);
         System.out.println("Prénom: " + firstName);
         System.out.println("Email: " + email);
-        System.out.println("Mot de passe: " + password); // Attention: Ne jamais stocker le mot de passe en clair en production!
+        System.out.println("Mot de passe: " + password);
 
         showAlert(Alert.AlertType.INFORMATION, "Inscription réussie", "Votre compte a été créé avec succès !");
 
-        // Après l'inscription, vous pourriez rediriger l'utilisateur vers l'écran de connexion
         handleBackToLoginLink(registerButton);
     }
 
-    /**
-     * Gère l'action du bouton "Annuler".
-     * Redirige vers l'écran de connexion.
-     */
     @FXML
     private void handleCancelButton() {
         System.out.println("Bouton Annuler cliqué.");
         handleBackToLoginLink(cancelButton);
     }
 
-    /**
-     * Gère l'action du lien "Vous avez déjà un compte? Connectez-vous".
-     * Redirige vers l'écran de connexion.
-     */
     @FXML
     private void handleBackToLoginLink(Button back) {
         try {
@@ -141,12 +126,6 @@ public class UIInscriptionController extends Controller{
         }
     }
 
-    /**
-     * Affiche une boîte de dialogue d'alerte.
-     * @param alertType Le type d'alerte (INFORMATION, WARNING, ERROR, etc.)
-     * @param title Le titre de la boîte de dialogue.
-     * @param message Le message à afficher.
-     */
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

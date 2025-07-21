@@ -63,7 +63,6 @@ public class UIDashboardClientController extends Observer {
         this.currentClient = currentClient;
     }
 
-    // Exemple de données : Map<Marque, Liste de modèles>
     private final Map<String, List<String>> marqueModelesMap = new HashMap<>();
 
     public UIDashboardClientController() {
@@ -73,7 +72,6 @@ public class UIDashboardClientController extends Observer {
 
     @FXML
     public void initialize() {
-        // --- ToggleGroup pour rendre les RadioButton exclusifs ---
         ToggleGroup disponibiliteToggleGroup = new ToggleGroup();
         toutesRadio.setToggleGroup(disponibiliteToggleGroup);
         disponibleRadio.setToggleGroup(disponibiliteToggleGroup);
@@ -84,7 +82,6 @@ public class UIDashboardClientController extends Observer {
             afficherVoituresSelonDisponibilite();
         });
 
-        // Optionnel : sélectionner "Toutes" par défaut
         marqueComboBox.setPromptText("Toutes");
 
         // Listener pour filtrer les modèles selon la marque choisie
@@ -101,7 +98,6 @@ public class UIDashboardClientController extends Observer {
             modeleComboBox.setPromptText("Tous");
         });
 
-        // Désactiver le ComboBox des modèles tant qu'aucune marque n'est sélectionnée
         modeleComboBox.setDisable(true);
 
         chargerMarquesEtModelesDepuisBase();
@@ -122,20 +118,16 @@ public class UIDashboardClientController extends Observer {
         try {
             Image image;
             if (imageUrl != null && !imageUrl.isEmpty()) {
-                // Essaye d'abord depuis les ressources (classpath)
                 try {
                     image = new Image(getClass().getResource("/images/" + imageUrl).toExternalForm());
                 } catch (Exception e) {
-                    // Si échec, essaye comme URL/fichier absolu
                     image = new Image(imageUrl, true);
                 }
             } else {
-                // Image par défaut
                 image = new Image(getClass().getResource("/images/car_logo.png").toExternalForm());
             }
             imageView.setImage(image);
         } catch (Exception ex) {
-            // Si tout échoue, image vide
             imageView.setImage(new Image("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg=="));
         }
 
@@ -144,7 +136,6 @@ public class UIDashboardClientController extends Observer {
         imageView.setPreserveRatio(true);
         imageView.setStyle("-fx-effect: dropshadow(gaussian, #888, 8, 0.2, 0, 2);");
 
-        // Reste du code inchangé...
         Label statutLabel = new Label(statut);
         statutLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: " + getStatutColor(statut) + ";");
         statutLabel.setGraphic(new Circle(5, Color.web(getStatutColor(statut))));
@@ -165,7 +156,6 @@ public class UIDashboardClientController extends Observer {
         infosBox.getChildren().get(3).setStyle("-fx-font-size: 14px;");
         infosBox.getChildren().get(4).setStyle("-fx-text-fill: " + getStatutColor(statut) + "; -fx-font-size: 14px;");
 
-        // Prix et boutons à droite
         VBox prixBox = new VBox(10);
         prixBox.setAlignment(Pos.CENTER_RIGHT);
 
@@ -236,16 +226,11 @@ public class UIDashboardClientController extends Observer {
         }
     }
 
-    /**
-     * Recherche un véhicule par ses infos (à adapter selon ta logique réelle).
-     */
     private Vehicule findVehiculeByInfos(String marque, String modele, String immatriculation, String imageUrl) {
         try {
-            // Utilise le DAO pour récupérer le véhicule existant
             HibernateObjectDaoImpl<Vehicule> vehiculeDao =
                 new HibernateObjectDaoImpl<>(Vehicule.class);
 
-            // Ici, on suppose que l'immatriculation est unique
             List<Vehicule> vehicules = vehiculeDao.readAll();
             for (Vehicule v : vehicules) {
                 if (v.getMarque().equals(marque)
@@ -277,10 +262,10 @@ public class UIDashboardClientController extends Observer {
 
         List<String> marquesList = new ArrayList<>(marques);
         Collections.sort(marquesList);
-        marquesList.addFirst("Toutes"); // Ajoute "Toutes" en première position
+        marquesList.addFirst("Toutes");
 
         marqueComboBox.setItems(FXCollections.observableArrayList(marquesList));
-        marqueComboBox.getSelectionModel().selectFirst(); // Sélectionne "Toutes" par défaut
+        marqueComboBox.getSelectionModel().selectFirst();
 
         marqueComboBox.setOnAction(event -> {
             String selectedMarque = marqueComboBox.getValue();
@@ -294,13 +279,11 @@ public class UIDashboardClientController extends Observer {
             modeleComboBox.getSelectionModel().clearSelection();
             modeleComboBox.setPromptText("Tous");
 
-            afficherVoituresSelonDisponibilite(); // re-filtre après choix
+            afficherVoituresSelonDisponibilite();
         });
 
         modeleComboBox.setDisable(true);
     }
-
-    // Nouvelle méthode pour afficher selon la disponibilité
     private void afficherVoituresSelonDisponibilite() {
         voituresListVBox.getChildren().clear();
         HibernateObjectDaoImpl<Vehicule> vehiculeDao = new HibernateObjectDaoImpl<>(Vehicule.class);
@@ -310,7 +293,6 @@ public class UIDashboardClientController extends Observer {
         String modeleChoisi = modeleComboBox.getValue();
 
         for (Vehicule v : vehicules) {
-            // Filtrage par disponibilité AVANT l'affichage
             String statutDynamique = getStatutDynamiqueVehicule(v);
             boolean afficher = false;
             if (toutesRadio.isSelected()) {
@@ -321,23 +303,19 @@ public class UIDashboardClientController extends Observer {
                 afficher = true;
             }
 
-            // Filtrage par marque/modèle si sélectionnés
             if (afficher) {
                 if (marqueChoisie != null && !marqueChoisie.equals("Toutes") && !marqueChoisie.equals(v.getMarque())) continue;
                 if (modeleChoisi != null && !modeleChoisi.equals("Tous") && !modeleChoisi.equals(v.getModele())) continue;
 
-                // Récupération des prix
                 double prixSansChauffeur = v.getTarif();
                 double prixAvecChauffeur = v.getTarif() + 7000;
 
                 String statut = getStatutDynamiqueVehicule(v);
 
                 String photoName = null;
-                // Chargement de l'image depuis ressources/images si possible
                 if (v.getPhoto() != null && !v.getPhoto().isEmpty()) {
                     photoName = v.getPhoto();
 
-                    // Extraire le nom de fichier si c'est un chemin complet (optionnel)
                     if (photoName.contains("/")) {
                         photoName = photoName.substring(photoName.lastIndexOf('/') + 1);
                     } else if (photoName.contains("\\")) {
@@ -345,14 +323,12 @@ public class UIDashboardClientController extends Observer {
                     }
 
                     try {
-                        // Essayer de charger depuis classpath /images/
                         InputStream is = getClass().getResourceAsStream("/images/" + photoName);
 
                         if (is != null) {
                             Image image = new Image(is);
                             imageView.setImage(image);
                         } else {
-                            // Si non trouvé dans ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
                             Image image = new Image(v.getPhoto(), true);
                             imageView.setImage(image);
                         }
@@ -371,7 +347,7 @@ public class UIDashboardClientController extends Observer {
     private String getStatutDynamiqueVehicule(Vehicule vehicule) {
         LocalDate today = LocalDate.now();
 
-        List<Reservation> allReservations = controllerReservationList; // Assuming this is kept up-to-date
+        List<Reservation> allReservations = controllerReservationList;
 
         List<Reservation> vehiculeReservations = allReservations.stream()
                 .filter(r -> r.getVehicules() != null && r.getVehicules().contains(vehicule))

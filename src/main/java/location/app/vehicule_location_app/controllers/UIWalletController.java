@@ -1,6 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
 import javafx.fxml.FXML;
+import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Region;
@@ -30,7 +31,7 @@ public class UIWalletController extends Observer {
     private Button buttonRetrait;
 
     @FXML
-    private Label soldeCompteLabel; // Ajoute ce champ dans ton FXML avec fx:id="soldeCompteLabel"
+    private Label soldeCompteLabel;
 
     private Client clientConnecte;
 
@@ -59,7 +60,6 @@ public class UIWalletController extends Observer {
         buttonDepot.setOnAction(e -> handleDepotSelection());
         buttonRetrait.setOnAction(e -> handleRetraitSelection());
 
-        // Initialise le solde au démarrage
         updateSoldeCompteLabel(null);
     }
 
@@ -91,7 +91,6 @@ public class UIWalletController extends Observer {
             Region spacer = new Region();
             HBox.setHgrow(spacer, javafx.scene.layout.Priority.ALWAYS);
 
-            // RadioButton pour activer une seule carte
             RadioButton activerRadio = new RadioButton("Activer");
             activerRadio.setToggleGroup(activationGroup);
             activerRadio.setUserData(carte);
@@ -101,12 +100,10 @@ public class UIWalletController extends Observer {
                 setCarteActive(carte);
             });
 
-            // Sélection par clic sur la carte (pour dépôt/retrait)
             carteBox.setOnMouseClicked(e -> {
                 selectedCarte = carte;
                 updateSoldeCompteLabel(carte);
-                // Met la couleur de fond sélectionnée uniquement sur la carte sélectionnée
-                for (javafx.scene.Node node : cartesListVBox.getChildren()) {
+                for (Node node : cartesListVBox.getChildren()) {
                     if (node instanceof VBox) {
                         if (node == carteBox) {
                             node.setStyle(carteBox.getStyle() + ";-fx-background-color:#e3f2fd;");
@@ -133,7 +130,6 @@ public class UIWalletController extends Observer {
         }
     }
 
-    // Méthode pour obtenir la carte active (activée par le RadioButton)
     private CarteBancaire carteActive = null;
     private CarteBancaire getCarteActive() {
         return carteActive;
@@ -145,11 +141,9 @@ public class UIWalletController extends Observer {
     private CarteBancaire selectedCarte = null;
 
     private CarteBancaire getCarteSelectionnee() {
-        // Priorité à la carte sélectionnée par clic
         if (selectedCarte != null) {
             return selectedCarte;
         }
-        // Sinon, retourne la carte active
         if (carteActive != null) {
             return carteActive;
         }
@@ -165,7 +159,6 @@ public class UIWalletController extends Observer {
         root.setStyle("-fx-padding: 20;");
         root.setAlignment(javafx.geometry.Pos.CENTER);
 
-        // Infos carte
         Label titulaireLbl = new Label("Titulaire : " + carte.getTitulaire());
         Label numeroLbl = new Label("Numéro : " + carte.getNumeroCarte());
         Label cvcLbl = new Label("CVC : " + carte.getCvc());
@@ -176,7 +169,6 @@ public class UIWalletController extends Observer {
         VBox infosBox = new VBox(8, titulaireLbl, numeroLbl, cvcLbl, expLbl, soldeLbl);
         infosBox.setAlignment(javafx.geometry.Pos.CENTER_LEFT);
 
-        // Champ montant
         Label montantLbl = new Label("Montant à " + (isDepot ? "créditer" : "déduire") + " :");
         TextField montantField = new TextField();
         montantField.setPromptText("Montant en FCFA");

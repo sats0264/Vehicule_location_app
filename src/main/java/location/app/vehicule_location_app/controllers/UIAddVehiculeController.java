@@ -42,11 +42,9 @@ public class UIAddVehiculeController{
 
     @FXML
     public void initialize() {
-        // Exemple : Pré-remplissage des marques et modèles
         marqueComboBox.getItems().addAll("Renault", "Peugeot", "Citroen", "Toyota", "Hyundai","Mercedes", "BMW", "Audi", "Volkswagen");
         modeleComboBox.getItems().addAll("Clio", "208", "C3", "Yaris", "i20", "i30", "Tucson", "A-Class", "3 Series", "A4", "Golf");
 
-        // Comportement de sélection de la marque : filtrer les modèles si besoin
         marqueComboBox.setOnAction(e -> {
             String selected = marqueComboBox.getValue();
             modeleComboBox.getItems().clear();
@@ -86,11 +84,9 @@ public class UIAddVehiculeController{
                 Path targetPath = targetDir.resolve(file.getName());
                 Files.copy(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-                // On stocke uniquement le chemin classpath pour l'image
                 selectedPhotoFile = new File(file.getName());
                 photoField.setText(file.getName());
 
-                // Chargement de l'image via classpath (recommandé)
                 Image image = new Image(targetPath.toUri().toString());
                 photoImageView.setImage(image);
 

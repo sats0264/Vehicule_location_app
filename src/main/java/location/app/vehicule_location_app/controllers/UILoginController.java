@@ -35,20 +35,10 @@ public class UILoginController extends Controller {
     public UILoginController() throws DAOException {
     }
 
-    /**
-     * Méthode d'initialisation du contrôleur.
-     * Appelée automatiquement après le chargement du fichier FXML.
-     */
     @FXML
     public void initialize() {
-        // Vous pouvez ajouter ici une logique d'initialisation si nécessaire,
-        // par exemple, préremplir des champs pour le débogage.
     }
 
-    /**
-     * Gère l'action du bouton "Connexion".
-     * Récupère les informations d'identification et simule une tentative de connexion.
-     */
     @FXML
     private void handleLoginButton() {
         String loginInput = usernameField.getText();
@@ -113,11 +103,6 @@ public class UILoginController extends Controller {
         }
     }
 
-
-    /**
-     * Gère l'action du bouton "Annuler".
-     * Ferme la fenêtre de connexion ou réinitialise les champs.
-     */
     @FXML
     private void handleCancelButton() {
         System.out.println("Bouton Annuler cliqué.");
@@ -125,10 +110,6 @@ public class UILoginController extends Controller {
          stage.close();
     }
 
-    /**
-     * Gère l'action du lien "Créer en un".
-     * Simule la navigation vers un écran d'inscription.
-     */
     @FXML
     private void handleCreateAccountLink() {
         System.out.println("Lien 'Créer en un' cliqué.");
@@ -146,12 +127,6 @@ public class UILoginController extends Controller {
         }
     }
 
-    /**
-     * Affiche une boîte de dialogue d'alerte.
-     * @param alertType Le type d'alerte (INFORMATION, WARNING, ERROR, etc.)
-     * @param title Le titre de la boîte de dialogue.
-     * @param message Le message à afficher.
-     */
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);
         alert.setTitle(title);

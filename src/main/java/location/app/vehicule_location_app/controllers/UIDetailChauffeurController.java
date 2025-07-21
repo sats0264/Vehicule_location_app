@@ -23,9 +23,6 @@ public class UIDetailChauffeurController {
     @FXML
     private ImageView photoImageView;
 
-    /**
-     * Méthode appelée pour initialiser les données du chauffeur dans l'interface
-     */
     public void setChauffeur(Chauffeur chauffeur) {
 
         if (chauffeur != null) {
@@ -35,16 +32,14 @@ public class UIDetailChauffeurController {
             statutLabel.setText(chauffeur.getStatut().toString());
             photoLabel.setText(chauffeur.getPhoto() != null ? chauffeur.getPhoto() : "Aucune photo disponible");
 
-            photoImageView.setImage(null); // Force le rafraîchissement
+            photoImageView.setImage(null);
             try {
-                // Essayer de charger depuis classpath /images/
                 InputStream is = getClass().getResourceAsStream(chauffeur.getPhoto());
 
                 Image image;
                 if (is != null) {
                     image = new Image(is);
                 } else {
-                    // Si non trouvé dans les ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
                     image = new Image(chauffeur.getPhoto(), true);
                 }
                 photoImageView.setImage(image);

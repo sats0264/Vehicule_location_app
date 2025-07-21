@@ -58,7 +58,6 @@
                 </Button>
             </HBox>
         </VBox>
-        <!--   photo scection     -->
         <VBox prefWidth="200.0" style="-fx-background-color: white; -fx-padding: 20; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;" HBox.hgrow="ALWAYS">
             <Label text="Photo du véhicule" textFill="#424242">
                 <font>

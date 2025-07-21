@@ -23,7 +23,6 @@ import location.app.vehicule_location_app.observer.Observer;
 import location.app.vehicule_location_app.observer.Subject;
 
 import java.net.URL;
-import java.sql.Time;
 import java.util.ResourceBundle;
 
 public class UINotificationController extends Observer implements Initializable {
@@ -40,16 +39,11 @@ public class UINotificationController extends Observer implements Initializable 
     private Client currentClient;
     private UIFenetreClientController uiFenetreClientController;
 
-    // Constructeur: s'attache au service de notification dès la création de l'instance
     public UINotificationController() {
         this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 
-    /**
-     * Set the MainFenetreController instance. This is called by MainFenetreController after loading this FXML.
-     * @param mainFenetreController The instance of MainFenetreController.
-     */
     public void setMainFenetreController(MainFenetreController mainFenetreController) {
         this.mainFenetreController = mainFenetreController;
     }
@@ -57,10 +51,6 @@ public class UINotificationController extends Observer implements Initializable 
         this.uiFenetreClientController = uiClientController;
     }
 
-    /**
-     * Définit l'utilisateur actuellement connecté. Essentiel pour filtrer les notifications.
-     * @param currentUser L'instance de l'utilisateur connecté.
-     */
     public void setCurrentUser(Utilisateur currentUser) {
         this.currentUser = currentUser;
         NotificationService.getInstance().setUtilisateur(currentUser);
@@ -74,7 +64,6 @@ public class UINotificationController extends Observer implements Initializable 
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Initialisation du service de notification
         notificationService = NotificationService.getInstance();
 
         if (currentUser != null) {
@@ -91,10 +80,6 @@ public class UINotificationController extends Observer implements Initializable 
 
     }
 
-    /**
-     * Charge et affiche les notifications dans la ListView.
-     * Cette méthode doit être appelée chaque fois que les notifications doivent être rafraîchies.
-     */
     public void chargerNotifications() {
         if (notificationService != null && currentUser != null) {
             ObservableList<Notification> notifications = notificationService.getNotifications();
@@ -135,13 +120,12 @@ public class UINotificationController extends Observer implements Initializable 
                 timestampLabel.setStyle("-fx-font-size: 10px; -fx-text-fill: #999999;");
 
                 contentBox.getChildren().addAll(titleLabel, messageLabel, timestampLabel);
-                HBox.setHgrow(contentBox, Priority.ALWAYS); // Allow content to grow horizontally
+                HBox.setHgrow(contentBox, Priority.ALWAYS);
 
                 rootBox.getChildren().addAll(contentBox);
                 rootBox.setPadding(new Insets(10));
                 rootBox.setStyle("-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
 
-                // Add a click listener to the cell
                 rootBox.setOnMouseClicked(event -> {
                     Notification item = getItem();
                     if (item != null) {
@@ -167,13 +151,11 @@ public class UINotificationController extends Observer implements Initializable 
                                                 r.isRead());
 
                         if (isReadForCurrentUser) {
-                            // style GRIS clair (déjà lu)
                             rootBox.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
                             titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px; -fx-text-fill: #888888;");
                             messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
                             rootBox.setOnMouseClicked(null);
                         } else {
-                            // style BLEU (non lu)
                             rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2196f3; -fx-border-width: 2; -fx-border-radius: 5;");
                             titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
                             messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
@@ -181,20 +163,17 @@ public class UINotificationController extends Observer implements Initializable 
 
                         setGraphic(rootBox);
                     } else if (currentClient != null) {
-                        // Si currentClient est défini, on peut aussi vérifier les notifications pour le client
                         boolean isReadForCurrentClient = notification.getReceptions().stream()
                                 .anyMatch(r -> r.getClient() != null &&
                                         r.getClient().equals(currentClient) &&
                                         r.isRead());
 
                         if (isReadForCurrentClient) {
-                            // style GRIS clair (déjà lu)
                             rootBox.setStyle("-fx-background-color: #f0f0f0; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
                             titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px; -fx-text-fill: #888888;");
                             messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #888888;");
                             rootBox.setOnMouseClicked(null);
                         } else {
-                            // style BLEU (non lu)
                             rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #2196f3; -fx-border-width: 2; -fx-border-radius: 5;");
                             titleLabel.setStyle("-fx-font-weight: bold; -fx-font-size: 14px; -fx-text-fill: #333333;");
                             messageLabel.setStyle("-fx-font-size: 12px; -fx-text-fill: #555555;");
@@ -202,7 +181,6 @@ public class UINotificationController extends Observer implements Initializable 
 
                         setGraphic(rootBox);
                     } else {
-                        // Si aucun utilisateur ou client n'est défini, on affiche un style neutre
                         rootBox.setStyle("-fx-background-color: #ffffff; -fx-border-color: #e0e0e0; -fx-border-width: 1; -fx-border-radius: 5;");
                         titleLabel.setStyle("-fx-font-weight: normal; -fx-font-size: 14px;");
                         messageLabel.setStyle("-fx-font-size: 12px;");
@@ -214,11 +192,6 @@ public class UINotificationController extends Observer implements Initializable 
         });
     }
 
-    /**
-     * Handles the click event on a notification tile.
-     * Navigates to the relevant interface and marks the notification as read.
-     * @param notification The clicked notification.
-     */
     private void handleNotificationClick(Notification notification) {
         notificationService.markAsRead(notification);
         notificationListView.refresh();

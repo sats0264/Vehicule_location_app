@@ -90,8 +90,6 @@ public class UIAddChauffeurController {
     public void handleAnnuler(ActionEvent actionEvent) {
         Stage stage = (Stage) annulerButton.getScene().getWindow();
         stage.close();
-        // recharger la liste des chauffeurs si nécessaire
-
     }
 
     @FXML
@@ -113,11 +111,9 @@ public class UIAddChauffeurController {
                 Path targetPath = targetDir.resolve(file.getName());
                 Files.copy(file.toPath(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-                // On stocke uniquement le chemin classpath pour l'image
                 selectedPhotoFile = new File(file.getName());
                 photoField.setText(file.getName());
 
-                // Chargement de l'image via classpath (recommandé)
                 Image image = new Image(targetPath.toUri().toString());
                 photoImageView.setImage(image);
 
