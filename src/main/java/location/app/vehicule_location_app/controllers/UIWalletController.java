@@ -9,10 +9,14 @@ import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.CarteBancaire;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.util.List;
 
-public class UIWalletController {
+import static location.app.vehicule_location_app.controllers.Controller.updateObject;
+
+public class UIWalletController extends Observer {
 
     @FXML
     private VBox cartesListVBox;
@@ -37,6 +41,11 @@ public class UIWalletController {
 
     private ToggleGroup activationGroup = new ToggleGroup();
     private List<CarteBancaire> cartes;
+
+    public UIWalletController() {
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
+    }
 
     @FXML
     private void initialize() {
@@ -212,9 +221,9 @@ public class UIWalletController {
                     }
                     carte.setSolde(carte.getSolde() - montant);
                 }
-                HibernateObjectDaoImpl<CarteBancaire> carteDao = new HibernateObjectDaoImpl<>(CarteBancaire.class);
                 try {
-                    carteDao.update(carte);
+                    updateObject(carte, CarteBancaire.class);
+                    Subject.getInstance().notifyAllObservers();
                 } catch (DAOException ex) {
                     throw new RuntimeException(ex);
                 }
@@ -238,7 +247,6 @@ public class UIWalletController {
             javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/views/UIAddCard.fxml"));
             javafx.scene.Parent root = loader.load();
 
-            // Passe le client connecté au contrôleur de la fenêtre d'ajout
             UIAddCardController addCardController = loader.getController();
             addCardController.setClientConnecte(clientConnecte);
 
@@ -276,5 +284,11 @@ public class UIWalletController {
         if (carte != null) {
             ouvrirPopupTransaction(carte, false);
         }
+    }
+
+    @Override
+    public void update() {
+        afficherCartesClient();
+        updateSoldeCompteLabel(carteActive);
     }
 }

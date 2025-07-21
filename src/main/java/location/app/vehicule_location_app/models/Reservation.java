@@ -17,6 +17,9 @@ public class Reservation {
     private LocalDate dateDebut;
     private LocalDate dateFin;
 
+    private LocalDate proposedDateDebut;
+    private LocalDate proposedDateFin;
+
     @Enumerated(EnumType.STRING)
     private StatutReservation statut;
 
@@ -117,6 +120,22 @@ public class Reservation {
 
     public void setChauffeurs(List<Chauffeur> chauffeurs) {
         this.chauffeurs = chauffeurs;
+    }
+
+    public LocalDate getProposedDateDebut() {
+        return proposedDateDebut;
+    }
+
+    public void setProposedDateDebut(LocalDate proposedDateDebut) {
+        this.proposedDateDebut = proposedDateDebut;
+    }
+
+    public LocalDate getProposedDateFin() {
+        return proposedDateFin;
+    }
+
+    public void setProposedDateFin(LocalDate proposedDateFin) {
+        this.proposedDateFin = proposedDateFin;
     }
 
 }
