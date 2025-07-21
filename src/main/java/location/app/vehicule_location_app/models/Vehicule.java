@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity(name = "T_Vehicule")
 public class Vehicule {
@@ -45,6 +46,24 @@ public class Vehicule {
         this.statut = statut;
         this.immatriculation = immatriculation;
         this.photo = photo;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vehicule vehicule = (Vehicule) o;
+        return Objects.equals(immatriculation, vehicule.immatriculation);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(immatriculation);
+    }
+
+    @Override
+    public String toString() {
+        return marque + " " + modele + " (" + immatriculation + ")";
     }
 
     public int getId() {
