@@ -110,6 +110,13 @@ public class UIFenetreClientController extends Observer implements Initializable
             FXMLLoader loader = new FXMLLoader(getClass().getResource(fxmlPath));
             Parent view = loader.load();
 
+            if ("/views/UIDashboardClient.fxml".equals(fxmlPath)) {
+                Object controller = loader.getController();
+                if (controller instanceof UIDashboardClientController) {
+                    ((UIDashboardClientController) controller).setCurrentClient(currentClient);
+                }
+            }
+
             // Passe le client connecté au contrôleur du portefeuille
             if ("/views/UIWallet.fxml".equals(fxmlPath)) {
                 Object controller = loader.getController();

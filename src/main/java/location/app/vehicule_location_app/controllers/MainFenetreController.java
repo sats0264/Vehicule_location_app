@@ -78,7 +78,6 @@ public class MainFenetreController extends Observer implements Initializable {
 
         updateDateTimeLabel();
         loadView("/views/UIDashboard.fxml");
-        setSelectedButton(dashboardButton);
 
         Timeline timeline = new Timeline(
                 new KeyFrame(Duration.seconds(0), e -> updateDateTimeLabel()),
@@ -156,56 +155,38 @@ public class MainFenetreController extends Observer implements Initializable {
         }
     }
 
-    private void setSelectedButton(Button selectedButton) {
-        dashboardButton.getStyleClass().remove("selected-menu-btn");
-        reservationsButton.getStyleClass().remove("selected-menu-btn");
-        clientsButton.getStyleClass().remove("selected-menu-btn");
-        voituresButton.getStyleClass().remove("selected-menu-btn");
-        notificationsButton.getStyleClass().remove("selected-menu-btn");
-
-        // Ajoute la classe au bouton sélectionné
-        selectedButton.getStyleClass().add("selected-menu-btn");
-    }
-
     @FXML
     private void handleDashboardClick() {
-        setSelectedButton(dashboardButton);
         loadView("/views/UIDashboard.fxml");
     }
 
     @FXML
     private void handleReservationsClick() {
-        setSelectedButton(reservationsButton);
         loadView("/views/UIReservation.fxml");
     }
 
     @FXML
     private void handleClientsClick() {
-        setSelectedButton(clientsButton);
         loadView("/views/UIClient.fxml");
     }
 
 
     @FXML
     private void handleVoituresClick() {
-        setSelectedButton(voituresButton);
         loadView("/views/UIVehicule.fxml");
     }
 
     @FXML
     private void handleChauffeursClick() {
-        setSelectedButton(chauffeursButton);
         loadView("/views/UIChauffeur.fxml");
     }
 
     @FXML
     private void handleNotificationClick() {
-        setSelectedButton(notificationsButton);
         loadView("/views/UINotification.fxml");
     }
 
     public void showUIHistoriqueClient (Client selectedClient) throws IOException {
-        setSelectedButton(notificationsButton);
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIHistoriqueClient.fxml"));
         Parent view = loader.load();
         contentArea.getChildren().setAll(view);

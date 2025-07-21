@@ -9,23 +9,21 @@
 
 <BorderPane fx:id="mainBorderPane" prefHeight="720.0" prefWidth="1200.0" xmlns="http://javafx.com/javafx/17.0.12" xmlns:fx="http://javafx.com/fxml/1" fx:controller="location.app.vehicule_location_app.controllers.MainFenetreController">
     <top>
-        <!-- Top Menu Bar (HBox) - Similar to your previous design -->
         <HBox alignment="CENTER_LEFT" prefHeight="60.0" spacing="10.0" style="-fx-background-color: #f0f0f0; -fx-padding: 0 20;">
             <padding>
                 <Insets bottom="5.0" left="20.0" right="20.0" top="5.0" />
             </padding>
             <ImageView fitHeight="40.0" fitWidth="40.0" pickOnBounds="true" preserveRatio="true">
                 <image>
-                    <!-- Ensure car_logo.png is in src/main/resources/images/ -->
                     <Image url="@../images/car_logo.png" />
                 </image>
             </ImageView>
-            <Label text="RENTAL CAR" textFill="#2196f3">
+            <Label text="SEN LOCATION" textFill="#2196f3">
                 <font>
-                    <Font name="System Bold" size="24.0" />
+                    <Font name="Elephant" size="24.0" />
                 </font>
             </Label>
-            <Region HBox.hgrow="ALWAYS" /> <!-- Pushes content to the right -->
+            <Region HBox.hgrow="ALWAYS" />
             <Label fx:id="dateTimeLabel" text="24/02/2023 00:58:42" textFill="#616161">
                 <font>
                     <Font size="14.0" />
@@ -34,7 +32,6 @@
             <Button contentDisplay="GRAPHIC_ONLY" graphicTextGap="5.0" minHeight="30.0" minWidth="30.0" style="-fx-background-color: transparent;">
                 <graphic>
                     <ImageView fitHeight="25.0" fitWidth="25.0" pickOnBounds="true" preserveRatio="true">
-                        <!-- Ensure user_icon.png is in src/main/resources/images/ -->
                         <Image url="@../images/user_icon.png" />
                     </ImageView>
                 </graphic>
@@ -74,9 +71,7 @@
     </left>
 
     <center>
-        <!-- This AnchorPane will hold the dynamically loaded content (e.g., dashboard, vehicle management) -->
         <AnchorPane fx:id="contentArea" prefHeight="1000.0" prefWidth="640.0" style="-fx-background-color: #ffffff;">
-
         </AnchorPane>
     </center>
 </BorderPane>

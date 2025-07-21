@@ -18,9 +18,9 @@
                     <Image url="@../images/car_logo.png" />
                 </image>
             </ImageView>
-            <Label text="RENTAL CAR" textFill="#2196f3">
+            <Label text="SEN LOCATION" textFill="#2196f3">
                 <font>
-                    <Font name="System Bold" size="24.0" />
+                    <Font name="Elephant" size="24.0" />
                 </font>
             </Label>
             <Region HBox.hgrow="ALWAYS" />
