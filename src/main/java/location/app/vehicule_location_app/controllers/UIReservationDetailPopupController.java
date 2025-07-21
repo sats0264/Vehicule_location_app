@@ -12,17 +12,18 @@ import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.Notification;
-import location.app.vehicule_location_app.models.NotificationType;
+import location.app.vehicule_location_app.models.NotificationType; // Corrected import for NotificationType
 import location.app.vehicule_location_app.models.Reservation;
 import location.app.vehicule_location_app.models.StatutReservation;
 import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.observer.Subject; // Ensure this is imported
 
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
-import static location.app.vehicule_location_app.controllers.Controller.updateObject;
+import static location.app.vehicule_location_app.controllers.Controller.updateObject; // Keep this static import
 
 public class UIReservationDetailPopupController {
 
@@ -45,13 +46,13 @@ public class UIReservationDetailPopupController {
     private Label statutLabel;
 
     @FXML
-    private Label newDateDebutLabel; // Label pour "Nouvelle date début"
+    private Label newDateDebutLabel; // Label for "Nouvelle date début"
     @FXML
-    private DatePicker dateDebutPicker; // DatePicker pour la modification
+    private DatePicker dateDebutPicker; // DatePicker for modification
     @FXML
-    private Label newDateFinLabel;   // Label pour "Nouvelle date fin"
+    private Label newDateFinLabel;   // Label for "Nouvelle date fin"
     @FXML
-    private DatePicker dateFinPicker;   // DatePicker pour la modification
+    private DatePicker dateFinPicker;   // DatePicker for modification
 
     @FXML
     private Button requestModificationBtn;
@@ -66,27 +67,27 @@ public class UIReservationDetailPopupController {
 
     private Stage dialogStage;
     private Reservation reservation;
-    private Vehicule vehicule; // Le véhicule associé à la réservation
+    private Vehicule vehicule; // The vehicle associated with the reservation
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     /**
-     * Définit la scène (Stage) de ce popup.
-     * @param dialogStage Le Stage de la fenêtre modale.
+     * Sets the stage for this popup.
+     * @param dialogStage The modal Stage window.
      */
     public void setDialogStage(Stage dialogStage) {
         this.dialogStage = dialogStage;
     }
 
     /**
-     * Initialise les données de la réservation et du véhicule dans l'interface.
-     * @param reservation L'objet Reservation à afficher.
-     * @param vehicule L'objet Vehicule associé à la réservation.
+     * Initializes reservation and vehicle data in the interface.
+     * @param reservation The Reservation object to display.
+     * @param vehicule The Vehicule object associated with the reservation.
      */
     public void setReservationAndVehicule(Reservation reservation, Vehicule vehicule) {
         this.reservation = reservation;
         this.vehicule = vehicule;
 
-        // Affichage des détails du véhicule
+        // Display vehicle details
         if (vehicule != null) {
             marqueLabel.setText(vehicule.getMarque());
             modeleLabel.setText(vehicule.getModele());
@@ -99,18 +100,18 @@ public class UIReservationDetailPopupController {
             vehiculeImageView.setImage(null);
         }
 
-        // Affichage des détails de la réservation
+        // Display reservation details
         reservationIdLabel.setText(String.valueOf(reservation.getId()));
         dateDebutDisplayLabel.setText(reservation.getDateDebut().format(dateFormatter));
         dateFinDisplayLabel.setText(reservation.getDateFin().format(dateFormatter));
         statutLabel.setText(reservation.getStatut().toString());
         updateStatutLabelStyle(reservation.getStatut());
 
-        // Initialiser les DatePickers avec les dates actuelles (cachés par défaut)
+        // Initialize DatePickers with current dates (hidden by default)
         dateDebutPicker.setValue(reservation.getDateDebut());
         dateFinPicker.setValue(reservation.getDateFin());
 
-        // Configurer les actions et la visibilité des boutons selon le statut
+        // Configure button actions and visibility based on status
         configureButtonsByStatus();
     }
 
@@ -122,7 +123,7 @@ public class UIReservationDetailPopupController {
         directCancelBtn.setOnAction(event -> handleDirectCancel());
         saveModificationBtn.setOnAction(event -> handleSaveModification());
 
-        // Cacher les DatePickers et leurs labels par défaut
+        // Hide DatePickers and their labels by default
         newDateDebutLabel.setVisible(false);
         newDateDebutLabel.setManaged(false);
         dateDebutPicker.setVisible(false);
@@ -134,10 +135,10 @@ public class UIReservationDetailPopupController {
     }
 
     /**
-     * Configure la visibilité et l'action des boutons en fonction du statut de la réservation.
+     * Configures the visibility and action of buttons based on the reservation status.
      */
     private void configureButtonsByStatus() {
-        // Cacher tous les boutons d'action par défaut
+        // Hide all action buttons by default
         requestModificationBtn.setVisible(false);
         requestModificationBtn.setManaged(false);
         requestCancellationBtn.setVisible(false);
@@ -171,8 +172,8 @@ public class UIReservationDetailPopupController {
     }
 
     /**
-     * Met à jour le style du label de statut en fonction de la valeur.
-     * @param statut Le statut de la réservation.
+     * Updates the style of the status label based on its value.
+     * @param statut The reservation status.
      */
     private void updateStatutLabelStyle(StatutReservation statut) {
         String style = "-fx-font-size: 16px; -fx-font-weight: bold;";
@@ -203,16 +204,17 @@ public class UIReservationDetailPopupController {
 
 
     /**
-     * Gère la demande de modification de réservation.
-     * Rend les DatePickers visibles et le bouton "Enregistrer la modification".
+     * Handles the modification request.
+     * Makes the DatePickers visible and the "Save Modification" button.
      */
     private void handleRequestModification() {
-        // Afficher les DatePickers et cacher les labels d'affichage
+        // Hide display labels for dates
         dateDebutDisplayLabel.setVisible(false);
         dateDebutDisplayLabel.setManaged(false);
         dateFinDisplayLabel.setVisible(false);
         dateFinDisplayLabel.setManaged(false);
 
+        // Show DatePickers and their labels
         newDateDebutLabel.setVisible(true);
         newDateDebutLabel.setManaged(true);
         dateDebutPicker.setVisible(true);
@@ -222,7 +224,7 @@ public class UIReservationDetailPopupController {
         dateFinPicker.setVisible(true);
         dateFinPicker.setManaged(true);
 
-        // Cacher les boutons de demande et afficher le bouton d'enregistrement
+        // Hide request buttons and show save modification button
         requestModificationBtn.setVisible(false);
         requestModificationBtn.setManaged(false);
         requestCancellationBtn.setVisible(false);
@@ -235,8 +237,9 @@ public class UIReservationDetailPopupController {
     }
 
     /**
-     * Gère l'enregistrement de la modification de réservation.
-     * Met à jour la réservation dans la base de données et envoie une notification.
+     * Handles saving the modification request.
+     * Updates the reservation status to MODIFICATION_EN_ATTENTE and sends a notification to the admin.
+     * The actual dates are NOT changed in the database at this stage.
      */
     private void handleSaveModification() {
         LocalDate newDateDebut = dateDebutPicker.getValue();
@@ -256,96 +259,98 @@ public class UIReservationDetailPopupController {
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmer la modification");
-        confirm.setHeaderText("Confirmer la modification de la réservation N°" + reservation.getId() + " ?");
-        confirm.setContentText("Les dates seront changées du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) +
-                "\nvers du " + newDateDebut.format(dateFormatter) + " au " + newDateFin.format(dateFormatter) + ".");
+        confirm.setTitle("Confirmer la demande de modification");
+        confirm.setHeaderText("Confirmer la demande de modification pour la réservation N°" + reservation.getId() + " ?");
+        confirm.setContentText("Votre demande de modification des dates du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) +
+                "\nvers du " + newDateDebut.format(dateFormatter) + " au " + newDateFin.format(dateFormatter) + " sera envoyée à l'administration.");
         Optional<ButtonType> result = confirm.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-
             try {
-                reservation.setDateDebut(newDateDebut);
-                reservation.setDateFin(newDateFin);
-                reservation.setStatut(StatutReservation.MODIFICATION_EN_ATTENTE);
+                // --- NOUVEAU: Définir les dates proposées sur l'objet Reservation ---
+                reservation.setProposedDateDebut(newDateDebut);
+                reservation.setProposedDateFin(newDateFin);
+                // ------------------------------------------------------------------
 
+                reservation.setStatut(StatutReservation.MODIFICATION_EN_ATTENTE);
                 updateObject(reservation, Reservation.class);
 
-                // Envoyer une notification à l'administration
-                Notification notification = new Notification(
+                Subject.getInstance().notifyAllObservers();
+
+                Notification notificationToAdmin = new Notification(
                         "Demande de Modification Réservation",
                         "Le client " + reservation.getClient().getNom() + " " + reservation.getClient().getPrenom() +
-                                " a demandé une modification pour la réservation N°" + reservation.getId() +
-                                " aux dates du " + newDateDebut.format(dateFormatter) + " au " + newDateFin.format(dateFormatter) + ".",
+                                " a demandé une modification pour la réservation N°" + reservation.getId() + ".\n" +
+                                "Dates actuelles: Du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) + ".\n" +
+                                "Nouvelles dates proposées: Du " + newDateDebut.format(dateFormatter) + " au " + newDateFin.format(dateFormatter) + ".",
                         NotificationType.RESERVATION_MODIFICATION_REQUEST,
-                        reservation.getId()
+                        reservation.getId() // Ensure ID is String
                 );
-                NotificationService.getInstance().addNotification(notification);
+                NotificationService.getInstance().addNotification(notificationToAdmin);
 
                 Notification notificationToClient = new Notification(
-                        "Demande de Modification Reservation",
-                        "Votre demande de modification de la réservation a été envoyée. Un administrateur la traitera bientôt.",
+                        "Demande de Modification Réservation",
+                        "Votre demande de modification de la réservation N°" + reservation.getId() + " a été envoyée. Un administrateur la traitera bientôt.",
                         NotificationType.CLIENT_RESERVATION_MODIFICATION_REQUEST,
-                        reservation.getClient().getId()
+                        reservation.getClient().getId() // Ensure ID is String
                 );
                 NotificationService.getInstance().addNotificationForClient(notificationToClient, reservation.getClient());
 
-                showAlert(Alert.AlertType.INFORMATION, "Modification enregistrée", "Votre demande de modification a été envoyée. Un administrateur la traitera bientôt.");
+                showAlert(Alert.AlertType.INFORMATION, "Demande enregistrée", "Votre demande de modification a été envoyée. Un administrateur la traitera bientôt.");
                 dialogStage.close();
-
             } catch (DAOException ex) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de modification", "Impossible d'enregistrer la modification : " + ex.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur de demande", "Impossible d'envoyer la demande de modification : " + ex.getMessage());
+                ex.printStackTrace();
             }
         }
     }
 
     /**
-     * Gère la demande d'annulation de réservation (pour PAYEMENT_EN_ATTENTE).
-     * Envoie une notification à l'administration.
+     * Handles the cancellation request (for PAYEMENT_EN_ATTENTE or CONFIRMEE).
+     * Sends a notification to the administration.
      */
     private void handleRequestCancellation() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Confirmer l'annulation");
+        confirm.setTitle("Confirmer la demande d'annulation");
         confirm.setHeaderText("Confirmer la demande d'annulation de la réservation N°" + reservation.getId() + " ?");
         confirm.setContentText("Votre demande sera envoyée à l'administration pour traitement.");
         Optional<ButtonType> result = confirm.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-
             try {
                 reservation.setStatut(StatutReservation.ANNULATION_EN_ATTENTE);
                 updateObject(reservation, Reservation.class);
+                Subject.getInstance().notifyAllObservers();
 
-                // Envoyer une notification à l'administration
-                Notification notification = new Notification(
+                Notification notificationToAdmin = new Notification(
                         "Demande d'Annulation Réservation",
                         "Le client " + reservation.getClient().getNom() + " " + reservation.getClient().getPrenom() +
                                 " a demandé l'annulation de la réservation N°" + reservation.getId() + ".",
                         NotificationType.RESERVATION_CANCELLATION_REQUEST,
                         reservation.getId()
                 );
-                NotificationService.getInstance().addNotification(notification);
+                NotificationService.getInstance().addNotification(notificationToAdmin);
 
-                // Envoyer une notification au client
                 Notification notificationToClient = new Notification(
                         "Demande d'Annulation Réservation",
-                        "Votre demande d'annulation de la réservation a été envoyée. Un administrateur la traitera bientôt.",
+                        "Votre demande d'annulation de la réservation N°" + reservation.getId() + " a été envoyée. Un administrateur la traitera bientôt.",
                         NotificationType.CLIENT_RESERVATION_ANNULATION_REQUEST,
                         reservation.getClient().getId()
                 );
                 NotificationService.getInstance().addNotificationForClient(notificationToClient, reservation.getClient());
+
                 showAlert(Alert.AlertType.INFORMATION, "Demande d'annulation envoyée", "Votre demande d'annulation a été envoyée. Un administrateur la traitera bientôt.");
                 dialogStage.close();
-
             } catch (DAOException e) {
                 showAlert(Alert.AlertType.ERROR, "Erreur d'annulation", "Impossible d'envoyer la demande d'annulation : " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
     /**
-     * Gère l'annulation directe de réservation (pour EN_ATTENTE).
-     * Met à jour le statut de la réservation à ANNULEE directement.
+     * Handles direct cancellation of a reservation (for EN_ATTENTE status).
+     * Directly updates the reservation status to ANNULEE.
      */
     private void handleDirectCancel() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
@@ -355,22 +360,25 @@ public class UIReservationDetailPopupController {
         Optional<ButtonType> result = confirm.showAndWait();
 
         if (result.isPresent() && result.get() == ButtonType.OK) {
-
             try {
                 reservation.setStatut(StatutReservation.ANNULEE);
+                // No need to update associated entities status here, as the reservation was EN_ATTENTE
+                // and thus vehicles/chauffeurs were not yet marked INDISPONIBLE
                 updateObject(reservation, Reservation.class);
 
-                // Envoyer une notification à l'administration
-                Notification notification = new Notification(
+                Subject.getInstance().notifyAllObservers(); // Notify admin UI to refresh
+
+                // Send notification to administration
+                Notification notificationToAdmin = new Notification(
                         "Réservation Annulée par Client",
                         "Le client " + reservation.getClient().getNom() + " " + reservation.getClient().getPrenom() +
                                 " a annulé directement la réservation N°" + reservation.getId() + ".",
-                        NotificationType.RESERVATION_CANCELLATION_SUCCESS,
+                        NotificationType.RESERVATION_CANCELLATION_SUCCESS, // New type if needed
                         reservation.getId()
                 );
-                NotificationService.getInstance().addNotification(notification);
+                NotificationService.getInstance().addNotification(notificationToAdmin);
 
-                // Envoyer une notification au client
+                // Send notification to client
                 Notification notificationToClient = new Notification(
                         "Réservation Annulée",
                         "Votre réservation N°" + reservation.getId() + " a été annulée avec succès.",
@@ -380,16 +388,19 @@ public class UIReservationDetailPopupController {
                 NotificationService.getInstance().addNotificationForClient(notificationToClient, reservation.getClient());
 
                 showAlert(Alert.AlertType.INFORMATION, "Réservation annulée", "La réservation N°" + reservation.getId() + " a été annulée avec succès.");
+                dialogStage.close(); // Close the popup
+                // TODO: Consider refreshing the parent view (e.g., UIReservationController) if needed
             } catch (DAOException e) {
-                throw new RuntimeException(e);
+                showAlert(Alert.AlertType.ERROR, "Erreur d'annulation", "Impossible d'annuler la réservation : " + e.getMessage());
+                e.printStackTrace();
             }
         }
     }
 
 
     /**
-     * Charge l'image du véhicule avec gestion d'erreur robuste.
-     * @param imageUrl Le chemin ou l'URL de l'image.
+     * Loads the vehicle image with robust error handling.
+     * @param imageUrl The path or URL of the image.
      */
     private void loadVehiculeImage(String imageUrl) {
         String photoName = null;
@@ -407,22 +418,22 @@ public class UIReservationDetailPopupController {
                 if (is != null) {
                     vehiculeImageView.setImage(new Image(is));
                 } else {
-                    vehiculeImageView.setImage(new Image(imageUrl, true)); // Tente de charger directement l'URL
+                    vehiculeImageView.setImage(new Image(imageUrl, true)); // Tries to load directly from URL
                 }
             } catch (Exception e) {
                 System.err.println("Erreur lors du chargement de l'image du véhicule: " + e.getMessage());
                 vehiculeImageView.setImage(null);
             }
         } else {
-            vehiculeImageView.setImage(null); // Pas de photo définie
+            vehiculeImageView.setImage(null); // No photo defined
         }
     }
 
     /**
-     * Affiche une alerte.
-     * @param alertType Type de l'alerte.
-     * @param title Titre de l'alerte.
-     * @param message Message de l'alerte.
+     * Displays an alert.
+     * @param alertType Type of alert.
+     * @param title Alert title.
+     * @param message Alert message.
      */
     private void showAlert(Alert.AlertType alertType, String title, String message) {
         Alert alert = new Alert(alertType);

@@ -257,13 +257,12 @@ public class UIFactureClientController {
             return;
         }
 
-        // Déduction du solde et mise à jour
-        selectedCarte.setSolde(selectedCarte.getSolde() - montantTotal);
         try {
-//            new HibernateObjectDaoImpl<>(CarteBancaire.class).update(selectedCarte);
-            var daoCarte = ConcreteFactory.getFactory(HibernateFactory.class)
-                    .getHibernateObjectDaoImpl(CarteBancaire.class);
-            daoCarte.update(selectedCarte);
+            double newSolde = selectedCarte.getSolde() - montantTotal;
+            selectedCarte.setSolde(newSolde);
+//            var daoCarte = ConcreteFactory.getFactory(HibernateFactory.class)
+//                    .getHibernateObjectDaoImpl(CarteBancaire.class);
+            updateObject(selectedCarte, CarteBancaire.class);
 
             // Afficher un message de succès
             showAlert(Alert.AlertType.INFORMATION, "Paiement effectué",
@@ -282,6 +281,7 @@ public class UIFactureClientController {
             reservation.getClient().setPointFidelite(pointsActuels + pointsGagnes);
             updateObject(reservation.getClient(), Client.class);
 
+            Subject.getInstance().notifyAllObservers();
 
             Notification notificationUser = new Notification(
                     "Paiement effectué",

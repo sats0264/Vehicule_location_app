@@ -1,5 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -7,35 +9,29 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
-
+import javafx.scene.control.Alert;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.Reservation; // Import your Reservation model
-import location.app.vehicule_location_app.models.Client;     // Assuming you have a Client model
-import location.app.vehicule_location_app.models.Vehicule;   // Assuming you have a Vehicule model
+import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Reservation;
+import location.app.vehicule_location_app.models.StatutReservation;
+import location.app.vehicule_location_app.models.Vehicule;
 import location.app.vehicule_location_app.observer.Observer;
-// Assuming you have a Statut enum
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 import java.time.format.DateTimeFormatter;
 
-import static location.app.vehicule_location_app.controllers.Controller.*;
+import static location.app.vehicule_location_app.controllers.Controller.reservationDao;
 
 public class UIReservationController extends Observer {
 
-    // --- Action Buttons (now acting on the table selection) ---
-    @FXML
-    private Button refreshButton;
-    @FXML
-    private Button searchButton;
-    @FXML
-    private Button deleteButton;
-    @FXML
-    private Button inspectReservationButton;
-
-    // --- Reservations List Table ---
     @FXML
     private TableView<Reservation> reservationsTable;
     @FXML
@@ -55,17 +51,19 @@ public class UIReservationController extends Observer {
     @FXML
     private TableColumn<Reservation, String> resListMarqueColumn;
 
-    private ObservableList<Reservation> reservationList;
+    @FXML
+    private ComboBox<StatutReservation> statusFilterComboBox;
+
+    private ObservableList<Reservation> masterReservationList;
     private final DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     public UIReservationController() {
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
     }
 
     @FXML
     public void initialize() {
-
-        reservationList = FXCollections.observableArrayList(controllerReservationList);
-
         resListStartDateColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getDateDebut() != null
                         ? cellData.getValue().getDateDebut().format(dateFormatter)
@@ -106,26 +104,95 @@ public class UIReservationController extends Observer {
             return new ReadOnlyStringWrapper(v != null ? v.getMarque() : "");
         });
 
-        reservationsTable.setItems(reservationList);
+        statusFilterComboBox.getItems().add(null);
+        statusFilterComboBox.setButtonCell(new ListCell<StatutReservation>() {
+            @Override
+            protected void updateItem(StatutReservation item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Tous les statuts");
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
+        statusFilterComboBox.setCellFactory(lv -> new ListCell<>() {
+            @Override
+            protected void updateItem(StatutReservation item, boolean empty) {
+                super.updateItem(item, empty);
+                if (empty || item == null) {
+                    setText("Tous les statuts");
+                } else {
+                    setText(item.toString());
+                }
+            }
+        });
 
+        statusFilterComboBox.getItems().addAll(StatutReservation.values());
+        statusFilterComboBox.setValue(null);
+
+        statusFilterComboBox.valueProperty().addListener((obs, oldVal, newVal) -> filterReservations());
+
+        loadReservationsAndFilter();
+
+        Timeline timeLine = new Timeline(
+                new KeyFrame(Duration.seconds(5), event ->{
+                        loadReservationsAndFilter();
+                }
+        ));
+        timeLine.setCycleCount(Timeline.INDEFINITE);
+        timeLine.play();
     }
 
+    private void loadReservationsAndFilter() {
+        try {
+            masterReservationList = FXCollections.observableArrayList(reservationDao.list());
+            filterReservations();
+        } catch (DAOException e) {
+            e.printStackTrace();
+            showAlert(Alert.AlertType.ERROR, "Erreur de chargement", "Impossible de charger les réservations.");
+        }
+    }
+
+    private void filterReservations() {
+        StatutReservation selectedStatus = statusFilterComboBox.getValue();
+        ObservableList<Reservation> filteredList = FXCollections.observableArrayList();
+
+        if (selectedStatus == null) {
+            filteredList.addAll(masterReservationList);
+        } else {
+            for (Reservation res : masterReservationList) {
+                if (res.getStatut() == selectedStatus) {
+                    filteredList.add(res);
+                }
+            }
+        }
+        reservationsTable.setItems(filteredList);
+        reservationsTable.refresh();
+    }
+
+
     public void selectReservationById(int reservationId) {
-        if (reservationsTable == null || reservationsTable.getItems().isEmpty()) {
+        if (reservationsTable == null || masterReservationList == null || masterReservationList.isEmpty()) {
             System.err.println("Table des réservations non initialisée ou vide. Impossible de sélectionner.");
             return;
         }
-        for (Reservation reservation : reservationsTable.getItems()) {
-            if (reservation.getId() == reservationId) {
-                reservationsTable.getSelectionModel().select(reservation);
-                reservationsTable.scrollTo(reservation);
-                System.out.println("Réservation sélectionnée: ID " + reservationId);
-                break;
+        Reservation reservationToSelect = masterReservationList.stream()
+                .filter(r -> r.getId() == reservationId)
+                .findFirst()
+                .orElse(null);
+
+        if (reservationToSelect != null) {
+            if (statusFilterComboBox.getValue() != null && statusFilterComboBox.getValue() != reservationToSelect.getStatut()) {
+                statusFilterComboBox.setValue(null);
             }
+            reservationsTable.getSelectionModel().select(reservationToSelect);
+            reservationsTable.scrollTo(reservationToSelect);
+            System.out.println("Réservation sélectionnée: ID " + reservationId);
+        } else {
+            System.out.println("Réservation avec ID " + reservationId + " non trouvée dans la liste.");
         }
     }
-
-    // --- Event Handlers for Buttons ---
 
     @FXML
     private void handleInspectReservationButton() {
@@ -139,33 +206,8 @@ public class UIReservationController extends Observer {
 
     @FXML
     private void handleRefreshButton() {
-        try {
-            reservationList = FXCollections.observableArrayList(reservationDao.list());
-            reservationsTable.setItems(reservationList);
-            showAlert(Alert.AlertType.INFORMATION, "Rafraîchir", "Liste des réservations rafraîchie.");
-        } catch (DAOException e) {
-            e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de rafraîchir les réservations.");
-        }
-    }
-
-    @FXML
-    private void handleSearchButton() {
-        System.out.println("Search button clicked!");
-        showAlert(Alert.AlertType.INFORMATION, "Rechercher Réservation", "Logique pour rechercher des réservations.");
-        // This would typically open a search dialog or filter the table.
-    }
-
-    @FXML
-    private void handleDeleteButton() {
-        System.out.println("Delete button clicked!");
-        Reservation selectedReservation = reservationsTable.getSelectionModel().getSelectedItem();
-        if (selectedReservation != null) {
-            reservationList.remove(selectedReservation);
-            showAlert(Alert.AlertType.INFORMATION, "Suppression", "Réservation supprimée avec succès.");
-        } else {
-            showAlert(Alert.AlertType.WARNING, "Aucune sélection", "Veuillez sélectionner une réservation à supprimer.");
-        }
+        loadReservationsAndFilter();
+        showAlert(Alert.AlertType.INFORMATION, "Rafraîchir", "Liste des réservations rafraîchie.");
     }
 
     private void showAlert(Alert.AlertType alertType, String title, String message) {
@@ -178,7 +220,7 @@ public class UIReservationController extends Observer {
 
     private Vehicule getFirstVehicule(Reservation reservation) {
         if (reservation.getVehicules() != null && !reservation.getVehicules().isEmpty()) {
-            return reservation.getVehicules().get(0);
+            return reservation.getVehicules().getFirst();
         }
         return null;
     }
@@ -188,23 +230,26 @@ public class UIReservationController extends Observer {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/views/UIInspectReservation.fxml"));
             Parent root = loader.load();
 
-            // Récupérer le contrôleur pour lui transmettre la réservation sélectionnée
             UIInspectReservationController controller = loader.getController();
-            controller.setReservation(reservation); // méthode à créer dans le contrôleur
+            controller.setReservation(reservation);
 
             Stage stage = new Stage();
             stage.setTitle("Détails de la Réservation");
             stage.setScene(new Scene(root));
-            stage.initModality(Modality.APPLICATION_MODAL); // bloque la fenêtre principale
+            stage.initModality(Modality.APPLICATION_MODAL);
+
             stage.showAndWait();
+
+            update();
         } catch (IOException e) {
             e.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la vue d'inspection.");
+            showAlert(Alert.AlertType.ERROR, "Erreur", "Impossible de charger la vue de détails de la réservation.");
         }
     }
+// ...
 
     @Override
     public void update() {
-        reservationList.setAll(controllerReservationList);
+        loadReservationsAndFilter();
     }
 }

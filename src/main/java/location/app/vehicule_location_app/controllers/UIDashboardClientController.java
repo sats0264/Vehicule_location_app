@@ -1,9 +1,12 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.geometry.Pos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -11,16 +14,27 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.models.Reservation;
+import location.app.vehicule_location_app.models.StatutReservation;
 import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.InputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
-public class UIDashboardClientController {
+import static location.app.vehicule_location_app.controllers.Controller.controllerReservationList;
+
+public class UIDashboardClientController extends Observer {
 
     @FXML
     private ComboBox<String> marqueComboBox;
@@ -30,7 +44,7 @@ public class UIDashboardClientController {
 
     @FXML
     private RadioButton toutesRadio;
-    
+
     @FXML
     private RadioButton disponibleRadio;
 
@@ -45,8 +59,17 @@ public class UIDashboardClientController {
 
     private Client currentClient;
 
+    public void setCurrentClient(Client currentClient) {
+        this.currentClient = currentClient;
+    }
+
     // Exemple de données : Map<Marque, Liste de modèles>
     private final Map<String, List<String>> marqueModelesMap = new HashMap<>();
+
+    public UIDashboardClientController() {
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
+    }
 
     @FXML
     public void initialize() {
@@ -83,7 +106,15 @@ public class UIDashboardClientController {
 
         chargerMarquesEtModelesDepuisBase();
         toutesRadio.setSelected(true);
-        afficherVoituresSelonDisponibilite(); // Affichage initial
+        afficherVoituresSelonDisponibilite();
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), event -> {
+                    update();
+                })
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     private void addVoitureCard(String marque, String modele, String immatriculation, String imageUrl, String statut, double prixSansChauffeur, double prixAvecChauffeur) {
@@ -114,12 +145,18 @@ public class UIDashboardClientController {
         imageView.setStyle("-fx-effect: dropshadow(gaussian, #888, 8, 0.2, 0, 2);");
 
         // Reste du code inchangé...
-        VBox infosBox = new VBox(8,
-                new Label(marque + " " + modele),
-                new Label("Marque: " + marque),
-                new Label("Modèle: " + modele),
-                new Label("Immatriculation: " + immatriculation),
-                new Label("Statut: " + statut)
+        Label statutLabel = new Label(statut);
+        statutLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold; -fx-text-fill: " + getStatutColor(statut) + ";");
+        statutLabel.setGraphic(new Circle(5, Color.web(getStatutColor(statut))));
+
+
+        VBox infosBox = new VBox(8.0,
+                (Node) new Label(marque + " " + modele),
+                (Node) new Label("Marque: " + marque),
+                (Node) new Label("Modèle: " + modele),
+                (Node) new Label("Immatriculation: " + immatriculation),
+                statutLabel
+
         );
         infosBox.setAlignment(Pos.CENTER);
         infosBox.getChildren().get(0).setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
@@ -167,18 +204,12 @@ public class UIDashboardClientController {
     private String getStatutColor(String statut) {
         if (statut == null) return "gray";
 
-        switch (statut.toUpperCase()) {
-            case "DISPONIBLE":
-                return "green";
-            case "INDISPONIBLE":
-            case "LOUE":
-            case "EN_MAINTENANCE":
-                return "red";
-            case "RESERVE":
-                return "orange";
-            default:
-                return "gray";
-        }
+        return switch (statut.toUpperCase()) {
+            case "DISPONIBLE" -> "green";
+            case "INDISPONIBLE", "LOUE", "EN_MAINTENANCE" -> "red";
+            case "RESERVE" -> "orange";
+            default -> "gray";
+        };
     }
 
     private void showReservationPopup(String marque, String modele, String immatriculation, String imageUrl, boolean avecChauffeur) {
@@ -193,18 +224,7 @@ public class UIDashboardClientController {
             Vehicule vehicule = findVehiculeByInfos(marque, modele, immatriculation, imageUrl);
             controller.setVehicule(vehicule);
 
-            //Récupère le client connecté
-            Client client = getCurrentClient();
-            if (client == null) {
-                // Affiche une alerte et ne pas ouvrir la fenêtre si aucun client connecté
-                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
-                alert.setTitle("Erreur");
-                alert.setHeaderText("Aucun client connecté");
-                alert.setContentText("Veuillez vous connecter pour effectuer une réservation.");
-                alert.showAndWait();
-                return;
-            }
-            controller.setClient(client);
+            controller.setClient(currentClient);
 
             Stage stage = new Stage();
             stage.initModality(Modality.APPLICATION_MODAL);
@@ -241,34 +261,6 @@ public class UIDashboardClientController {
         }
     }
 
-    /**
-     * Récupère le client connecté depuis la base de données via Hibernate.
-     * À adapter selon ta logique d'authentification (exemple ici avec un email stocké dans une propriété système).
-     */
-    private Client getCurrentClient() {
-        if (currentClient != null) {
-            return currentClient;
-        }
-        // Exemple : récupération de l'email du client connecté (à adapter selon ton appli)
-        String emailConnecte = System.getProperty("client.email");
-        if (emailConnecte != null && !emailConnecte.isEmpty()) {
-            try (org.hibernate.Session session = location.app.vehicule_location_app.jdbc.HibernateConnection.getSessionFactory().openSession()) {
-                // Requête HQL pour récupérer le client par email
-                Client client = session.createQuery(
-                        "from T_Client where lower(email) = :email", Client.class)
-                        .setParameter("email", emailConnecte.toLowerCase())
-                        .uniqueResult();
-                if (client != null) {
-                    currentClient = client;
-                    return client;
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
-        return null;
-    }
-
     private void chargerMarquesEtModelesDepuisBase() {
         HibernateObjectDaoImpl<Vehicule> vehiculeDao = new HibernateObjectDaoImpl<>(Vehicule.class);
         List<Vehicule> vehicules = vehiculeDao.readAll();
@@ -285,7 +277,7 @@ public class UIDashboardClientController {
 
         List<String> marquesList = new ArrayList<>(marques);
         Collections.sort(marquesList);
-        marquesList.add(0, "Toutes"); // Ajoute "Toutes" en première position
+        marquesList.addFirst("Toutes"); // Ajoute "Toutes" en première position
 
         marqueComboBox.setItems(FXCollections.observableArrayList(marquesList));
         marqueComboBox.getSelectionModel().selectFirst(); // Sélectionne "Toutes" par défaut
@@ -319,12 +311,13 @@ public class UIDashboardClientController {
 
         for (Vehicule v : vehicules) {
             // Filtrage par disponibilité AVANT l'affichage
+            String statutDynamique = getStatutDynamiqueVehicule(v);
             boolean afficher = false;
             if (toutesRadio.isSelected()) {
                 afficher = true;
-            } else if (disponibleRadio.isSelected() && v.getStatut() != null && v.getStatut().name().equalsIgnoreCase("DISPONIBLE")) {
+            }else if (disponibleRadio.isSelected() && statutDynamique.startsWith("Disponible")) {
                 afficher = true;
-            } else if (nonDisponibleRadio.isSelected() && v.getStatut() != null && v.getStatut().name().equalsIgnoreCase("INDISPONIBLE")) {
+            } else if (nonDisponibleRadio.isSelected() && !statutDynamique.startsWith("Disponible")) {
                 afficher = true;
             }
 
@@ -337,7 +330,8 @@ public class UIDashboardClientController {
                 double prixSansChauffeur = v.getTarif();
                 double prixAvecChauffeur = v.getTarif() + 7000;
 
-                String statut = (v.getStatut() != null) ? v.getStatut().name() : "INCONNU";
+                String statut = getStatutDynamiqueVehicule(v);
+
                 String photoName = null;
                 // Chargement de l'image depuis ressources/images si possible
                 if (v.getPhoto() != null && !v.getPhoto().isEmpty()) {
@@ -367,10 +361,44 @@ public class UIDashboardClientController {
                     }
                 }
 
-                // Affichage UNE SEULE FOIS avec tous les paramètres
+
                 addVoitureCard(v.getMarque(), v.getModele(), v.getImmatriculation(),
-                        photoName, statut, prixSansChauffeur, prixAvecChauffeur);
+                        photoName, statutDynamique, prixSansChauffeur, prixAvecChauffeur);
             }
         }
+    }
+
+    private String getStatutDynamiqueVehicule(Vehicule vehicule) {
+        LocalDate today = LocalDate.now();
+
+        List<Reservation> allReservations = controllerReservationList; // Assuming this is kept up-to-date
+
+        List<Reservation> vehiculeReservations = allReservations.stream()
+                .filter(r -> r.getVehicules() != null && r.getVehicules().contains(vehicule))
+                .filter(r -> r.getStatut() == StatutReservation.APPROUVEE || r.getStatut() == StatutReservation.PAYEMENT_EN_ATTENTE) // Include PAYEMENT_EN_ATTENTE
+                .toList();
+
+        for (Reservation res : vehiculeReservations) {
+            if (!today.isBefore(res.getDateDebut()) && !today.isAfter(res.getDateFin())) {
+                return "En location (jusqu’au " + res.getDateFin().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) + ")";
+            }
+        }
+
+        Optional<Reservation> futureReservation = vehiculeReservations.stream()
+                .filter(r -> today.isBefore(r.getDateDebut()))
+                .min(Comparator.comparing(Reservation::getDateDebut));
+
+        if (futureReservation.isPresent()) {
+            LocalDate dateDebut = futureReservation.get().getDateDebut();
+            return "Réservé pour le " + dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
+        }
+
+        return "Disponible";
+    }
+
+
+    @Override
+    public void update() {
+        afficherVoituresSelonDisponibilite();
     }
 }

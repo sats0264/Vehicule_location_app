@@ -1,21 +1,25 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.beans.property.*;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
-import location.app.vehicule_location_app.exceptions.DAOException;
+import javafx.util.Duration;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 
-public class UIClientController extends Controller {
+import static location.app.vehicule_location_app.controllers.Controller.controllerClientList;
+
+public class UIClientController extends Observer {
 
     @FXML
     public Button historiqueClientButton;
-    // --- Clients List Table ---
     @FXML
     private TableView<Client> clientsTable;
     @FXML
@@ -31,10 +35,11 @@ public class UIClientController extends Controller {
     @FXML
     private TableColumn<Client, Integer> fideliteColumn;
 
-    private ObservableList<location.app.vehicule_location_app.models.Client> clientList;
     private MainFenetreController mainFenetreController;
 
-    public UIClientController() throws DAOException {
+    public UIClientController() {
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
     }
 
     public void setMainFenetreController(MainFenetreController mainFenetreController) {
@@ -44,8 +49,7 @@ public class UIClientController extends Controller {
     @FXML
     public void initialize() {
 
-        // Initialize TableView columns
-        clientList = FXCollections.observableArrayList(controllerClientList);
+        ObservableList<Client> clientList = FXCollections.observableArrayList(controllerClientList);
 
         prenomColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getPrenom() != null
@@ -66,6 +70,13 @@ public class UIClientController extends Controller {
                 new ReadOnlyObjectWrapper<>(cellData.getValue().getPointFidelite()));
 
         clientsTable.setItems(clientList);
+
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(10),
+                        event -> update())
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     public void selectClientById(int clientId) {
@@ -74,7 +85,7 @@ public class UIClientController extends Controller {
             return;
         }
         for (Client client : clientsTable.getItems()) {
-            if (client.getId() == clientId) { // Assurez-vous que Client a une méthode getId()
+            if (client.getId() == clientId) {
                 clientsTable.getSelectionModel().select(client);
                 clientsTable.scrollTo(client);
                 System.out.println("Client sélectionné: " + client.getNom() + " (ID: " + clientId + ")");
@@ -83,11 +94,11 @@ public class UIClientController extends Controller {
         }
     }
 
-    public void handleHistoriqueClient(ActionEvent actionEvent) {
+    public void handleHistoriqueClient() {
         Client selectedClient = clientsTable.getSelectionModel().getSelectedItem();
         if (selectedClient == null) {
-            showAlert(Alert.AlertType.WARNING, "Aucun client sélectionné",
-                    "Veuillez sélectionner un client pour afficher son historique.");
+            showAlert(
+            );
             return;
         }
         try {
@@ -97,15 +108,18 @@ public class UIClientController extends Controller {
         }
     }
 
-
-    /**
-     * Affiche une boîte de dialogue d'alerte.
-     */
-    private void showAlert(Alert.AlertType alertType, String title, String message) {
-        Alert alert = new Alert(alertType);
-        alert.setTitle(title);
+    private void showAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Aucun client sélectionné");
         alert.setHeaderText(null);
-        alert.setContentText(message);
+        alert.setContentText("Veuillez sélectionner un client pour afficher son historique.");
         alert.showAndWait();
+    }
+
+    @Override
+    public void update() {
+        clientsTable.getItems().clear();
+        ObservableList<Client> clientList = FXCollections.observableArrayList(controllerClientList);
+        clientsTable.setItems(clientList);
     }
 }

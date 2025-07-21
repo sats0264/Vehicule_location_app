@@ -1,5 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
+import static location.app.vehicule_location_app.controllers.Controller.ajouterObject;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -10,6 +12,7 @@ import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.CarteBancaire;
 import location.app.vehicule_location_app.models.Client;
+import location.app.vehicule_location_app.observer.Subject;
 
 public class UIAddCardController {
 
@@ -119,9 +122,9 @@ public class UIAddCardController {
             clientConnecte,
             0.0
         );
-        HibernateObjectDaoImpl<CarteBancaire> carteDao = new HibernateObjectDaoImpl<>(CarteBancaire.class);
         try {
-            carteDao.create(carte);
+            ajouterObject(carte,CarteBancaire.class);
+            Subject.getInstance().notifyAllObservers();
         } catch (DAOException e) {
             throw new RuntimeException(e);
         }

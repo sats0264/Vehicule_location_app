@@ -8,6 +8,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
@@ -111,6 +112,17 @@ public class UIChauffeurController extends Observer {
                 e.printStackTrace();
             }
         }
+        else {
+            showAlert();
+        }
+    }
+
+    private void showAlert() {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Aucun Chauffeur Selectionne");
+        alert.setHeaderText(null);
+        alert.setContentText("Veuillez sélectionner un chauffeur pour voir les détails.");
+        alert.showAndWait();
     }
 
     @Override

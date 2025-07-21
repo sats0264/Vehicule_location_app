@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
@@ -120,11 +119,15 @@
                     <Separator />
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Date de début :" />
-                        <DatePicker fx:id="startDatePicker" disable="true" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                        <DatePicker fx:id="startDatePicker" disable="true" editable="false" prefHeight="25.0" prefWidth="130.0" HBox.hgrow="ALWAYS" />
+                        <Label prefHeight="17.0" prefWidth="38.0" text="---&gt;" />
+                        <DatePicker fx:id="startDateModificationPicker" disable="true" editable="false" layoutX="100.0" layoutY="10.0" prefHeight="25.0" prefWidth="130.0" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Date de fin :" />
-                        <DatePicker fx:id="endDatePicker" disable="true" editable="false" prefWidth="200.0" HBox.hgrow="ALWAYS" />
+                        <DatePicker fx:id="endDatePicker" disable="true" editable="false" prefHeight="25.0" prefWidth="130.0" HBox.hgrow="ALWAYS" />
+                        <Label prefHeight="17.0" prefWidth="38.0" text="---&gt;" />
+                        <DatePicker fx:id="endDateModificationPicker" disable="true" editable="false" layoutX="100.0" layoutY="10.0" prefHeight="25.0" prefWidth="130.0" />
                     </HBox>
                     <HBox alignment="CENTER_LEFT" spacing="10.0">
                         <Label prefWidth="80.0" text="Durée :" />
@@ -149,22 +152,22 @@
                 </font>
             </Button>
             <!-- Nouveaux boutons pour les demandes de modification/annulation -->
-            <Button fx:id="approuverModificationBtn" onAction="#handleApprouverModification" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Modif." visible="false" managed="false">
+            <Button fx:id="approuverModificationBtn" managed="false" onAction="#handleApprouverModification" style="-fx-background-color: #007bff; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Modif." visible="false">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Button>
-            <Button fx:id="rejeterModificationBtn" onAction="#handleRejeterModification" style="-fx-background-color: #ff5722; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Modif." visible="false" managed="false">
+            <Button fx:id="rejeterModificationBtn" managed="false" onAction="#handleRejeterModification" style="-fx-background-color: #ff5722; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Modif." visible="false">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Button>
-            <Button fx:id="approuverAnnulationBtn" onAction="#handleApprouverAnnulation" style="-fx-background-color: #673ab7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Annul." visible="false" managed="false">
+            <Button fx:id="approuverAnnulationBtn" managed="false" onAction="#handleApprouverAnnulation" style="-fx-background-color: #673ab7; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Approuver Annul." visible="false">
                 <font>
                     <Font size="14.0" />
                 </font>
             </Button>
-            <Button fx:id="rejeterAnnulationBtn" onAction="#handleRejeterAnnulation" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Annul." visible="false" managed="false">
+            <Button fx:id="rejeterAnnulationBtn" managed="false" onAction="#handleRejeterAnnulation" style="-fx-background-color: #f44336; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 8 20;" text="Rejeter Annul." visible="false">
                 <font>
                     <Font size="14.0" />
                 </font>

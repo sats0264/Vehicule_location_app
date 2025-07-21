@@ -15,6 +15,7 @@ import javafx.scene.Parent; // Import for Parent
 import javafx.scene.layout.HBox; // Import for HBox
 import location.app.vehicule_location_app.dao.NotificationService;
 import location.app.vehicule_location_app.models.*;
+import location.app.vehicule_location_app.observer.Subject;
 import org.hibernate.Transaction;
 
 import java.io.IOException; // Import for IOException
@@ -25,7 +26,7 @@ import java.time.temporal.ChronoUnit;
 public class UIClientReservationController {
 
     @FXML
-    private ImageView imageView; // Renommé de 'voitureImage' pour correspondre au FXML
+    private ImageView imageView;
     @FXML
     private Label marqueLabel;
     @FXML
@@ -154,7 +155,7 @@ public class UIClientReservationController {
         if (vehicule != null) {
             double prixJour = vehicule.getTarif();
             if (avecChauffeur) {
-                prixJour = prixJour * 7000;
+                prixJour += 7000;
             }
             prixLabel.setText(String.format("%.0f FCFA / jour", prixJour)); // Supprimé "Prix :"
             loadVehiculeImage(vehicule.getPhoto());
@@ -327,6 +328,7 @@ public class UIClientReservationController {
                     NotificationType.CLIENT_NEW_RESERVATION,
                     reservationId
             );
+            Subject.getInstance().notifyAllObservers();
             NotificationService.getInstance().addNotification(notificationToUser);
             NotificationService.getInstance().addNotificationForClient(notificationToClient, client);
 

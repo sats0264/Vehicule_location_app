@@ -13,20 +13,24 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 import location.app.vehicule_location_app.dao.HibernateObjectDaoImpl;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Reservation;
 import location.app.vehicule_location_app.models.Vehicule;
+import location.app.vehicule_location_app.observer.Observer;
+import location.app.vehicule_location_app.observer.Subject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
+import static javafx.stage.Modality.APPLICATION_MODAL;
 import static location.app.vehicule_location_app.controllers.Controller.reservationDao;
 
-public class UIFenetreReservationController{
+public class UIFenetreReservationController extends Observer {
 
     @FXML
     private ImageView imageView;
@@ -46,6 +50,11 @@ public class UIFenetreReservationController{
     private Client clientConnecte;// à initialiser lors de la connexion
     private Vehicule vehicule;
 
+    public UIFenetreReservationController() {
+        this.subject = Subject.getInstance();
+        this.subject.attach(this);
+    }
+
     /**
      * Setter à appeler AVANT affichage pour initialiser le client connecté et afficher ses réservations.
      */
@@ -56,7 +65,6 @@ public class UIFenetreReservationController{
 
     @FXML
     private void initialize() {
-        // Ne rien faire ici pour la liste, elle sera chargée après setClientConnecte
     }
 
     public void afficherReservationsClient() {
@@ -148,7 +156,9 @@ public class UIFenetreReservationController{
                             Stage stage = new Stage();
                             stage.setTitle("Facture Client");
                             stage.setScene(new Scene(view));
-                            stage.show();
+                            stage.initModality(APPLICATION_MODAL);
+                            stage.setResizable(false);
+                            stage.showAndWait();
                         }
                         catch (IOException e) {
                             System.err.println("Erreur lors du chargement de la vue de facture : " + e.getMessage());
@@ -224,7 +234,7 @@ public class UIFenetreReservationController{
 
             // Create a new Stage for the popup
             Stage popupStage = new Stage();
-            popupStage.initModality(javafx.stage.Modality.APPLICATION_MODAL); // Make it modal
+            popupStage.initModality(APPLICATION_MODAL); // Make it modal
             popupStage.setTitle("Détail de la Réservation N°" + reservation.getId());
 
             // Pass the Stage to the controller so it can close itself
@@ -256,5 +266,10 @@ public class UIFenetreReservationController{
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    @Override
+    public void update() {
+        afficherReservationsClient();
     }
 }

@@ -10,7 +10,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.util.Duration;
-import location.app.vehicule_location_app.exceptions.DAOException;
 import location.app.vehicule_location_app.models.*;
 import location.app.vehicule_location_app.observer.Observer;
 import location.app.vehicule_location_app.observer.Subject;
@@ -20,10 +19,8 @@ import java.util.stream.Collectors;
 
 import static location.app.vehicule_location_app.controllers.Controller.*;
 
-@SuppressWarnings("ClassEscapesDefinedScope")
 public class UIDashboardController extends Observer {
 
-    // --- Summary Labels ---
     @FXML
     private Label chiffreAffairesLabel;
     @FXML
@@ -31,7 +28,6 @@ public class UIDashboardController extends Observer {
     @FXML
     private Label clientsCountLabel;
 
-    // --- Reserved Cars Table ---
     @FXML
     private TableView<Reservation> reservedCarsTable;
     @FXML
@@ -45,7 +41,6 @@ public class UIDashboardController extends Observer {
     @FXML
     private TableColumn<Reservation, String> resClientNameColumn;
 
-    // --- Top Clients Table ---
     @FXML
     private TableView<Client> topClientsTable;
     @FXML
@@ -53,25 +48,20 @@ public class UIDashboardController extends Observer {
     @FXML
     private TableColumn<Client, String> topClientLastNameColumn;
     @FXML
-    private TableColumn<Client, Double> topClientAmountColumn;
+    private TableColumn<Client, Integer> topClientFideliteColumn;
 
     public UIDashboardController() {
         this.subject = Subject.getInstance();
         this.subject.attach(this);
     }
 
-    /**
-     * Méthode d'initialisation du contrôleur.
-     * Appelée automatiquement après le chargement du fichier FXML.
-     */
     @FXML
     public void initialize() {
-        System.out.println("Dashboard initialized");  // test
+        System.out.println("Dashboard initialized");
         System.out.println(">>> Nombre de véhicules : " + controllerVehiculeList.size());
         System.out.println(">>> Nombre de clients : " + controllerClientList.size());
         System.out.println(">>> Nombre de réservations : " + controllerReservationList.size());
 
-        // --- Initialisation des labels de statistique ---
         chargerStatistique();
 
         resMatriculeColumn.setCellValueFactory(cellData -> {
@@ -102,7 +92,6 @@ public class UIDashboardController extends Observer {
         reservedCarsTable.setItems(reservedCars);
 
 
-        // --- Top Clients Table ---
         topClientFirstNameColumn.setCellValueFactory(cellData ->
                 new ReadOnlyStringWrapper(cellData.getValue().getPrenom())
         );
@@ -111,31 +100,11 @@ public class UIDashboardController extends Observer {
                 new ReadOnlyStringWrapper(cellData.getValue().getNom())
         );
 
-        topClientAmountColumn.setCellValueFactory(cellData -> {
-            double total = cellData.getValue().getReservations().stream()
-                    .filter(r -> r.getFacture() != null)
-                    .mapToDouble(r -> r.getFacture().getMontant())
-                    .sum();
-            return new ReadOnlyObjectWrapper<>(total);
-        });
+        topClientFideliteColumn.setCellValueFactory(cellData -> 
+                new ReadOnlyObjectWrapper<>(cellData.getValue().getPointFidelite()));
 
-        // Calculer le montant total des factures pour chaque client
-        List<Client> topClients = controllerClientList.stream()
-                .sorted((c1, c2) -> {
-                    double total1 = c1.getReservations().stream()
-                            .filter(r -> r.getFacture() != null)
-                            .mapToDouble(r -> r.getFacture().getMontant())
-                            .sum();
-                    double total2 = c2.getReservations().stream()
-                            .filter(r -> r.getFacture() != null)
-                            .mapToDouble(r -> r.getFacture().getMontant())
-                            .sum();
-                    return Double.compare(total2, total1); // Tri décroissant
-                })
-                .limit(5)
-                .collect(Collectors.toList());
+        List<Client> topClients = TrierClient();
 
-        // Si tous les montants sont 0, on prend les 5 premiers clients
         boolean allZero = topClients.stream().allMatch(c ->
                 c.getReservations().stream()
                         .filter(r -> r.getFacture() != null)
@@ -145,7 +114,7 @@ public class UIDashboardController extends Observer {
         if (allZero) {
             topClients = controllerClientList.stream().limit(5).collect(Collectors.toList());
         }
-        // Mettre à jour le TableView
+
         topClientsTable.setItems(FXCollections.observableArrayList(topClients));
 
         Timeline timeline = new Timeline(
@@ -153,6 +122,8 @@ public class UIDashboardController extends Observer {
                     loadDashboardData();
                 })
         );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
     }
 
     private void chargerStatistique() {
@@ -166,8 +137,25 @@ public class UIDashboardController extends Observer {
         chiffreAffairesLabel.setText(String.format("%.0f FCFA", chiffreAffaires));
     }
 
+    private List<Client> TrierClient() {
+
+        return controllerClientList.stream()
+                .sorted((c1, c2) -> {
+                    double total1 = c1.getReservations().stream()
+                            .filter(r -> r.getFacture() != null)
+                            .mapToDouble(r -> r.getFacture().getMontant())
+                            .sum();
+                    double total2 = c2.getReservations().stream()
+                            .filter(r -> r.getFacture() != null)
+                            .mapToDouble(r -> r.getFacture().getMontant())
+                            .sum();
+                    return Double.compare(total2, total1); // Tri décroissant
+                })
+                .limit(5)
+                .collect(Collectors.toList());
+    }
+
     private void loadDashboardData() {
-        // Recharger les données des véhicules, clients et réservations
         controllerVehiculeList = vehiculeDao.getAll();
         controllerClientList = clientDao.getAll();
         controllerReservationList = reservationDao.getAll();
@@ -177,7 +165,12 @@ public class UIDashboardController extends Observer {
 
     @Override
     public void update() {
-        // Recharger les statistiques ici
         loadDashboardData();
+        ObservableList<Reservation> reservedCars = FXCollections.observableArrayList(reservationListActif);
+        reservedCarsTable.setItems(reservedCars);
+
+        List<Client> topClients = TrierClient();
+
+        topClientsTable.setItems(FXCollections.observableArrayList(topClients));
     }
 }

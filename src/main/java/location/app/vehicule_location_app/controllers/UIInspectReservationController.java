@@ -4,20 +4,26 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
-import location.app.vehicule_location_app.dao.NotificationService;
-import location.app.vehicule_location_app.exceptions.DAOException;
-import location.app.vehicule_location_app.models.*;
-import location.app.vehicule_location_app.observer.Subject; // Assurez-vous que Subject.getInstance() est disponible
+import location.app.vehicule_location_app.dao.NotificationService; // Assuming this exists
+import location.app.vehicule_location_app.exceptions.DAOException; // Assuming this exists
+import location.app.vehicule_location_app.models.*; // Import all necessary models
+import location.app.vehicule_location_app.observer.Subject;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.List;
-import java.util.Optional; // Import pour Optional
+import java.util.Optional;
 
-public class UIInspectReservationController extends Controller {
+import static location.app.vehicule_location_app.controllers.Controller.updateObject;
+
+// Assuming Controller is a base class that provides updateObject and other common methods
+// If Controller class is not available or does not have updateObject,
+// you might need to implement a DAO or pass a service here.
+// For this example, I'll assume `updateObject` is accessible (e.g., as a static method or via injection).
+
+public class UIInspectReservationController {
 
     private Reservation reservation;
-    private List<Chauffeur> chauffeursSelectionnes; // Pas utilisé directement dans le FXML fourni, mais gardé
-
     // --- Champs Client ---
     @FXML
     private Label clientLastNameField;
@@ -28,7 +34,7 @@ public class UIInspectReservationController extends Controller {
     @FXML
     private Label clientEmailField;
     @FXML
-    private Label clientFideliteField; // Renommé pour correspondre au FXML
+    private Label clientFideliteField;
 
     // --- Champs Véhicule ---
     @FXML
@@ -54,23 +60,32 @@ public class UIInspectReservationController extends Controller {
 
     // --- Champs Durée et Montant ---
     @FXML
-    private DatePicker startDatePicker;
+    private DatePicker startDatePicker; // Now a DatePicker
     @FXML
-    private DatePicker endDatePicker;
+    private DatePicker startDateModificationPicker;
+    @FXML
+    private DatePicker endDatePicker;   // Now a DatePicker
+    @FXML
+    private DatePicker endDateModificationPicker;
     @FXML
     private Label durationField;
     @FXML
     private Label amountField;
+    @FXML
+    private Label currentDateLabel;
+    @FXML
+    private Label proposedDateLabel;
+
 
     // --- Boutons d'action principaux ---
     @FXML
-    private Button approuverButton; // Pour EN_ATTENTE -> PAYEMENT_EN_ATTENTE
+    private Button approuverButton; // For EN_ATTENTE -> PAYEMENT_EN_ATTENTE
     @FXML
-    private Button rejeterButton;   // Pour EN_ATTENTE -> REJETEE
+    private Button rejeterButton;   // For EN_ATTENTE -> REJETEE
     @FXML
     private Button fermerButton;
 
-    // --- Nouveaux boutons pour les demandes ---
+    // --- New buttons for requests ---
     @FXML
     private Button approuverModificationBtn;
     @FXML
@@ -80,13 +95,16 @@ public class UIInspectReservationController extends Controller {
     @FXML
     private Button rejeterAnnulationBtn;
 
-    public UIInspectReservationController() throws DAOException {
-        // Le constructeur par défaut de Controller est appelé
-    }
+    // Removed proposed date fields and their container as they are not in the provided FXML
+    // @FXML private Label proposedStartDateLabel;
+    // @FXML private Label proposedEndDateLabel;
+    // @FXML private VBox modificationRequestDetailsBox;
+
+    private DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 
     @FXML
     public void initialize() {
-        // Initialisation des listeners pour les boutons
+        // Initialize listeners for buttons
         approuverButton.setOnAction(e -> handleApprouver());
         rejeterButton.setOnAction(e -> handleRejeter());
         fermerButton.setOnAction(this::handleFermer);
@@ -96,16 +114,20 @@ public class UIInspectReservationController extends Controller {
         approuverAnnulationBtn.setOnAction(e -> handleApprouverAnnulation());
         rejeterAnnulationBtn.setOnAction(e -> handleRejeterAnnulation());
 
-        // Les DatePickers sont désactivés pour l'inspection
+        // DatePickers are disabled and non-editable for inspection as per FXML
         startDatePicker.setDisable(true);
+        startDatePicker.setEditable(false);
         endDatePicker.setDisable(true);
+        endDatePicker.setEditable(false);
 
-        // Assurer que tous les boutons de demande sont cachés par défaut
+        // Ensure all request buttons are hidden by default
         hideAllRequestButtons();
+
+        // No modificationRequestDetailsBox in this FXML, so no need to hide/manage it here.
     }
 
     /**
-     * Cache tous les boutons liés aux demandes de modification/annulation.
+     * Hides all buttons related to modification/cancellation requests.
      */
     private void hideAllRequestButtons() {
         approuverModificationBtn.setVisible(false);
@@ -116,19 +138,20 @@ public class UIInspectReservationController extends Controller {
         approuverAnnulationBtn.setManaged(false);
         rejeterAnnulationBtn.setVisible(false);
         rejeterAnnulationBtn.setManaged(false);
-        approuverButton.setVisible(false); // Cacher les boutons initiaux aussi
+        approuverButton.setVisible(false); // Hide initial buttons as well
         approuverButton.setManaged(false);
         rejeterButton.setVisible(false);
         rejeterButton.setManaged(false);
     }
 
     /**
-     * Définit la réservation à inspecter et met à jour l'interface.
-     * Active/désactive les boutons d'action en fonction du statut.
-     * @param reservation L'objet Reservation à afficher.
+     * Sets the reservation to inspect and updates the interface.
+     * Enables/disables action buttons based on status.
+     * @param reservation The Reservation object to display.
      */
     public void setReservation(Reservation reservation) {
         this.reservation = reservation;
+
         if (reservation == null) {
             showAlert(Alert.AlertType.ERROR, "Erreur", "Aucune réservation à afficher.");
             return;
@@ -141,21 +164,25 @@ public class UIInspectReservationController extends Controller {
             clientLastNameField.setText(c.getNom());
             clientPhoneField.setText(c.getTelephone());
             clientEmailField.setText(c.getEmail());
-            clientFideliteField.setText(String.valueOf(c.getPointFidelite())); // Utilise le nouveau fx:id
+            clientFideliteField.setText(String.valueOf(c.getPointFidelite()));
+        } else {
+            // Clear client fields if no client
+            clientFirstNameField.setText("N/A");
+            clientLastNameField.setText("N/A");
+            clientPhoneField.setText("N/A");
+            clientEmailField.setText("N/A");
+            clientFideliteField.setText("N/A");
         }
 
-        // --- Véhicules ---
+        // --- Vehicles ---
         if (reservation.getVehicules() != null && !reservation.getVehicules().isEmpty()) {
-            // Remplir la ComboBox avec les immatriculations
             voitureImmatriculationField.getItems().setAll(
                     reservation.getVehicules().stream().map(Vehicule::getImmatriculation).toList()
             );
-            // Sélectionner le premier véhicule par défaut
             Vehicule firstVehicule = reservation.getVehicules().getFirst();
             voitureImmatriculationField.setValue(firstVehicule.getImmatriculation());
             updateVehiculeDetails(firstVehicule);
 
-            // Listener pour la ComboBox des véhicules
             voitureImmatriculationField.setOnAction(event -> {
                 String selectedImmatriculation = voitureImmatriculationField.getValue();
                 Vehicule selectedVehicule = reservation.getVehicules()
@@ -167,20 +194,24 @@ public class UIInspectReservationController extends Controller {
                     updateVehiculeDetails(selectedVehicule);
                 }
             });
+        } else {
+            voitureImmatriculationField.getItems().clear();
+            voitureImmatriculationField.setPromptText("Aucun véhicule");
+            voitureModeleField.setText("N/A");
+            voitureMarqueField.setText("N/A");
+            voitureTarifField.setText("N/A");
+            voitureStatutField.setText("N/A");
         }
 
         // --- Chauffeur ---
         if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
-            // Remplir la ComboBox avec les IDs des chauffeurs
             chauffeurIdComboBox.getItems().setAll(
                     reservation.getChauffeurs().stream().map(Chauffeur::getId).toList()
             );
-            // Sélectionner le premier chauffeur par défaut
             Chauffeur firstChauffeur = reservation.getChauffeurs().getFirst();
             chauffeurIdComboBox.setValue(firstChauffeur.getId());
             updateChauffeurDetails(firstChauffeur);
 
-            // Listener pour la ComboBox des chauffeurs
             chauffeurIdComboBox.setOnAction(event -> {
                 Integer selectedId = chauffeurIdComboBox.getValue();
                 Chauffeur selectedChauffeur = reservation.getChauffeurs()
@@ -193,7 +224,6 @@ public class UIInspectReservationController extends Controller {
                 }
             });
         } else {
-            // Cacher les champs chauffeur si aucun chauffeur
             chauffeurIdComboBox.setVisible(false);
             chauffeurIdComboBox.setManaged(false);
             chauffeurLastNameField.setText("N/A");
@@ -205,20 +235,51 @@ public class UIInspectReservationController extends Controller {
         startDatePicker.setValue(reservation.getDateDebut());
         endDatePicker.setValue(reservation.getDateFin());
 
-        // --- Durée ---
+        // Cacher les DatePicker de modification par défaut
+        startDateModificationPicker.setVisible(false);
+        startDateModificationPicker.setManaged(false);
+        endDateModificationPicker.setVisible(false);
+        endDateModificationPicker.setManaged(false);
+
+        // --- Duration ---
         long duration = ChronoUnit.DAYS.between(reservation.getDateDebut(), reservation.getDateFin()) + 1;
         durationField.setText(duration + " jour(s)");
 
-        // --- Montant ---
+        // --- Amount ---
         calculateAndDisplayAmount(duration);
 
-        // --- Visibilité des boutons selon le statut ---
+        // --- Configure button visibility based on status ---
         configureButtonsBasedOnStatus();
+
+//        // Display proposed modification dates if status is MODIFICATION_EN_ATTENTE
+//        // NOTE: The FXML provided does not have fields for proposed dates.
+//        // If you want to display them, you need to add them back to the FXML.
+//        // For now, this logic is removed as the FXML elements are missing.
+//        if (reservation.getStatut() == StatutReservation.MODIFICATION_EN_ATTENTE) {
+//            // Since proposed date labels are removed from FXML,
+//            // we can display them in an Alert or log for now.
+//            if (reservation.getProposedDateDebut() != null && reservation.getProposedDateFin() != null) {
+//                showAlert(Alert.AlertType.INFORMATION, "Demande de Modification",
+//                        "Dates actuelles: Du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) + "\n" +
+//                                "Dates proposées par le client: Du " + reservation.getProposedDateDebut().format(dateFormatter) + " au " + reservation.getProposedDateFin().format(dateFormatter));
+//            }
+//        }
+        // Si statut = MODIFICATION_EN_ATTENTE, on affiche les dates proposées
+        if (reservation.getStatut() == StatutReservation.MODIFICATION_EN_ATTENTE) {
+            if (reservation.getProposedDateDebut() != null && reservation.getProposedDateFin() != null) {
+                startDateModificationPicker.setValue(reservation.getProposedDateDebut());
+                endDateModificationPicker.setValue(reservation.getProposedDateFin());
+                startDateModificationPicker.setVisible(true);
+                startDateModificationPicker.setManaged(true);
+                endDateModificationPicker.setVisible(true);
+                endDateModificationPicker.setManaged(true);
+            }
+        }
     }
 
     /**
-     * Met à jour les labels d'information du véhicule.
-     * @param vehicule Le véhicule sélectionné.
+     * Updates the vehicle information labels.
+     * @param vehicule The selected vehicle.
      */
     private void updateVehiculeDetails(Vehicule vehicule) {
         voitureModeleField.setText(vehicule.getModele());
@@ -228,8 +289,8 @@ public class UIInspectReservationController extends Controller {
     }
 
     /**
-     * Met à jour les labels d'information du chauffeur.
-     * @param chauffeur Le chauffeur sélectionné.
+     * Updates the chauffeur information labels.
+     * @param chauffeur The selected chauffeur.
      */
     private void updateChauffeurDetails(Chauffeur chauffeur) {
         chauffeurLastNameField.setText(chauffeur.getNom());
@@ -238,8 +299,8 @@ public class UIInspectReservationController extends Controller {
     }
 
     /**
-     * Calcule et affiche le montant total de la réservation.
-     * @param duration Le nombre de jours de la réservation.
+     * Calculates and displays the total amount of the reservation.
+     * @param duration The number of days of the reservation.
      */
     private void calculateAndDisplayAmount(long duration) {
         double vehiculeTotalTarif = reservation.getVehicules().stream()
@@ -248,18 +309,17 @@ public class UIInspectReservationController extends Controller {
         double montantTotal = vehiculeTotalTarif * duration;
 
         if (reservation.getChauffeurs() != null && !reservation.getChauffeurs().isEmpty()) {
-            // Supposons un tarif fixe par jour par chauffeur
-            double chauffeurDailyFee = 7000.0; // À définir comme constante si ce n'est pas déjà fait
+            double chauffeurDailyFee = 7000.0; // Define as a constant if not already
             montantTotal += reservation.getChauffeurs().size() * chauffeurDailyFee * duration;
         }
         amountField.setText(String.format("%.0f FCFA", montantTotal));
     }
 
     /**
-     * Configure la visibilité des boutons en fonction du statut de la réservation.
+     * Configures the visibility of buttons based on the reservation status.
      */
     private void configureButtonsBasedOnStatus() {
-        hideAllRequestButtons(); // Cache tout d'abord
+        hideAllRequestButtons(); // Hide everything first
 
         StatutReservation statut = reservation.getStatut();
         switch (statut) {
@@ -282,22 +342,21 @@ public class UIInspectReservationController extends Controller {
                 rejeterAnnulationBtn.setManaged(true);
                 break;
             default:
-                // Pour tous les autres statuts (CONFIRMEE, PAYEE, ANNULEE, REFUSEE, TERMINEE),
-                // aucun bouton d'action n'est visible à part "Fermer".
                 break;
         }
     }
 
-    // --- Gestion des actions des boutons ---
+
+    // --- Handle button actions ---
 
     @FXML
     private void handleApprouver() {
-        // Logique pour approuver la réservation initiale (EN_ATTENTE -> PAYEMENT_EN_ATTENTE)
-        Optional<ButtonType> result = showAlertConfirmation("Approuver la réservation", "Voulez-vous vraiment approuver cette réservation ?");
+        // Logic to approve the initial reservation (EN_ATTENTE -> PAYEMENT_EN_ATTENTE)
+        Optional<ButtonType> result = showAlertConfirmation("Approuver la Réservation", "Voulez-vous vraiment approuver cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 reservation.setStatut(StatutReservation.PAYEMENT_EN_ATTENTE);
-                // Mettre à jour le statut des véhicules et chauffeurs à INDISPONIBLE
+                // Update status of associated vehicles and chauffeurs to UNAVAILABLE
                 updateAssociatedEntitiesStatus(Statut.INDISPONIBLE);
                 updateObject(reservation, Reservation.class);
 
@@ -309,15 +368,15 @@ public class UIInspectReservationController extends Controller {
                 );
                 sendReservationStatusNotificationForClient(
                         "Réservation Approuvée",
-                        "Votre réservation du " + reservation.getDateDebut() + " au " + reservation.getDateFin() + " a été approuvée.\nVeuillez procéder au paiement pour finaliser la réservation.",
-                        NotificationType.RESERVATION_CONFIRMATION,
+                        "Votre réservation du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) + " a été approuvée.\nVeuillez procéder au paiement pour finaliser la réservation.",
+                        NotificationType.CLIENT_RESERVATION_CONFIRMATION,
                         reservation.getClient()
                 );
 
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Réservation approuvée et en attente de paiement.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de la réservation: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de la réservation : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -325,12 +384,12 @@ public class UIInspectReservationController extends Controller {
 
     @FXML
     private void handleRejeter() {
-        // Logique pour rejeter la réservation initiale (EN_ATTENTE -> REJETEE)
-        Optional<ButtonType> result = showAlertConfirmation("Rejeter la réservation", "Voulez-vous vraiment rejeter cette réservation ?");
+        // Logic to reject the initial reservation (EN_ATTENTE -> REJETEE)
+        Optional<ButtonType> result = showAlertConfirmation("Rejeter la Réservation", "Voulez-vous vraiment rejeter cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 reservation.setStatut(StatutReservation.REJETEE);
-                // Remettre le statut des véhicules et chauffeurs à DISPONIBLE
+                // Set status of associated vehicles and chauffeurs back to AVAILABLE
                 updateAssociatedEntitiesStatus(Statut.DISPONIBLE);
                 updateObject(reservation, Reservation.class);
 
@@ -342,15 +401,15 @@ public class UIInspectReservationController extends Controller {
                 );
                 sendReservationStatusNotificationForClient(
                         "Réservation Rejetée",
-                        "Votre réservation du " + reservation.getDateDebut() + " au " + reservation.getDateFin() + " a été rejetée.",
-                        NotificationType.RESERVATION_REFUSED,
+                        "Votre réservation du " + reservation.getDateDebut().format(dateFormatter) + " au " + reservation.getDateFin().format(dateFormatter) + " a été rejetée.",
+                        NotificationType.CLIENT_RESERVATION_ANNULATION_REFUSED,
                         reservation.getClient()
                 );
 
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Réservation rejetée.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de la réservation: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de la réservation : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -358,27 +417,41 @@ public class UIInspectReservationController extends Controller {
 
     @FXML
     private void handleApprouverModification() {
-        // Logique pour approuver une demande de modification (MODIFICATION_EN_ATTENTE -> CONFIRMEE ou EN_ATTENTE)
-        Optional<ButtonType> result = showAlertConfirmation("Approuver la modification", "Voulez-vous vraiment approuver la modification de cette réservation ?");
+        // Logic to approve a modification request (MODIFICATION_EN_ATTENTE -> CONFIRMEE or previous status)
+        Optional<ButtonType> result = showAlertConfirmation("Approuver la Modification", "Voulez-vous vraiment approuver la modification de cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                // Ici, vous devriez avoir accès aux nouvelles dates de modification
-                // Si la modification a déjà été appliquée à l'objet reservation lors de la demande
-                // par le client, il suffit de changer le statut.
-                // Sinon, vous devrez récupérer les nouvelles dates de la notification ou d'un autre champ.
+                // Apply the proposed new dates to the reservation object
+                // These dates are stored in the Reservation object from the client's request
+                LocalDate approvedStartDate = reservation.getProposedDateDebut();
+                LocalDate approvedEndDate = reservation.getProposedDateFin();
 
-                reservation.setStatut(StatutReservation.EN_ATTENTE); // Ou au statut précédent si c'était EN_ATTENTE
+                if (approvedStartDate == null || approvedEndDate == null) {
+                    showAlert(Alert.AlertType.ERROR, "Erreur", "Dates de modification proposées introuvables.");
+                    return;
+                }
+
+                reservation.setDateDebut(approvedStartDate);
+                reservation.setDateFin(approvedEndDate);
+                // Clear proposed dates after approval
+                reservation.setProposedDateDebut(null);
+                reservation.setProposedDateFin(null);
+
+                // Set status back to a relevant active state, e.g., PAYEMENT_EN_ATTENTE or CONFIRMEE
+                reservation.setStatut(StatutReservation.PAYEMENT_EN_ATTENTE);
                 updateObject(reservation, Reservation.class);
+
+                Subject.getInstance().notifyAllObservers();
 
                 // Notifications
                 sendReservationStatusNotification(
-                        "Modification Réservation Approuvée",
-                        "La demande de modification pour la réservation N°" + reservation.getId() + " a été approuvée.",
-                        NotificationType.RESERVATION_MODIFICATION_SUCCESS // Nouveau type
+                        "Modification de Réservation Approuvée",
+                        "La demande de modification pour la réservation N°" + reservation.getId() + " a été approuvée. Nouvelles dates: Du " + approvedStartDate.format(dateFormatter) + " au " + approvedEndDate.format(dateFormatter) + ".",
+                        NotificationType.RESERVATION_MODIFICATION_SUCCESS
                 );
                 sendReservationStatusNotificationForClient(
                         "Modification Approuvée",
-                        "Votre demande de modification pour la réservation N°" + reservation.getId() + " a été approuvée.",
+                        "Votre demande de modification pour la réservation N°" + reservation.getId() + " a été approuvée. Nouvelles dates: Du " + approvedStartDate.format(dateFormatter) + " au " + approvedEndDate.format(dateFormatter) + ".",
                         NotificationType.CLIENT_RESERVATION_MODIFICATION_SUCCESS,
                         reservation.getClient()
                 );
@@ -386,7 +459,7 @@ public class UIInspectReservationController extends Controller {
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Modification de réservation approuvée.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de la modification: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de la modification : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -394,20 +467,25 @@ public class UIInspectReservationController extends Controller {
 
     @FXML
     private void handleRejeterModification() {
-        // Logique pour rejeter une demande de modification (MODIFICATION_EN_ATTENTE -> statut précédent)
-        Optional<ButtonType> result = showAlertConfirmation("Rejeter la modification", "Voulez-vous vraiment rejeter la modification de cette réservation ?");
+        // Logic to reject a modification request (MODIFICATION_EN_ATTENTE -> previous status)
+        Optional<ButtonType> result = showAlertConfirmation("Rejeter la Modification", "Voulez-vous vraiment rejeter la modification de cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                // Remettre le statut de la réservation à son état précédent (ex: EN_ATTENTE ou CONFIRMEE)
-                // Cela dépend de votre logique métier. Ici, je la remets à EN_ATTENTE par défaut.
-                reservation.setStatut(StatutReservation.EN_ATTENTE);
+                // Revert the reservation status to its previous state (e.g., PAYEMENT_EN_ATTENTE or CONFIRMEE)
+                reservation.setStatut(StatutReservation.PAYEMENT_EN_ATTENTE); // Or the status before modification request
+                // Clear proposed dates as modification is rejected
+                reservation.setProposedDateDebut(null);
+                reservation.setProposedDateFin(null);
+
                 updateObject(reservation, Reservation.class);
+
+                Subject.getInstance().notifyAllObservers();
 
                 // Notifications
                 sendReservationStatusNotification(
-                        "Modification Réservation Rejetée",
+                        "Modification de Réservation Rejetée",
                         "La demande de modification pour la réservation N°" + reservation.getId() + " a été rejetée.",
-                        NotificationType.RESERVATION_MODIFICATION_REFUSED // Nouveau type
+                        NotificationType.RESERVATION_MODIFICATION_REFUSED
                 );
                 sendReservationStatusNotificationForClient(
                         "Modification Rejetée",
@@ -419,7 +497,7 @@ public class UIInspectReservationController extends Controller {
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Modification de réservation rejetée.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de la modification: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de la modification : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -427,32 +505,32 @@ public class UIInspectReservationController extends Controller {
 
     @FXML
     private void handleApprouverAnnulation() {
-        // Logique pour approuver une demande d'annulation (ANNULATION_EN_ATTENTE -> ANNULEE)
-        Optional<ButtonType> result = showAlertConfirmation("Approuver l'annulation", "Voulez-vous vraiment approuver l'annulation de cette réservation ?");
+        // Logic to approve a cancellation request (ANNULATION_EN_ATTENTE -> ANNULEE)
+        Optional<ButtonType> result = showAlertConfirmation("Approuver l'Annulation", "Voulez-vous vraiment approuver l'annulation de cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
                 reservation.setStatut(StatutReservation.ANNULEE);
-                // Remettre le statut des véhicules et chauffeurs à DISPONIBLE
+                // Set status of associated vehicles and chauffeurs back to AVAILABLE
                 updateAssociatedEntitiesStatus(Statut.DISPONIBLE);
                 updateObject(reservation, Reservation.class);
 
                 // Notifications
                 sendReservationStatusNotification(
-                        "Annulation Réservation Approuvée",
+                        "Annulation de Réservation Approuvée",
                         "La demande d'annulation pour la réservation N°" + reservation.getId() + " a été approuvée.",
                         NotificationType.RESERVATION_CANCELLATION_SUCCESS
                 );
                 sendReservationStatusNotificationForClient(
                         "Annulation Approuvée",
                         "Votre demande d'annulation pour la réservation N°" + reservation.getId() + " a été approuvée.",
-                        NotificationType.RESERVATION_CANCELLATION_SUCCESS,
+                        NotificationType.CLIENT_RESERVATION_ANNULATION_SUCCESS,
                         reservation.getClient()
                 );
 
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Demande d'annulation approuvée. Réservation annulée.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de l'annulation: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors de l'approbation de l'annulation : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -460,32 +538,31 @@ public class UIInspectReservationController extends Controller {
 
     @FXML
     private void handleRejeterAnnulation() {
-        // Logique pour rejeter une demande d'annulation (ANNULATION_EN_ATTENTE -> statut précédent)
-        Optional<ButtonType> result = showAlertConfirmation("Rejeter l'annulation", "Voulez-vous vraiment rejeter l'annulation de cette réservation ?");
+        // Logic to reject a cancellation request (ANNULATION_EN_ATTENTE -> previous status)
+        Optional<ButtonType> result = showAlertConfirmation("Rejeter l'Annulation", "Voulez-vous vraiment rejeter l'annulation de cette réservation ?");
         if (result.isPresent() && result.get() == ButtonType.OK) {
             try {
-                // Remettre le statut de la réservation à son état précédent (ex: PAYEMENT_EN_ATTENTE ou CONFIRMEE)
-                // Cela dépend de votre logique métier. Ici, je la remets à PAYEMENT_EN_ATTENTE par défaut.
+                // Revert the reservation status to its previous state (e.g., PAYEMENT_EN_ATTENTE or CONFIRMEE)
                 reservation.setStatut(StatutReservation.PAYEMENT_EN_ATTENTE);
                 updateObject(reservation, Reservation.class);
 
                 // Notifications
                 sendReservationStatusNotification(
-                        "Annulation Réservation Rejetée",
+                        "Annulation de Réservation Rejetée",
                         "La demande d'annulation pour la réservation N°" + reservation.getId() + " a été rejetée.",
-                        NotificationType.RESERVATION_CANCELLATION_REFUSED // Nouveau type
+                        NotificationType.RESERVATION_CANCELLATION_REFUSED
                 );
                 sendReservationStatusNotificationForClient(
                         "Annulation Rejetée",
                         "Votre demande d'annulation pour la réservation N°" + reservation.getId() + " a été rejetée.",
-                        NotificationType.RESERVATION_CANCELLATION_REFUSED,
+                        NotificationType.CLIENT_RESERVATION_ANNULATION_REFUSED,
                         reservation.getClient()
                 );
 
                 showAlert(Alert.AlertType.INFORMATION, "Succès", "Demande d'annulation rejetée.");
                 closeStage();
             } catch (DAOException e) {
-                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de l'annulation: " + e.getMessage());
+                showAlert(Alert.AlertType.ERROR, "Erreur", "Erreur lors du rejet de l'annulation : " + e.getMessage());
                 e.printStackTrace();
             }
         }
@@ -497,8 +574,8 @@ public class UIInspectReservationController extends Controller {
     }
 
     /**
-     * Met à jour le statut des véhicules et chauffeurs associés à la réservation.
-     * @param newStatus Le nouveau statut à appliquer (DISPONIBLE ou INDISPONIBLE).
+     * Updates the status of vehicles and chauffeurs associated with the reservation.
+     * @param newStatus The new status to apply (DISPONIBLE or INDISPONIBLE).
      */
     private void updateAssociatedEntitiesStatus(Statut newStatus) throws DAOException {
         if (reservation.getVehicules() != null) {
@@ -516,35 +593,34 @@ public class UIInspectReservationController extends Controller {
     }
 
     /**
-     * Envoie une notification à l'administration.
-     * @param title Titre de la notification.
-     * @param message Message de la notification.
-     * @param type Type de notification.
+     * Sends a notification to the administration.
+     * @param title Notification title.
+     * @param message Notification message.
+     * @param type Notification type.
      */
     private void sendReservationStatusNotification(String title, String message, NotificationType type) {
         try {
             Notification notification = new Notification(title, message, type, reservation.getId());
             NotificationService.getInstance().addNotification(notification);
-            Subject.getInstance().notifyAllObservers(); // Notifie les observateurs de l'admin
         } catch (Exception e) {
-            System.err.println("Erreur lors de l'envoi de la notification admin: " + e.getMessage());
+            System.err.println("Error sending admin notification: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
     /**
-     * Envoie une notification spécifique au client.
-     * @param title Titre de la notification.
-     * @param message Message de la notification.
-     * @param type Type de notification.
-     * @param client Le client concerné.
+     * Sends a specific notification to the client.
+     * @param title Notification title.
+     * @param message Notification message.
+     * @param type Notification type.
+     * @param client The client concerned.
      */
     private void sendReservationStatusNotificationForClient(String title, String message, NotificationType type, Client client) {
         try {
             Notification notification = new Notification(title, message, type, reservation.getId());
-            NotificationService.getInstance().addNotificationForClient(notification, client);
+            NotificationService.getInstance().addNotificationForClient(notification, client); // Fallback to general notification
         } catch (Exception e) {
-            System.err.println("Erreur lors de l'envoi de la notification client: " + e.getMessage());
+            System.err.println("Error sending client notification: " + e.getMessage());
             e.printStackTrace();
         }
     }

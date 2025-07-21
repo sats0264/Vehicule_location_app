@@ -1,5 +1,7 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.KeyFrame;
+import javafx.animation.Timeline;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -12,6 +14,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.VBox;
 
+import javafx.util.Duration;
 import location.app.vehicule_location_app.models.Client;
 import location.app.vehicule_location_app.models.Notification;
 import location.app.vehicule_location_app.dao.NotificationService;
@@ -20,6 +23,7 @@ import location.app.vehicule_location_app.observer.Observer;
 import location.app.vehicule_location_app.observer.Subject;
 
 import java.net.URL;
+import java.sql.Time;
 import java.util.ResourceBundle;
 
 public class UINotificationController extends Observer implements Initializable {
@@ -77,10 +81,13 @@ public class UINotificationController extends Observer implements Initializable 
             chargerNotifications();
         }else if (currentClient != null) {
             chargerNotificationsClient();
-        } else {
-            System.err.println("Aucun utilisateur ou client n'est défini pour charger les notifications.");
         }
 
+        Timeline timeline = new Timeline(
+                new KeyFrame(Duration.seconds(10), event -> update())
+        );
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
 
     }
 
@@ -90,12 +97,12 @@ public class UINotificationController extends Observer implements Initializable 
      */
     public void chargerNotifications() {
         if (notificationService != null && currentUser != null) {
-            System.out.println("Chargement des notifications pour l'utilisateur: " + currentUser.getLogin());
             ObservableList<Notification> notifications = notificationService.getNotifications();
             notificationListView.setItems(notifications);
         } else {
-            System.err.println("Impossible de charger les notifications : NotificationService ou currentUser non initialisé.");
             notificationListView.getItems().clear();
+            showAlert(Alert.AlertType.WARNING, "Aucune notification",
+                    "Aucune notification disponible pour l'utilisateur actuel.");
         }
 
         chargerListView();
@@ -103,12 +110,12 @@ public class UINotificationController extends Observer implements Initializable 
 
     private void chargerNotificationsClient() {
         if (notificationService != null && currentClient != null) {
-            System.out.println("Chargement des notifications pour le client: " + currentClient.getNom());
             ObservableList<Notification> notifications = notificationService.getNotifications();
             notificationListView.setItems(notifications);
         } else {
-            System.err.println("Impossible de charger les notifications : NotificationService ou currentClient non initialisé.");
             notificationListView.getItems().clear();
+            showAlert(Alert.AlertType.WARNING, "Aucune notification",
+                    "Aucune notification disponible pour le client actuel.");
         }
 
         chargerListView();
@@ -219,65 +226,58 @@ public class UINotificationController extends Observer implements Initializable 
         System.out.println("Notification clicked: " + notification.getTitle()
                 + " (Type: " + notification.getType() + ", ID: " + notification.getEntityId() + ")");
 
-        // Gérer les notifications côté client
         if (uiFenetreClientController != null) {
             switch (notification.getType()) {
-                case CLIENT_NEW_RESERVATION:
-                case CLIENT_RESERVATION_MODIFICATION_REQUEST:
-                case CLIENT_RESERVATION_ANNULATION_REQUEST:
-                case CLIENT_RESERVATION_CONFIRMATION:
+                case CLIENT_NEW_RESERVATION,CLIENT_RESERVATION_MODIFICATION_REQUEST,
+                     CLIENT_RESERVATION_ANNULATION_REQUEST,CLIENT_RESERVATION_CONFIRMATION->{
+
                     controller = uiFenetreClientController.loadView("/views/UIFenetreReservation.fxml");
-                    showAlert(Alert.AlertType.INFORMATION, "Réservation",
-                            "Naviguer vers la réservation ID " + notification.getEntityId());
-                    break;
-                case CLIENT_PAYMENT_SUCCESS:
-                    // TODO: Naviguer vers facture ou confirmation de paiement si nécessaire
-                    break;
-                default:
-                    showAlert(Alert.AlertType.INFORMATION, "Notification",
+                    showNavigationMessage("Réservation", "Accès à la réservation ID " + notification.getEntityId());
+                }
+                case CLIENT_PAYMENT_SUCCESS -> {
+                    controller = uiFenetreClientController.loadView("/views/UIFenetreReservation.fxml");
+                    showNavigationMessage("Paiement", "Accès à la facture ID " + notification.getEntityId());
+                }
+                default -> showAlert(Alert.AlertType.INFORMATION, "Notification",
                             "Type de notification client non géré : " + notification.getType());
-                    break;
             }
             return;
         }
 
-        // Gérer les notifications côté admin
+
         if (mainFenetreController != null) {
             switch (notification.getType()) {
-                case NEW_CLIENT_REGISTRATION:
+                case NEW_CLIENT_REGISTRATION -> {
                     controller = mainFenetreController.loadView("/views/UIClient.fxml");
                     if (controller instanceof UIClientController uiClientController) {
                         uiClientController.selectClientById(notification.getEntityId());
                     }
-                    showAlert(Alert.AlertType.INFORMATION, "Nouveau Client",
-                            "Naviguer vers la gestion des clients pour " + notification.getEntityId());
-                    break;
+                    showNavigationMessage("Nouveau Client", "Accès au client ID " + notification.getEntityId());
+                }
 
-                case NEW_RESERVATION:
-                case RESERVATION_MODIFICATION_REQUEST:
-                case CLIENT_RESERVATION_ANNULATION_REFUSED:
-                case RESERVATION_CONFIRMATION:
-                case RESERVATION_REFUSED:
+                case NEW_RESERVATION, RESERVATION_MODIFICATION_REQUEST, CLIENT_RESERVATION_ANNULATION_REFUSED,
+                     RESERVATION_CONFIRMATION, RESERVATION_REFUSED -> {
                     controller = mainFenetreController.loadView("/views/UIReservation.fxml");
                     if (controller instanceof UIReservationController uiReservationController) {
                         uiReservationController.selectReservationById(notification.getEntityId());
                     }
-                    showAlert(Alert.AlertType.INFORMATION, "Réservation",
-                            "Naviguer vers la réservation ID " + notification.getEntityId());
-                    break;
+                    showNavigationMessage("Réservation", "Accès à la réservation ID " + notification.getEntityId());
+                }
 
-                case PAYMENT_RECEIVED:
-                    controller = mainFenetreController.loadView("/views/UIFactureFinal.fxml");
-                    break;
+                case PAYMENT_RECEIVED -> {
+                    controller = mainFenetreController.loadView("/views/UIClient.fxml");
+                    if (controller instanceof UIReservationController uiReservationController) {
+                        uiReservationController.selectReservationById(notification.getEntityId());
+                    }
+                    showNavigationMessage("Facture", "Accès à la facture ID " + notification.getEntityId());
+                }
 
-                default:
-                    showAlert(Alert.AlertType.INFORMATION, "Notification",
-                            "Type de notification admin non géré : " + notification.getType());
-                    break;
+                default -> showAlert(Alert.AlertType.INFORMATION, "Notification",
+                        "Type de notification non géré : " + notification.getType());
             }
         } else {
             showAlert(Alert.AlertType.ERROR, "Erreur de Navigation",
-                    "Le contrôleur principal ou client n'est pas défini.");
+                    "Le contrôleur principal n'est pas défini.");
         }
     }
 
@@ -285,6 +285,11 @@ public class UINotificationController extends Observer implements Initializable 
     @FXML
     private void handleMarkAllAsRead() {
         notificationService.markAllAsRead();
+        if(currentUser != null) {
+            chargerNotifications();
+        } else if (currentClient != null) {
+            chargerNotificationsClient();
+        }
         showAlert(Alert.AlertType.INFORMATION, "Notifications", "Toutes les notifications ont été marquées comme lues.");
     }
 
@@ -302,26 +307,20 @@ public class UINotificationController extends Observer implements Initializable 
         alert.showAndWait();
     }
 
+    private void showNavigationMessage(String titre, String contenu) {
+        showAlert(Alert.AlertType.INFORMATION, titre, contenu + "\nNavigation effectuée.");
+    }
+
+
     @Override
     public void update() {
-        System.out.println("UINotificationController: Mise à jour reçue du NotificationService.");
-
-        javafx.application.Platform.runLater(() -> {
-            if (notificationService != null) {
-                if (currentUser != null) {
-                    chargerNotifications();
-                } else if (currentClient != null) {
-                    chargerNotificationsClient();
-                } else {
-                    System.err.println("Aucun utilisateur ou client connecté lors de la mise à jour.");
-                    notificationListView.getItems().clear();
-                }
-
-                notificationListView.refresh();
-            } else {
-                System.err.println("UINotificationController: NotificationService est null lors de la mise à jour.");
-            }
-        });
+        if (currentUser != null) {
+            chargerNotifications();
+        } else if (currentClient != null) {
+            chargerNotificationsClient();
+        } else {
+            System.err.println("Aucun utilisateur ou client n'est défini pour mettre à jour les notifications.");
+        }
     }
 
 }

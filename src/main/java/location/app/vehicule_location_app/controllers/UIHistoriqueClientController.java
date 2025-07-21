@@ -94,6 +94,10 @@ public class UIHistoriqueClientController {
                     chauffeurTelLabel.setStyle("-fx-text-fill: gray;");
                     chauffeurBox.getChildren().addAll(chauffeurNomLabel, chauffeurTelLabel);
 
+                    // dans l'initialiseur (hors updateItem)
+                    chauffeurBox.setAlignment(Pos.CENTER_LEFT);
+                    chauffeurBox.setSpacing(5);
+                    HBox.setHgrow(chauffeurBox, Priority.NEVER);
 
                     // STATUT
                     statutLabel.setStyle("-fx-font-size: 14px; -fx-font-weight: bold;");
@@ -109,15 +113,6 @@ public class UIHistoriqueClientController {
                     rootBox.setAlignment(Pos.CENTER);
                     rootBox.setMaxWidth(Double.MAX_VALUE);
                     HBox.setHgrow(rootBox, Priority.ALWAYS);
-
-
-                    // Add a click listener to the cell
-                    rootBox.setOnMouseClicked(event -> {
-                        Reservation selectedReservation = getItem();
-                        if (selectedReservation != null) {
-                            handleReservationClick(selectedReservation);
-                        }
-                    });
                 }
 
                 @Override
@@ -127,6 +122,8 @@ public class UIHistoriqueClientController {
                         setText(null);
                         setGraphic(null);
                     } else {
+                        chauffeurBox.getChildren().clear();
+
                         // INFO
 
                         long duree = ChronoUnit.DAYS.between(reservation.getDateDebut(),reservation.getDateFin()) +1;
@@ -150,6 +147,7 @@ public class UIHistoriqueClientController {
                             case "APPROUVEE" -> "green";
                             case "REJETEE", "ANNULEE" -> "red";
                             case "PAYEMENT_EN_ATTENTE" -> "blue";
+                            case "ANNULATION_EN_ATTENTE", "MODIFICATION_EN_ATTENTE" -> "purple";
                             default -> "black";
                         };
                         statutLabel.setStyle("-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: " + color + ";");
@@ -169,40 +167,39 @@ public class UIHistoriqueClientController {
                             System.err.println("Aucun véhicule associé à cette réservation.");
                         }
 
-                        // CHAUFFEURS
+                        // CHAUFFEUR
+                        chauffeurBox.getChildren().clear();
+
                         List<Chauffeur> chauffeurs = reservation.getChauffeurs();
                         if (chauffeurs != null && !chauffeurs.isEmpty()) {
-                            for (Chauffeur chauffeur : chauffeurs) {
-                                Label nom = new Label("Nom : " + chauffeur.getNom());
-                                nom.setStyle("-fx-font-weight: bold;");
-                                Label tel = new Label("Tél : " + chauffeur.getTelephone());
-                                tel.setStyle("-fx-text-fill: gray;");
+                            Chauffeur chauffeur = chauffeurs.getFirst();
 
-                                VBox infoChauffeurBox = new VBox(5, nom, tel);
+                            chauffeurNomLabel.setText("Nom : " + chauffeur.getNom());
+                            chauffeurTelLabel.setText("Tél : " + chauffeur.getTelephone());
 
-                                ImageView img = new ImageView();
-                                img.setFitWidth(100);
-                                img.setFitHeight(70);
+                            imageViewChauffeur.setImage(null);
                                 if (chauffeur.getPhoto() != null) {
                                     URL chauffeurPhoto = getClass().getResource(chauffeur.getPhoto());
                                     if (chauffeurPhoto != null) {
-                                        img.setImage(new Image(chauffeurPhoto.toExternalForm()));
+                                        imageViewChauffeur.setImage(new Image(chauffeurPhoto.toExternalForm()));
                                     } else {
                                         System.err.println("Image chauffeur non trouvée : " + chauffeur.getPhoto());
                                     }
                                 }
 
-                                HBox chauffeurItemBox = new HBox(10, img, infoChauffeurBox);
-                                chauffeurBox.getChildren().add(chauffeurItemBox);
-                            }
+//                            HBox chauffeurRow = new HBox(10, imageViewChauffeur, new VBox(chauffeurNomLabel, chauffeurTelLabel));
+                            VBox chauffeurRow = new VBox(10, chauffeurNomLabel, chauffeurTelLabel);
+                            chauffeurBox.getChildren().add(chauffeurRow);
                         }
+
 
                         // Composition finale
                         rootBox.getChildren().clear();
                         rootBox.getChildren().addAll(imageView, centerBox);
 
                         if (!chauffeurBox.getChildren().isEmpty()) {
-                            rootBox.getChildren().add(chauffeurBox);
+//                            rootBox.getChildren().add(chauffeurBox);
+                            rootBox.getChildren().addAll(imageViewChauffeur, chauffeurBox);
                         }
 
                         if ("APPROUVEE".equals(statut)) {
@@ -241,8 +238,5 @@ public class UIHistoriqueClientController {
         stage.setTitle("Facture Client");
         stage.setScene(new Scene(view));
         stage.show();
-    }
-
-    private void handleReservationClick(Reservation selectedReservation) {
     }
 }
