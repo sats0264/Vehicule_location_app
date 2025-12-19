@@ -57,10 +57,6 @@ public class UIAddCardController {
                 }
                 formatted.append(digitsOnly.charAt(i));
             }
-            if (!newText.equals(formatted.toString())) {
-                numeroCarteField.setText(formatted.toString());
-            }
-        });
 
             updateFieldIfChanged(numeroCarteField, formatted.toString(), newText);
         });
@@ -102,7 +98,7 @@ public class UIAddCardController {
     @FXML
     private void handleAdd() {
         String titulaire = titulaireField.getText();
-        String numeroCarte = numeroCarteField.getText().replaceAll(" ", "");
+        String numeroCarte = numeroCarteField.getText().replace(" ", "");
         String cvcStr = cvcField.getText();
         String expiration = expirationField.getText();
 
