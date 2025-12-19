@@ -52,68 +52,89 @@ public class UIChauffeurSelectionController {
     private void loadAvailableChauffeurs() {
         chauffeursDisplayContainer.getChildren().clear();
         try {
-            List<Chauffeur> allChauffeurs = chauffeurDao.list();
-
-            List<Chauffeur> availableChauffeurs = allChauffeurs.stream()
+            List<Chauffeur> available = chauffeurDao.list().stream()
                     .filter(c -> c.getStatut() == Statut.DISPONIBLE)
                     .toList();
 
-            if (availableChauffeurs.isEmpty()) {
-                noChauffeurMessage.setVisible(true);
-                noChauffeurMessage.setManaged(true);
-                selectChauffeurBtn.setDisable(true);
-                return;
+            updateEmptyState(available.isEmpty());
+            if (!available.isEmpty()) {
+                populateChauffeurGrid(available);
             }
-
-            noChauffeurMessage.setVisible(false);
-            noChauffeurMessage.setManaged(false);
-
-            HBox currentRow = null;
-            for (int i = 0; i < availableChauffeurs.size(); i++) {
-                Chauffeur chauffeur = availableChauffeurs.get(i);
-
-                if (i % 3 == 0) {
-                    currentRow = new HBox(20);
-                    currentRow.setAlignment(Pos.CENTER);
-                    chauffeursDisplayContainer.getChildren().add(currentRow);
-                }
-
-                VBox chauffeurCard = createChauffeurCard(chauffeur);
-                currentRow.getChildren().add(chauffeurCard);
-
-                chauffeurCard.setOnMouseClicked(event -> {
-                    if (selectedChauffeur == chauffeur) {
-                        selectedChauffeur = null;
-                        chauffeurCard.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px;");
-                        selectChauffeurBtn.setDisable(true);
-                    } else {
-                        if (selectedChauffeur != null) {
-                            for (Node node : chauffeursDisplayContainer.getChildren()) {
-                                if (node instanceof HBox) {
-                                    for (Node card : ((HBox) node).getChildren()) {
-                                        if (card instanceof VBox && card.getUserData() == selectedChauffeur) {
-                                            card.setStyle("-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px;");
-                                            break;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        selectedChauffeur = chauffeur;
-                        chauffeurCard.setStyle("-fx-border-color: #007bff; -fx-border-width: 3px; -fx-border-radius: 5px; -fx-background-color: #e6f2ff;"); // Highlight selected
-                        selectChauffeurBtn.setDisable(false);
-                    }
-                });
-                chauffeurCard.setUserData(chauffeur);
-            }
-
         } catch (DAOException e) {
-            System.err.println("Erreur lors du chargement des chauffeurs: " + e.getMessage());
-            e.printStackTrace();
-            showAlert();
+            handleLoadError(e);
         }
     }
 
+    private void updateEmptyState(boolean isEmpty) {
+        noChauffeurMessage.setVisible(isEmpty);
+        noChauffeurMessage.setManaged(isEmpty);
+        selectChauffeurBtn.setDisable(isEmpty);
+    }
+
+    private void populateChauffeurGrid(List<Chauffeur> availableChauffeurs) {
+        HBox currentRow = null;
+        for (int i = 0; i < availableChauffeurs.size(); i++) {
+            if (i % 3 == 0) {
+                currentRow = createNewRow();
+                chauffeursDisplayContainer.getChildren().add(currentRow);
+            }
+
+            Chauffeur chauffeur = availableChauffeurs.get(i);
+            VBox chauffeurCard = createChauffeurCard(chauffeur);
+            chauffeurCard.setUserData(chauffeur);
+            chauffeurCard.setOnMouseClicked(event -> handleChauffeurSelection(chauffeur, chauffeurCard));
+
+            if (currentRow != null) {
+                currentRow.getChildren().add(chauffeurCard);
+            }
+        }
+    }
+
+    private HBox createNewRow() {
+        HBox row = new HBox(20);
+        row.setAlignment(Pos.CENTER);
+        return row;
+    }
+
+    private void handleChauffeurSelection(Chauffeur chauffeur, VBox card) {
+        if (selectedChauffeur == chauffeur) {
+            deselectCurrent();
+        } else {
+            if (selectedChauffeur != null) {
+                resetAllCardStyles();
+            }
+            selectNewChauffeur(chauffeur, card);
+        }
+    }
+
+    private void deselectCurrent() {
+        selectedChauffeur = null;
+        resetAllCardStyles();
+        selectChauffeurBtn.setDisable(true);
+    }
+
+    private void selectNewChauffeur(Chauffeur chauffeur, VBox card) {
+        selectedChauffeur = chauffeur;
+        card.setStyle("-fx-border-color: #007bff; -fx-border-width: 3px; -fx-border-radius: 5px; -fx-background-color: #e6f2ff;");
+        selectChauffeurBtn.setDisable(false);
+    }
+
+    private void resetAllCardStyles() {
+        String defaultStyle = "-fx-border-color: #cccccc; -fx-border-width: 1px; -fx-border-radius: 5px;";
+        for (Node rowNode : chauffeursDisplayContainer.getChildren()) {
+            if (rowNode instanceof HBox row) {
+                for (Node cardNode : row.getChildren()) {
+                    cardNode.setStyle(defaultStyle);
+                }
+            }
+        }
+    }
+
+    private void handleLoadError(DAOException e) {
+        System.err.println("Erreur lors du chargement des chauffeurs: " + e.getMessage());
+        e.printStackTrace();
+        showAlert();
+    }
     private VBox createChauffeurCard(Chauffeur chauffeur) {
         VBox card = new VBox(10);
         card.setAlignment(Pos.CENTER);
