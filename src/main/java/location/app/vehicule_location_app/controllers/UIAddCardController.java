@@ -38,12 +38,18 @@ public class UIAddCardController {
 
     @FXML
     private void initialize() {
-        // Numéro de carte : formatage et blocage à 16 chiffres
+        setupCardNumberFormatter();
+        setupCvcFormatter();
+        setupExpirationFormatter();
+    }
+
+    private void setupCardNumberFormatter() {
         numeroCarteField.textProperty().addListener((obs, oldText, newText) -> {
             String digitsOnly = newText.replaceAll("\\D", "");
             if (digitsOnly.length() > 16) {
                 digitsOnly = digitsOnly.substring(0, 16);
             }
+
             StringBuilder formatted = new StringBuilder();
             for (int i = 0; i < digitsOnly.length(); i++) {
                 if (i > 0 && i % 4 == 0) {
@@ -56,18 +62,21 @@ public class UIAddCardController {
             }
         });
 
-        // CVC : blocage à 3 chiffres
+            updateFieldIfChanged(numeroCarteField, formatted.toString(), newText);
+        });
+    }
+
+    private void setupCvcFormatter() {
         cvcField.textProperty().addListener((obs, oldText, newText) -> {
             String digitsOnly = newText.replaceAll("\\D", "");
             if (digitsOnly.length() > 3) {
                 digitsOnly = digitsOnly.substring(0, 3);
             }
-            if (!newText.equals(digitsOnly)) {
-                cvcField.setText(digitsOnly);
-            }
+            updateFieldIfChanged(cvcField, digitsOnly, newText);
         });
+    }
 
-        // Expiration : ajout automatique du slash après 2 chiffres (MM/AA)
+    private void setupExpirationFormatter() {
         expirationField.textProperty().addListener((obs, oldText, newText) -> {
             String digitsOnly = newText.replaceAll("\\D", "");
             StringBuilder formatted = new StringBuilder();
@@ -77,10 +86,17 @@ public class UIAddCardController {
                 }
                 formatted.append(digitsOnly.charAt(i));
             }
-            if (!newText.equals(formatted.toString())) {
-                expirationField.setText(formatted.toString());
-            }
+            updateFieldIfChanged(expirationField, formatted.toString(), newText);
         });
+    }
+
+    /**
+     * Helper to prevent infinite loops by only updating if the value is actually different.
+     */
+    private void updateFieldIfChanged(TextField field, String formatted, String current) {
+        if (!current.equals(formatted)) {
+            field.setText(formatted);
+        }
     }
 
     @FXML
