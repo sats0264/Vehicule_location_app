@@ -13,9 +13,9 @@ import javafx.scene.Scene;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.layout.HBox;
-import location.app.vehicule_location_app.dao.NotificationService;
+import location.app.vehicule_location_app.jdbc.HibernateConnection;
 import location.app.vehicule_location_app.models.*;
-import location.app.vehicule_location_app.observer.Subject;
+import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.io.IOException;
@@ -56,7 +56,6 @@ public class UIClientReservationController {
     private Vehicule vehicule;
     private Client client;
     private boolean avecChauffeur;
-    private int reservationId;
     private Chauffeur selectedChauffeur;
 
     private Stage getStage() {
@@ -98,7 +97,7 @@ public class UIClientReservationController {
     }
 
     private void loadVehiculeImage(String imageUrl) {
-        String photoName = null;
+        String photoName;
         if (vehicule != null && vehicule.getPhoto() != null && !vehicule.getPhoto().isEmpty()) {
             photoName = vehicule.getPhoto();
 
@@ -113,15 +112,15 @@ public class UIClientReservationController {
                 // Essayer de charger depuis classpath /images/
                 InputStream is = getClass().getResourceAsStream("/images/" + photoName);
 
+                Image image;
                 if (is != null) {
-                    Image image = new Image(is);
-                    imageView.setImage(image);
+                    image = new Image(is);
                 } else {
                     // Si non trouvé dans ressources, essayer d'utiliser directement l'URL dans vehicule.getPhoto()
                     // Attention: les URL externes nécessitent une connexion internet
-                    Image image = new Image(vehicule.getPhoto(), true);
-                    imageView.setImage(image);
+                    image = new Image(vehicule.getPhoto(), true);
                 }
+                imageView.setImage(image);
             } catch (Exception e) {
                 System.err.println("Erreur lors du chargement de l'image du véhicule: " + e.getMessage());
                 imageView.setImage(null); // Efface l'image en cas d'erreur
@@ -208,104 +207,100 @@ public class UIClientReservationController {
 
     private void validerReservation() {
         Transaction transaction = null;
-        try (org.hibernate.Session session = location.app.vehicule_location_app.jdbc.HibernateConnection.getSessionFactory().openSession()) {
+        try (Session session = HibernateConnection.getSessionFactory().openSession()) {
             transaction = session.beginTransaction();
 
-            if (client == null) {
-                String emailConnecte = System.getProperty("client.email");
-                if (emailConnecte != null && !emailConnecte.isEmpty()) {
-                    Client c = session.createQuery(
-                                    "from T_Client where lower(email) = :email", Client.class)
-                            .setParameter("email", emailConnecte.toLowerCase())
-                            .uniqueResult();
-                    if (c != null) {
-                        client = c;
-                    }
-                }
-            }
+            // 1. Ensure client is identified
+            ensureClientIsLoaded(session);
 
-            if (!validateReservationData()) {
+            // 2. Validate basic inputs and chauffeur requirement
+            if (!validateInputs() || !validateChauffeurSelection()) {
                 if (transaction != null) transaction.rollback();
                 return;
             }
 
-            Vehicule attachedVehicule = session.find(Vehicule.class, vehicule.getId());
-            Client attachedClient = session.find(Client.class, client.getId());
-
-            int clientId = client.getId();
-            System.out.println("ID du client : " + clientId);
-
-            Reservation reservation = new Reservation();
-            reservation.addVehicule(attachedVehicule);
-            reservation.setClient(attachedClient);
-            reservation.setDateDebut(dateDebutPicker.getValue());
-            reservation.setDateFin(dateFinPicker.getValue());
-            reservation.setStatut(StatutReservation.EN_ATTENTE);
-
-            if (avecChauffeur && selectedChauffeur != null) {
-                Chauffeur attachedChauffeur = session.find(Chauffeur.class, selectedChauffeur.getId());
-                reservation.addChauffeur(attachedChauffeur);
-            } else if (avecChauffeur && selectedChauffeur == null) {
-                showAlert(Alert.AlertType.ERROR, "Erreur de validation", "Veuillez choisir un chauffeur pour une réservation avec chauffeur.");
-                if (transaction != null) transaction.rollback();
-                return;
-            }
-
-
-            double prixJourVehicule = attachedVehicule.getTarif();
-            long nombreJours = ChronoUnit.DAYS.between(dateDebutPicker.getValue(), dateFinPicker.getValue()) + 1;
-            if (nombreJours <= 0) {
-                nombreJours = 1;
-            }
-
-            double montantTotal = prixJourVehicule * nombreJours;
-
+            // 3. Create and persist reservation
+            Reservation reservation = createReservationObject(session);
             session.persist(reservation);
+
             transaction.commit();
 
-            reservationId = reservation.getId();
-
-            Notification notificationToUser = new Notification(
-                    "Nouvelle Demande de réservation",
-                    "Le client " + attachedClient.getNom() + " " + attachedClient.getPrenom() +
-                            " a fait une demande",
-                    NotificationType.NEW_RESERVATION,
-                    reservationId
-            );
-            Notification notificationToClient = new Notification(
-                    "Demande de réservation enregistrée",
-                    "Votre demande de réservation a été enregistrée avec succès.",
-                    NotificationType.CLIENT_NEW_RESERVATION,
-                    reservationId
-            );
-            Subject.getInstance().notifyAllObservers();
-            NotificationService.getInstance().addNotification(notificationToUser);
-            NotificationService.getInstance().addNotificationForClient(notificationToClient, client);
-
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setTitle("Réservation confirmée");
-            alert.setHeaderText("Réservation N°" + reservationId);
-            alert.setContentText(
-                    "Votre réservation a été enregistrée avec succès !\n\n" +
-                            "Détails :\n" +
-                            "• Véhicule : " + attachedVehicule.getMarque() + " " + attachedVehicule.getModele() + "\n" +
-                            "• Du : " + dateDebutPicker.getValue() + "\n" +
-                            "• Au : " + dateFinPicker.getValue() + "\n" +
-                            "• Durée : " + nombreJours + " jour(s)\n" +
-                            "• Type : " + (avecChauffeur ? "Avec chauffeur" : "Sans chauffeur") +
-                            (avecChauffeur && selectedChauffeur != null ? "\n• Chauffeur : " + selectedChauffeur.getPrenom() + " " + selectedChauffeur.getNom() : "") + "\n" +
-                            "• Montant total estimé : " + String.format("%.0f", montantTotal) + " FCFA\n" +
-                            "• Statut : En attente de validation"
-            );
-            alert.showAndWait();
-
+            // 4. Finalize UI
+            showSuccessAlert(reservation);
             getStage().close();
 
         } catch (Exception ex) {
-            if (transaction != null && transaction.isActive()) transaction.rollback();
-            ex.printStackTrace();
-            showAlert(Alert.AlertType.ERROR, "Erreur d'enregistrement", "Impossible d'enregistrer la réservation : " + ex.getMessage());
+            handleTransactionError(transaction, ex);
         }
+    }
+
+    private void ensureClientIsLoaded(org.hibernate.Session session) {
+        if (client != null) return;
+
+        String emailConnecte = System.getProperty("client.email");
+        if (emailConnecte != null && !emailConnecte.isEmpty()) {
+            client = session.createQuery("from T_Client where lower(email) = :email", Client.class)
+                    .setParameter("email", emailConnecte.toLowerCase())
+                    .uniqueResult();
+        }
+    }
+
+    private boolean validateInputs() {
+        return validateReservationData();
+    }
+
+    private boolean validateChauffeurSelection() {
+        if (avecChauffeur && selectedChauffeur == null) {
+            showAlert(Alert.AlertType.ERROR, "Erreur de validation",
+                    "Veuillez choisir un chauffeur pour une réservation avec chauffeur.");
+            return false;
+        }
+        return true;
+    }
+
+    private Reservation createReservationObject(org.hibernate.Session session) {
+        Vehicule attachedVehicule = session.find(Vehicule.class, vehicule.getId());
+        Client attachedClient = session.find(Client.class, client.getId());
+
+        Reservation reservation = new Reservation();
+        reservation.setClient(attachedClient);
+        reservation.addVehicule(attachedVehicule);
+        reservation.setDateDebut(dateDebutPicker.getValue());
+        reservation.setDateFin(dateFinPicker.getValue());
+        reservation.setStatut(StatutReservation.EN_ATTENTE);
+
+        if (avecChauffeur && selectedChauffeur != null) {
+            Chauffeur attachedChauffeur = session.find(Chauffeur.class, selectedChauffeur.getId());
+            reservation.addChauffeur(attachedChauffeur);
+        }
+
+        return reservation;
+    }
+
+    private void showSuccessAlert(Reservation res) {
+        long jours = Math.max(1, ChronoUnit.DAYS.between(res.getDateDebut(), res.getDateFin()) + 1);
+        double total = res.getVehicules().getFirst().getTarif() * jours;
+
+        String chauffeurInfo = (avecChauffeur && selectedChauffeur != null)
+                ? "\n• Chauffeur : " + selectedChauffeur.getPrenom() + " " + selectedChauffeur.getNom() : "";
+
+        String message = String.format(
+                "Détails :\n• Véhicule : %s %s\n• Du : %s\n• Au : %s\n• Durée : %d jour(s)\n• Type : %s%s\n• Montant total : %.0f FCFA",
+                res.getVehicules().getFirst().getMarque(), res.getVehicules().getFirst().getModele(),
+                res.getDateDebut(), res.getDateFin(), jours,
+                avecChauffeur ? "Avec chauffeur" : "Sans chauffeur",
+                chauffeurInfo, total
+        );
+
+        showAlert(Alert.AlertType.INFORMATION, "Réservation enregistrée", message);
+    }
+
+    private void handleTransactionError(Transaction transaction, Exception ex) {
+        if (transaction != null && transaction.isActive()) {
+            transaction.rollback();
+        }
+        ex.printStackTrace();
+        showAlert(Alert.AlertType.ERROR, "Erreur d'enregistrement", "Impossible : " + ex.getMessage());
     }
 
     private boolean validateReservationData() {
