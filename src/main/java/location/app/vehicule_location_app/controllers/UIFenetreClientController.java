@@ -1,5 +1,6 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.fxml.FXML;
@@ -79,7 +80,7 @@ public class UIFenetreClientController extends Observer implements Initializable
                     }
                 })
         );
-        autoRefreshTimeline.setCycleCount(Timeline.INDEFINITE);
+        autoRefreshTimeline.setCycleCount(Animation.INDEFINITE);
         autoRefreshTimeline.play();
 
         notificationCountLabel.textProperty().bind(notificationService.unreadCountProperty().asString());
