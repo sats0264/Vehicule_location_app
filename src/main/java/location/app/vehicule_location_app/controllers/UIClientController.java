@@ -1,5 +1,6 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.*;
@@ -75,7 +76,7 @@ public class UIClientController extends Observer {
                 new KeyFrame(Duration.seconds(10),
                         event -> update())
         );
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
     }
 

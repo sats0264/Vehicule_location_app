@@ -70,7 +70,7 @@ public class UIFenetreClientController extends Observer implements Initializable
                 new KeyFrame(Duration.seconds(1))
 
         );
-        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.setCycleCount(Animation.INDEFINITE);
         timeline.play();
         Timeline autoRefreshTimeline = new Timeline(
                 new KeyFrame(Duration.seconds(10), e -> {

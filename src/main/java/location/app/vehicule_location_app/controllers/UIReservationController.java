@@ -1,5 +1,6 @@
 package location.app.vehicule_location_app.controllers;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.beans.property.ReadOnlyStringWrapper;
@@ -140,7 +141,7 @@ public class UIReservationController extends Observer {
                         loadReservationsAndFilter();
                 }
         ));
-        timeLine.setCycleCount(Timeline.INDEFINITE);
+        timeLine.setCycleCount(Animation.INDEFINITE);
         timeLine.play();
     }
 
