@@ -42,10 +42,6 @@ public class UIAddChauffeurController {
     private Button uploadPhotoButton;
     private File selectedPhotoFile;
 
-
-    public UIAddChauffeurController()  {
-    }
-
     @FXML
     private void initialize() {
         clearForm();
