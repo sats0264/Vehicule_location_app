@@ -46,6 +46,7 @@ public class UIChauffeurSelectionController {
     }
 
     public void initData(LocalDate startDate, LocalDate endDate) {
+        // Todo: Use dates to filter chauffeurs based on availability
         loadAvailableChauffeurs();
     }
 
@@ -84,9 +85,7 @@ public class UIChauffeurSelectionController {
             chauffeurCard.setUserData(chauffeur);
             chauffeurCard.setOnMouseClicked(event -> handleChauffeurSelection(chauffeur, chauffeurCard));
 
-            if (currentRow != null) {
-                currentRow.getChildren().add(chauffeurCard);
-            }
+            currentRow.getChildren().add(chauffeurCard);
         }
     }
 
