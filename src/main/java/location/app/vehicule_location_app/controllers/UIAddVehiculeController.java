@@ -37,9 +37,6 @@ public class UIAddVehiculeController{
 
     private File selectedPhotoFile;
 
-    public UIAddVehiculeController() {
-    }
-
     @FXML
     public void initialize() {
         marqueComboBox.getItems().addAll("Renault", "Peugeot", "Citroen", "Toyota", "Hyundai","Mercedes", "BMW", "Audi", "Volkswagen");
