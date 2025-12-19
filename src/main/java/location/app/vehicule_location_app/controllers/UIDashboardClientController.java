@@ -37,6 +37,7 @@ import static location.app.vehicule_location_app.controllers.Controller.controll
 
 public class UIDashboardClientController extends Observer {
 
+    public static final String TOUTES = "Toutes";
     @FXML
     private ComboBox<String> marqueComboBox;
 
@@ -83,7 +84,7 @@ public class UIDashboardClientController extends Observer {
             afficherVoituresSelonDisponibilite();
         });
 
-        marqueComboBox.setPromptText("Toutes");
+        marqueComboBox.setPromptText(TOUTES);
 
         // Listener pour filtrer les modèles selon la marque choisie
         marqueComboBox.setOnAction(event -> {
@@ -263,14 +264,14 @@ public class UIDashboardClientController extends Observer {
 
         List<String> marquesList = new ArrayList<>(marques);
         Collections.sort(marquesList);
-        marquesList.addFirst("Toutes");
+        marquesList.addFirst(TOUTES);
 
         marqueComboBox.setItems(FXCollections.observableArrayList(marquesList));
         marqueComboBox.getSelectionModel().selectFirst();
 
         marqueComboBox.setOnAction(event -> {
             String selectedMarque = marqueComboBox.getValue();
-            if (selectedMarque != null && !selectedMarque.equals("Toutes") && marqueModeleMap.containsKey(selectedMarque)) {
+            if (selectedMarque != null && !selectedMarque.equals(TOUTES) && marqueModeleMap.containsKey(selectedMarque)) {
                 modeleComboBox.setItems(FXCollections.observableArrayList(marqueModeleMap.get(selectedMarque)));
                 modeleComboBox.setDisable(false);
             } else {
@@ -305,7 +306,7 @@ public class UIDashboardClientController extends Observer {
             }
 
             if (afficher) {
-                if (marqueChoisie != null && !marqueChoisie.equals("Toutes") && !marqueChoisie.equals(v.getMarque())) continue;
+                if (marqueChoisie != null && !marqueChoisie.equals(TOUTES) && !marqueChoisie.equals(v.getMarque())) continue;
                 if (modeleChoisi != null && !modeleChoisi.equals("Tous") && !modeleChoisi.equals(v.getModele())) continue;
 
                 double prixSansChauffeur = v.getTarif();
