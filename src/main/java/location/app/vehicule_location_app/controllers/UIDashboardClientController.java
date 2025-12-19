@@ -38,6 +38,7 @@ import static location.app.vehicule_location_app.controllers.Controller.controll
 public class UIDashboardClientController extends Observer {
 
     public static final String TOUTES = "Toutes";
+    public static final String FX_FONT_SIZE_14_PX = "-fx-font-size: 14px;";
     @FXML
     private ComboBox<String> marqueComboBox;
 
@@ -153,9 +154,9 @@ public class UIDashboardClientController extends Observer {
         );
         infosBox.setAlignment(Pos.CENTER);
         infosBox.getChildren().get(0).setStyle("-fx-font-weight: bold; -fx-font-size: 18px;");
-        infosBox.getChildren().get(1).setStyle("-fx-font-size: 14px;");
-        infosBox.getChildren().get(2).setStyle("-fx-font-size: 14px;");
-        infosBox.getChildren().get(3).setStyle("-fx-font-size: 14px;");
+        infosBox.getChildren().get(1).setStyle(FX_FONT_SIZE_14_PX);
+        infosBox.getChildren().get(2).setStyle(FX_FONT_SIZE_14_PX);
+        infosBox.getChildren().get(3).setStyle(FX_FONT_SIZE_14_PX);
         infosBox.getChildren().get(4).setStyle("-fx-text-fill: " + getStatutColor(statut) + "; -fx-font-size: 14px;");
 
         VBox prixBox = new VBox(10);
