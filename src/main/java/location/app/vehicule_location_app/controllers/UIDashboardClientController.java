@@ -39,6 +39,7 @@ public class UIDashboardClientController extends Observer {
 
     public static final String TOUTES = "Toutes";
     public static final String FX_FONT_SIZE_14_PX = "-fx-font-size: 14px;";
+    public static final String DISPONIBLE = "Disponible";
     @FXML
     private ComboBox<String> marqueComboBox;
 
@@ -302,8 +303,8 @@ public class UIDashboardClientController extends Observer {
     private boolean estTypeStatutSelectionne(Vehicule v) {
         String statutDynamique = getStatutDynamiqueVehicule(v);
         if (toutesRadio.isSelected()) return true;
-        if (disponibleRadio.isSelected()) return statutDynamique.startsWith("Disponible");
-        if (nonDisponibleRadio.isSelected()) return !statutDynamique.startsWith("Disponible");
+        if (disponibleRadio.isSelected()) return statutDynamique.startsWith(DISPONIBLE);
+        if (nonDisponibleRadio.isSelected()) return !statutDynamique.startsWith(DISPONIBLE);
         return false;
     }
 
@@ -369,7 +370,7 @@ public class UIDashboardClientController extends Observer {
             return "Réservé pour le " + dateDebut.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
         }
 
-        return "Disponible";
+        return DISPONIBLE;
     }
 
 
