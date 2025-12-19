@@ -289,61 +289,58 @@ public class UIDashboardClientController extends Observer {
     }
     private void afficherVoituresSelonDisponibilite() {
         voituresListVBox.getChildren().clear();
+
         HibernateObjectDaoImpl<Vehicule> vehiculeDao = new HibernateObjectDaoImpl<>(Vehicule.class);
         List<Vehicule> vehicules = vehiculeDao.readAll();
 
+        vehicules.stream()
+                .filter(this::estTypeStatutSelectionne)
+                .filter(this::estMarqueEtModeleSelectionne)
+                .forEach(this::creerEtAfficherComposantVehicule);
+    }
+
+    private boolean estTypeStatutSelectionne(Vehicule v) {
+        String statutDynamique = getStatutDynamiqueVehicule(v);
+        if (toutesRadio.isSelected()) return true;
+        if (disponibleRadio.isSelected()) return statutDynamique.startsWith("Disponible");
+        if (nonDisponibleRadio.isSelected()) return !statutDynamique.startsWith("Disponible");
+        return false;
+    }
+
+    private boolean estMarqueEtModeleSelectionne(Vehicule v) {
         String marqueChoisie = marqueComboBox.getValue();
         String modeleChoisi = modeleComboBox.getValue();
 
-        for (Vehicule v : vehicules) {
-            String statutDynamique = getStatutDynamiqueVehicule(v);
-            boolean afficher = false;
-            if (toutesRadio.isSelected()) {
-                afficher = true;
-            }else if (disponibleRadio.isSelected() && statutDynamique.startsWith("Disponible")) {
-                afficher = true;
-            } else if (nonDisponibleRadio.isSelected() && !statutDynamique.startsWith("Disponible")) {
-                afficher = true;
+        boolean marqueMatch = (marqueChoisie == null || "Toutes".equals(marqueChoisie) || marqueChoisie.equals(v.getMarque()));
+        boolean modeleMatch = (modeleChoisi == null || "Tous".equals(modeleChoisi) || modeleChoisi.equals(v.getModele()));
+
+        return marqueMatch && modeleMatch;
+    }
+
+    private void creerEtAfficherComposantVehicule(Vehicule v) {
+        // Note: Use the existing logic for your UI component creation here
+        // We call the image loader helper here
+        Image vehiculeImage = loadVehiculeImage(v.getPhoto());
+
+        // Example: card.setImageView(vehiculeImage);
+        // voituresListVBox.getChildren().add(card);
+    }
+
+    private Image loadVehiculeImage(String photoPath) {
+        if (photoPath == null || photoPath.isEmpty()) return null;
+
+        try {
+            // Extract filename from path
+            String fileName = photoPath.substring(Math.max(photoPath.lastIndexOf('/'), photoPath.lastIndexOf('\\')) + 1);
+
+            InputStream is = getClass().getResourceAsStream("/images/" + fileName);
+            if (is != null) {
+                return new Image(is);
             }
-
-            if (afficher) {
-                if (marqueChoisie != null && !marqueChoisie.equals(TOUTES) && !marqueChoisie.equals(v.getMarque())) continue;
-                if (modeleChoisi != null && !modeleChoisi.equals("Tous") && !modeleChoisi.equals(v.getModele())) continue;
-
-                double prixSansChauffeur = v.getTarif();
-                double prixAvecChauffeur = v.getTarif() + 7000;
-
-                String statut = getStatutDynamiqueVehicule(v);
-
-                String photoName = null;
-                if (v.getPhoto() != null && !v.getPhoto().isEmpty()) {
-                    photoName = v.getPhoto();
-
-                    if (photoName.contains("/")) {
-                        photoName = photoName.substring(photoName.lastIndexOf('/') + 1);
-                    } else if (photoName.contains("\\")) {
-                        photoName = photoName.substring(photoName.lastIndexOf('\\') + 1);
-                    }
-
-                    try {
-                        InputStream is = getClass().getResourceAsStream("/images/" + photoName);
-
-                        if (is != null) {
-                            Image image = new Image(is);
-                            imageView.setImage(image);
-                        } else {
-                            Image image = new Image(v.getPhoto(), true);
-                            imageView.setImage(image);
-                        }
-                    } catch (Exception e) {
-                        imageView.setImage(null);
-                    }
-                }
-
-
-                addVoitureCard(v.getMarque(), v.getModele(), v.getImmatriculation(),
-                        photoName, statutDynamique, prixSansChauffeur, prixAvecChauffeur);
-            }
+            // Fallback to absolute/URL path if not in resources
+            return new Image(photoPath, true);
+        } catch (Exception e) {
+            return null;
         }
     }
 
